@@ -1,0 +1,49 @@
+.welcome {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.12), rgba(89, 208, 147, 0.08));
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.welcome-content {
+  flex: 1;
+}
+
+.welcome-content strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.welcome-content ol {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.welcome-content b {
+  color: var(--text);
+}
+
+.welcome-content em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.welcome-dismiss {
+  align-self: flex-start;
+}

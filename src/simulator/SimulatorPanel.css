@@ -1,0 +1,141 @@
+.simpanel-grid {
+  display: grid;
+  grid-template-columns: 280px 220px 1fr;
+  gap: 12px;
+  height: 100%;
+  min-height: 200px;
+}
+
+.simpanel-section {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.simpanel-field {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.simpanel-field > span {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.simpanel-field input {
+  width: 100%;
+}
+
+.simpanel-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.simpanel-scenario-controls {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.simpanel-scenario-controls input {
+  flex: 1;
+  min-width: 0;
+}
+
+.simpanel-scenario-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.simpanel-scenario-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.simpanel-scenario-list button {
+  flex: 1;
+  text-align: left;
+}
+
+.simpanel-scenario-list small {
+  color: var(--text-dim);
+}
+
+.simpanel-trace {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.simpanel-terminal {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  color: #11161f;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.simpanel-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+}
+
+.simpanel-steps li {
+  display: grid;
+  grid-template-columns: 60px 130px 1fr;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.simpanel-step-time {
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.simpanel-step-type {
+  color: var(--accent);
+}
+
+.simpanel-step-msg {
+  color: var(--text);
+}
+
+.simpanel-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+.simpanel-sub strong {
+  color: var(--text);
+}

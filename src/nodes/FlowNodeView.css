@@ -1,0 +1,125 @@
+.fn-node {
+  min-width: 160px;
+  max-width: 240px;
+  background: var(--bg-elev);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.fn-node.is-selected {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.fn-node.is-visited {
+  box-shadow:
+    0 0 0 2px var(--ok),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.fn-node.is-dimmed {
+  opacity: 0.35;
+}
+
+.fn-node-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  color: #11161f;
+}
+
+.fn-node-badge-error {
+  background: var(--danger);
+}
+
+.fn-node-badge-warning {
+  background: var(--warn);
+}
+
+.fn-node-header {
+  padding: 4px 8px;
+  border-radius: 4px 4px 0 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fn-node-body {
+  padding: 6px 8px 8px;
+  color: var(--text-dim);
+  line-height: 1.35;
+}
+
+.fn-node-body strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.fn-node-row {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fn-node-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fn-node-port-label {
+  position: absolute;
+  left: 10px;
+  font-size: 10px;
+  color: var(--text-dim);
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.fn-node-port-label-menu {
+  color: var(--text);
+}
+
+/* React Flow handle override — bigger and clearer than the default. */
+.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  background: var(--bg-elev);
+  border: 2px solid var(--text-dim);
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+}
+
+.react-flow__handle:hover,
+.react-flow__handle.connecting,
+.react-flow__handle.connectingfrom,
+.react-flow__handle.connectingto {
+  border-color: var(--accent);
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+.react-flow__handle.source {
+  border-color: var(--ok);
+}
+
+.react-flow__handle.target {
+  border-color: var(--info);
+}
+
+.react-flow__handle.source:hover {
+  border-color: var(--accent);
+}

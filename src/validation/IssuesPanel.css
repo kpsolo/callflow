@@ -1,0 +1,93 @@
+.issues-empty {
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.issues-ok-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.issues-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.issues-row button {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.issues-row-error button {
+  border-left: 3px solid var(--danger);
+}
+
+.issues-row-warning button {
+  border-left: 3px solid var(--warn);
+}
+
+.issues-row-info button {
+  border-left: 3px solid var(--info);
+}
+
+.issues-sev {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+.issues-row-error .issues-sev {
+  color: var(--danger);
+}
+
+.issues-row-warning .issues-sev {
+  color: var(--warn);
+}
+
+.issues-msg {
+  color: var(--text);
+}
+
+.issues-code {
+  font-family: ui-monospace, monospace;
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+.vs {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.vs-ok {
+  color: var(--ok);
+}
+
+.vs-err {
+  color: var(--danger);
+}
+
+.vs-warn {
+  color: var(--warn);
+}

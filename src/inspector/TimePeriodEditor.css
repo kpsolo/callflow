@@ -1,0 +1,75 @@
+.tpe {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.tpe-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.tpe-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding-top: 4px;
+}
+
+.tpe-time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tpe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tpe-chip {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.tpe-chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.tpe-chip.is-on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.tpe-link {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--text-dim);
+  border-radius: 0;
+  padding: 2px 0;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.tpe-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tpe-clear {
+  font-size: 10px;
+  color: var(--text-dim);
+}

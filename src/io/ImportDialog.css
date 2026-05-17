@@ -1,0 +1,90 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: min(680px, 90vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal header button {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--text-dim);
+}
+
+.modal-body {
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal footer {
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.import-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.import-hint {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.modal-body textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.import-warning {
+  background: rgba(255, 180, 84, 0.1);
+  border-left: 3px solid var(--warn);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.import-errors {
+  background: rgba(255, 85, 119, 0.1);
+  border-left: 3px solid var(--danger);
+  padding: 6px 24px;
+  font-size: 12px;
+  color: var(--text);
+  margin: 0;
+}
+
+.import-preview {
+  font-size: 12px;
+  color: var(--text-dim);
+}

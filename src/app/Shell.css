@@ -1,0 +1,172 @@
+.shell {
+  display: grid;
+  grid-template-rows: 44px 1fr auto;
+  height: 100vh;
+  background: var(--bg);
+}
+
+.shell-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border);
+}
+
+.shell-topbar-left,
+.shell-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shell-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  display: inline-block;
+}
+
+.shell-body {
+  display: grid;
+  grid-template-columns: 240px 1fr 5px var(--inspector-width, 320px);
+  min-height: 0;
+}
+
+.shell-resizer {
+  background: var(--border);
+  cursor: col-resize;
+  position: relative;
+  transition: background 0.12s ease;
+}
+
+.shell-resizer:hover,
+.shell-resizer:focus,
+.shell-resizer:active {
+  background: var(--accent);
+  outline: none;
+}
+
+/* Wider invisible hit area for easier grabbing. */
+.shell-resizer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  right: -3px;
+}
+
+/* Grip dots — visual cue. */
+.shell-resizer::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1px;
+  height: 28px;
+  background: var(--text-dim);
+  box-shadow:
+    0 -6px 0 var(--text-dim),
+    0 6px 0 var(--text-dim);
+  opacity: 0.5;
+}
+
+.shell-resizer:hover::after,
+.shell-resizer:focus::after {
+  background: #fff;
+  box-shadow:
+    0 -6px 0 #fff,
+    0 6px 0 #fff;
+  opacity: 0.9;
+}
+
+.shell-palette,
+.shell-inspector {
+  background: var(--bg-elev);
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.shell-palette {
+  border-right: 1px solid var(--border);
+}
+
+.shell-inspector {
+  border-left: 1px solid var(--border);
+}
+
+.shell-canvas {
+  position: relative;
+  background:
+    radial-gradient(circle, #1a1f2a 1px, transparent 1px) 0 0 / 20px 20px,
+    var(--bg);
+  min-height: 0;
+}
+
+.shell-canvas-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.shell-canvas-placeholder div {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.shell-section-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shell-hr {
+  margin: 16px 0 12px;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.shell-placeholder {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.shell-simdrawer {
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev);
+  transition: max-height 0.15s ease;
+}
+
+.shell-simdrawer-toggle {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 6px 12px;
+  color: var(--text-dim);
+  border-bottom: 1px solid transparent;
+}
+
+.shell-simdrawer.is-open .shell-simdrawer-toggle {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+
+.shell-simdrawer-body {
+  padding: 12px;
+  min-height: 160px;
+}
