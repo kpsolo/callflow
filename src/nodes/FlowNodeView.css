@@ -47,7 +47,9 @@
 .fn-node-header {
   padding: 4px 8px;
   border-radius: 4px 4px 0 0;
-  color: #fff;
+  /* `color` is set inline by FlowNodeView.tsx via pickHeaderText() so the
+     header text passes WCAG AA on light category colours (action orange,
+     answering amber, condition yellow, etc.). */
   font-weight: 600;
   font-size: 11px;
   letter-spacing: 0.02em;
@@ -57,16 +59,19 @@
 }
 
 .fn-node-start-chip {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: currentColor;
+  color: inherit;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 1px 6px;
   border-radius: 999px;
   margin-right: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid currentColor;
   white-space: nowrap;
+  /* Invert the background relative to text so the chip stays legible regardless
+     of the picked header text color. */
+  mix-blend-mode: difference;
 }
 
 .fn-node-body {

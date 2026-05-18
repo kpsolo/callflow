@@ -29,6 +29,13 @@
   backdrop-filter: blur(4px);
 }
 
+.canvas-hint .is-done {
+  color: var(--ok);
+  text-decoration: line-through;
+  text-decoration-color: rgba(89, 208, 147, 0.5);
+  text-decoration-thickness: 1px;
+}
+
 .react-flow__controls {
   background: var(--bg-elev);
   border: 1px solid var(--border);

@@ -35,13 +35,26 @@ export function Inspector() {
     updateNodeData(node.id, next);
   };
 
+  // Surface a name field for nodes that carry their own data.name (menus, custom-
+  // labelled actions). For everything else the instance id remains the only identity.
+  const nodeName =
+    typeof (data as Record<string, unknown>).name === "string"
+      ? ((data as Record<string, unknown>).name as string)
+      : undefined;
+
   return (
     <div className="inspector">
       <header className="inspector-header">
-        <span className="inspector-color" style={{ background: def.color }} aria-hidden />
         <div className="inspector-title">
-          <strong>{def.label}</strong>
-          <small>{node.id}</small>
+          <span
+            className="inspector-type-chip"
+            style={{ background: def.color }}
+            title={def.label}
+          >
+            {def.label}
+          </span>
+          <strong className="inspector-name">{nodeName ?? def.label}</strong>
+          <code className="inspector-id">{node.id}</code>
         </div>
         {!def.singletonPerEntity && (
           <button

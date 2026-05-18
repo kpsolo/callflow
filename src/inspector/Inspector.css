@@ -6,26 +6,48 @@
 
 .inspector-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-}
-
-.inspector-color {
-  width: 4px;
-  height: 22px;
-  border-radius: 2px;
-  flex: 0 0 auto;
 }
 
 .inspector-title {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.inspector-title small {
+.inspector-type-chip {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #11161f;
+  white-space: nowrap;
+}
+
+.inspector-name {
+  font-size: 14px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inspector-id {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
   color: var(--text-dim);
-  font-size: 11px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 6px;
+  align-self: flex-start;
 }
 
 .inspector-delete {

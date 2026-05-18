@@ -5,6 +5,7 @@ import { getNodeType } from "./registry";
 import { renderSummary } from "./summaries";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
+import { pickHeaderText } from "./contrast";
 import "./FlowNodeView.css";
 
 type FlowNodeViewProps = NodeProps<FlowNode["data"]>;
@@ -44,7 +45,10 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
       role="group"
       aria-label={`${def.label} node`}
     >
-      <div className="fn-node-header" style={{ background: def.color }}>
+      <div
+        className="fn-node-header"
+        style={{ background: def.color, color: pickHeaderText(def.color) }}
+      >
         {kind === "menu_root" && (
           <span className="fn-node-start-chip" aria-label="Start of the call flow">
             START
