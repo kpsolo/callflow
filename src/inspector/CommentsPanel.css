@@ -80,8 +80,16 @@
 }
 
 .comment-delete {
-  color: var(--danger);
-  border-color: var(--danger);
+  color: var(--text-dim);
+  border-color: var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comment-delete:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 .comments-show-resolved {

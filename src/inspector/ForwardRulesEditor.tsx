@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
 
@@ -109,11 +109,12 @@ export function ForwardRulesEditor({
                 </label>
                 <button
                   type="button"
+                  className="rules-list-row-remove"
                   onClick={() => onChange(typedRules.filter((_, j) => j !== i))}
                   title="Remove rule"
                   aria-label="Remove rule"
                 >
-                  <X size={14} aria-hidden />
+                  <Trash2 size={14} aria-hidden />
                 </button>
               </div>
               <label className="inspector-field">

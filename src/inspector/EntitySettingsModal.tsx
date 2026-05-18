@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import type { Entity } from "@/schema";
 import "./EntitySettingsModal.css";
@@ -164,6 +164,7 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
                     </label>
                     <button
                       type="button"
+                      className="esm-directory-remove"
                       onClick={() =>
                         patch({
                           directory: (entity.directory ?? []).filter((_, j) => j !== i),
@@ -171,7 +172,7 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
                       }
                       aria-label="Remove entry"
                     >
-                      <X size={14} aria-hidden />
+                      <Trash2 size={14} aria-hidden />
                     </button>
                   </li>
                 ))}

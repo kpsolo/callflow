@@ -76,3 +76,20 @@
   font-size: 13px;
   color: var(--text-dim);
 }
+
+.esm-directory-remove {
+  padding: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.esm-directory-remove:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}

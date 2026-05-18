@@ -384,8 +384,8 @@
 }
 
 .actions-row-remove:hover {
-  color: var(--danger);
-  border-color: var(--danger);
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 .actions-row-prompt {
@@ -433,4 +433,21 @@
   font-size: 13px;
   color: var(--text-dim);
   margin-left: auto;
+}
+
+.rules-list-row-remove {
+  padding: 2px 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rules-list-row-remove:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }

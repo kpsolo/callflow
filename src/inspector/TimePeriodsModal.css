@@ -156,3 +156,25 @@
   align-self: flex-start;
   font-size: 13px;
 }
+
+.tpm-subperiod-remove {
+  padding: 2px 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tpm-subperiod-remove:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.tpm-subperiod-remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

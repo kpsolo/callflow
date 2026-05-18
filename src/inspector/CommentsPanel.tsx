@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
 import { useCollab, type Comment, type CommentAnchor } from "@/api";
 import "./CommentsPanel.css";
 
@@ -143,8 +144,14 @@ function CommentRow({
           </button>
         )}
         {canManage && (
-          <button type="button" className="comment-delete" onClick={onDelete}>
-            Delete
+          <button
+            type="button"
+            className="comment-delete"
+            onClick={onDelete}
+            title="Delete comment"
+            aria-label="Delete comment"
+          >
+            <Trash2 size={12} aria-hidden />
           </button>
         )}
       </div>

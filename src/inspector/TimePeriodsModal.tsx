@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import {
   autoNamePeriod,
@@ -180,6 +180,7 @@ export function TimePeriodsModal({ onClose }: { onClose: () => void }) {
                       <small>{summarizePeriod(p)}</small>
                       <button
                         type="button"
+                        className="tpm-subperiod-remove"
                         onClick={() => setList(current.filter((_, j) => j !== i))}
                         disabled={current.length === 1}
                         title={
@@ -189,7 +190,7 @@ export function TimePeriodsModal({ onClose }: { onClose: () => void }) {
                         }
                         aria-label="Remove"
                       >
-                        <X size={14} aria-hidden />
+                        <Trash2 size={14} aria-hidden />
                       </button>
                     </div>
                     <TimePeriodEditor
