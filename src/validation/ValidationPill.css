@@ -1,0 +1,74 @@
+.vp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.vp:hover {
+  border-color: var(--accent);
+}
+
+.vp.is-ok {
+  color: var(--ok);
+  border-color: rgba(89, 208, 147, 0.4);
+}
+
+.vp.is-warn {
+  color: var(--warn);
+  border-color: rgba(255, 180, 84, 0.4);
+}
+
+.vp.is-err {
+  color: var(--danger);
+  border-color: rgba(255, 85, 119, 0.4);
+}
+
+.vp-count {
+  background: currentColor;
+  color: #11161f;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 10px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.vp-popover {
+  position: absolute;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  min-width: 360px;
+  max-width: 480px;
+}
+
+.vp-popover header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 6px;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vp-popover header button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 16px;
+  padding: 0 4px;
+}

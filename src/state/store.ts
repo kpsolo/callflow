@@ -36,6 +36,11 @@ export interface FlowStore {
   selectedNodeId: string | null;
   /** Bumped every time `loadFlow` is called so the canvas knows to fitView. */
   loadCounter: number;
+  /** True when the flow has changes since the last load/clear/export. */
+  dirty: boolean;
+  /** Epoch ms of the last load/clear/export — used for the "saved Ns ago" pill. */
+  lastSavedAt: number | null;
+  markSaved: () => void;
 
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
@@ -103,13 +108,34 @@ export const useFlowStore = create<FlowStore>()(
       scenarios: [],
       selectedNodeId: null,
       loadCounter: 0,
+      dirty: false,
+      lastSavedAt: null,
 
-      onNodesChange: (changes) =>
-        set({ nodes: applyNodeChanges(changes, get().nodes) }),
-      onEdgesChange: (changes) =>
-        set({ edges: applyEdgeChanges(changes, get().edges) }),
+      markSaved: () => set({ dirty: false, lastSavedAt: Date.now() }),
+
+      onNodesChange: (changes) => {
+        // applyNodeChanges emits selection / dimension changes that aren't actual
+        // edits — we only set dirty for structural/data deltas.
+        const isStructural = changes.some(
+          (c) => c.type !== "select" && c.type !== "dimensions",
+        );
+        set({
+          nodes: applyNodeChanges(changes, get().nodes),
+          ...(isStructural ? { dirty: true } : {}),
+        });
+      },
+      onEdgesChange: (changes) => {
+        const isStructural = changes.some((c) => c.type !== "select");
+        set({
+          edges: applyEdgeChanges(changes, get().edges),
+          ...(isStructural ? { dirty: true } : {}),
+        });
+      },
       onConnect: (conn) =>
-        set({ edges: rfAddEdge({ ...conn, id: genId("e") }, get().edges) }),
+        set({
+          edges: rfAddEdge({ ...conn, id: genId("e") }, get().edges),
+          dirty: true,
+        }),
 
       addNode: (kind, position) => {
         const def = getNodeType(kind);
@@ -120,7 +146,7 @@ export const useFlowStore = create<FlowStore>()(
           position,
           data: def.defaultData(),
         };
-        set({ nodes: [...get().nodes, node], selectedNodeId: id });
+        set({ nodes: [...get().nodes, node], selectedNodeId: id, dirty: true });
         return id;
       },
 
@@ -129,6 +155,7 @@ export const useFlowStore = create<FlowStore>()(
           nodes: get().nodes.map((n) =>
             n.id === id ? { ...n, data: data as typeof n.data } : n,
           ),
+          dirty: true,
         }),
 
       removeNode: (id) => {
@@ -138,6 +165,7 @@ export const useFlowStore = create<FlowStore>()(
           nodes: get().nodes.filter((n) => n.id !== id),
           edges: get().edges.filter((e) => e.source !== id && e.target !== id),
           selectedNodeId: get().selectedNodeId === id ? null : get().selectedNodeId,
+          dirty: true,
         });
       },
 
@@ -152,16 +180,16 @@ export const useFlowStore = create<FlowStore>()(
           position: { x: src.position.x + 40, y: src.position.y + 40 },
           data: JSON.parse(JSON.stringify(src.data)),
         };
-        set({ nodes: [...get().nodes, clone], selectedNodeId: newId });
+        set({ nodes: [...get().nodes, clone], selectedNodeId: newId, dirty: true });
         return newId;
       },
 
       removeEdge: (id) =>
-        set({ edges: get().edges.filter((e) => e.id !== id) }),
+        set({ edges: get().edges.filter((e) => e.id !== id), dirty: true }),
 
       setSelected: (id) => set({ selectedNodeId: id }),
 
-      setEntity: (entity) => set({ entity }),
+      setEntity: (entity) => set({ entity, dirty: true }),
 
       loadFlow: (flow) =>
         set({
@@ -172,6 +200,8 @@ export const useFlowStore = create<FlowStore>()(
           scenarios: flow.scenarios,
           selectedNodeId: null,
           loadCounter: get().loadCounter + 1,
+          dirty: false,
+          lastSavedAt: Date.now(),
         }),
 
       clearFlow: () =>
@@ -181,6 +211,8 @@ export const useFlowStore = create<FlowStore>()(
           scenarios: [],
           selectedNodeId: null,
           loadCounter: get().loadCounter + 1,
+          dirty: false,
+          lastSavedAt: Date.now(),
         }),
 
       exportFlow: () => ({
@@ -203,6 +235,7 @@ export const useFlowStore = create<FlowStore>()(
           nodes: get().nodes.map((n) =>
             positions[n.id] ? { ...n, position: positions[n.id] } : n,
           ),
+          dirty: true,
         }),
     }),
     {

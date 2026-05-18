@@ -18,7 +18,8 @@
       "Bash(git commit -m 'feat\\(canvas\\): anchor ROOT visually with START chip + dagre upper-left align *)",
       "Bash(git commit -m 'feat\\(fixtures\\): splitFanIn de-clutters terminals with many inbound edges *)",
       "Bash(git commit -m 'feat\\(canvas\\): edge styling vocabulary + distinct inactive style *)",
-      "Bash(git commit -m 'feat\\(inspector\\): redesign menu actions editor + cross-pane highlight *)"
+      "Bash(git commit -m 'feat\\(inspector\\): redesign menu actions editor + cross-pane highlight *)",
+      "Bash(git commit -m 'feat\\(topbar\\): reorganize — sim button + validation pill + save status + overflow *)"
     ]
   }
 }
