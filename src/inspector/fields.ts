@@ -139,6 +139,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "prompt", label: "Prompt", type: "text" },
     { key: "announce_extensions", label: "Announce extension numbers", type: "toggle" },
   ],
+  action_nop: [{ key: "prompt", label: "Optional prompt", type: "text" }],
   answering_mode_ext: [
     { key: "mode", label: "Mode", type: "select", options: ANSWERING_EXT_MODES },
     { key: "ring_timeout_s", label: "Ring timeout (s)", type: "number", min: 1, max: 120 },

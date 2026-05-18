@@ -113,6 +113,14 @@ export const ActionGotoMenuDataSchema = z.object({
   target_menu_node_id: z.string().min(1).optional(),
 });
 
+export const ActionNopDataSchema = z.object({
+  /**
+   * Optional prompt to play after the no-op (e.g., "this option is intentionally
+   * disabled"). The simulator returns the caller to the parent menu either way.
+   */
+  prompt: PromptIdSchema.optional(),
+});
+
 export const AnsweringModeExtDataSchema = z.object({
   mode: AnsweringModeExtSchema.default("ring_only"),
   ring_timeout_s: z.number().int().min(1).max(120).default(20),

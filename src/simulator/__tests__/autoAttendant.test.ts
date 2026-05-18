@@ -310,6 +310,48 @@ describe("Auto Attendant simulator (§13.2)", () => {
     expect(t.prompts).toContain("p_closed");
   });
 
+  it("action_nop returns control to the parent menu and consumes the next input", () => {
+    // Press '1' → action_nop (plays a prompt, returns to ROOT) → press '2' → voicemail.
+    const flow = mkAaFlow([
+      mkNode(
+        "menu_root",
+        {
+          menu_prompt: "p_menu",
+          actions: {
+            "1": { target_node_id: "nop" },
+            "2": { target_node_id: "vm" },
+          },
+        },
+        "root",
+      ),
+      mkNode("action_nop", { prompt: "p_nop" }, "nop"),
+      mkNode("voicemail", {}, "vm"),
+    ]);
+    const t = simulate(flow, { ...baseInput, press_sequence: ["1", "2"] });
+    expect(t.terminal).toBe("voicemail_left");
+    expect(t.prompts).toContain("p_nop");
+    // menu_prompt plays once on entry and again after the no-op.
+    expect(t.prompts.filter((p) => p === "p_menu").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("action_nop alone with no further input falls through retry loop, eventually disconnecting", () => {
+    const flow = mkAaFlow([
+      mkNode(
+        "menu_root",
+        {
+          menu_prompt: "p_menu",
+          max_input_errors: 2,
+          actions: { "1": { target_node_id: "nop" } },
+        },
+        "root",
+      ),
+      mkNode("action_nop", {}, "nop"),
+    ]);
+    const t = simulate(flow, { ...baseInput, press_sequence: ["1"] });
+    // After the no-op we re-enter consumeInput; no more presses → retry loop → disconnect.
+    expect(t.terminal).toBe("disconnected");
+  });
+
   it("PRD §11.3 inactive-after-hours example", () => {
     const flow = mkAaFlow([
       mkNode(

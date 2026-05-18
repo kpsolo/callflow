@@ -241,6 +241,20 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     outputs: OUT_NEXT,
     defaultData: () => ({}),
   },
+  action_nop: {
+    kind: "action_nop",
+    category: "action",
+    primaryFor: ["auto_attendant"],
+    label: "Do Nothing",
+    color: C.action,
+    description:
+      "Intentionally-inert action. The caller's input is consumed, an optional " +
+      "prompt is played, and control returns to the parent menu — useful when " +
+      "you want a key to be a no-op without leaving it unassigned.",
+    inputs: IN,
+    outputs: NO_PORTS,
+    defaultData: () => ({}),
+  },
   answering_mode_ext: {
     kind: "answering_mode_ext",
     category: "answering",

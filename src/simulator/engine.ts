@@ -41,6 +41,9 @@ interface Ctx {
   pressIndex: number;
   /** Whether ROOT intro has already been played (intro plays once per call). */
   introPlayed: boolean;
+  /** Stack of menus we're currently inside, innermost last. Used by `action_nop`
+   *  to return control to the caller without disconnecting. */
+  menuStack: Array<NodeOf<"menu_root"> | NodeOf<"menu_custom">>;
 }
 
 function step(ctx: Ctx, node_id: string | null, node_type: string, message: string) {
@@ -153,6 +156,7 @@ export const simulate: SimulateFn = function simulate(
     stepLimit: opts.step_limit ?? DEFAULT_STEP_LIMIT,
     pressIndex: 0,
     introPlayed: false,
+    menuStack: [],
   };
 
   step(ctx, null, "entry", `Caller=${input.caller} Callee=${input.callee} Time=${input.time}`);
@@ -519,6 +523,7 @@ function runMenu(
 ): Trace {
   if (--ctx.stepLimit <= 0) return terminate(ctx, "dropped", "Step limit exceeded");
 
+  ctx.menuStack.push(menu);
   step(ctx, menu.id, menu.type, `Enter menu ${menu.data.name}`);
 
   // Active period check.
@@ -685,6 +690,21 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       const m = tgt ? ctx.nodesById.get(tgt) : undefined;
       if (m && (m.type === "menu_root" || m.type === "menu_custom")) return runMenu(ctx, m);
       return terminate(ctx, "dropped", "Goto menu target missing");
+    }
+    case "action_nop": {
+      // "Do Nothing": play an optional prompt and return control to the parent
+      // menu without counting as an invalid attempt. If we've somehow arrived
+      // here without a parent menu (e.g. as a flow entry point), terminate
+      // cleanly — there's nowhere to fall back to.
+      playPrompt(ctx, node.data.prompt);
+      const parent = ctx.menuStack[ctx.menuStack.length - 1];
+      if (!parent) return terminate(ctx, "dropped", "Do-nothing action has no parent menu");
+      step(ctx, node.id, node.type, `No-op → re-enter ${parent.data.name}`);
+      // Replay the menu prompt and resume waiting for the next input. We don't
+      // re-push the parent (it's already on the stack), and we don't reset
+      // pressIndex — the caller may have queued further keys.
+      playPrompt(ctx, parent.data.menu_prompt);
+      return consumeInput(ctx, parent);
     }
     case "action_queue": {
       step(ctx, node.id, node.type, `Queue: ${node.data.queue_name ?? "?"}`);
