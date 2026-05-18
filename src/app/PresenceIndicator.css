@@ -1,0 +1,33 @@
+.presence {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.presence-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.presence:hover .presence-avatar {
+  border-color: var(--accent);
+  transform: scale(1.05);
+  transition: transform 0.1s ease;
+}
+
+.presence-edit {
+  width: 120px;
+  font-size: 11px;
+  padding: 2px 6px;
+}

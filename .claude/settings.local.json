@@ -21,7 +21,13 @@
       "Bash(git commit -m 'feat\\(inspector\\): redesign menu actions editor + cross-pane highlight *)",
       "Bash(git commit -m 'feat\\(topbar\\): reorganize — sim button + validation pill + save status + overflow *)",
       "Bash(git commit -m 'polish: WCAG header contrast, minimap colors, dismissible hints, inspector chip *)",
-      "Bash(git commit -m 'feat\\(inspector\\): tab menu node settings into General/Prompts/Actions/Errors *)"
+      "Bash(git commit -m 'feat\\(inspector\\): tab menu node settings into General/Prompts/Actions/Errors *)",
+      "Bash(git commit --allow-empty -m 'chore: UX pass summary *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'perf\\(build\\): split vendor chunks \\(reactflow, dagre, zod, zustand, react\\) *)",
+      "Bash(git commit -m 'feat\\(store\\): bidirectional menu-action <-> canvas-edge sync *)",
+      "Bash(git commit -m 'feat\\(action_nop\\): Do Nothing action — explicitly inert key on a menu *)",
+      "Bash(git commit -m 'feat\\(presence\\): minimal user-presence placeholder in top bar \\(P5-10\\) *)"
     ]
   }
 }

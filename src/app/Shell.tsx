@@ -20,6 +20,7 @@ import { WelcomeBanner } from "./WelcomeBanner";
 import { useResizable } from "./useResizable";
 import { SaveStatus } from "./SaveStatus";
 import { OverflowMenu } from "./OverflowMenu";
+import { PresenceIndicator } from "./PresenceIndicator";
 import "./Shell.css";
 
 export function Shell() {
@@ -136,9 +137,9 @@ export function Shell() {
               { label: "Help / shortcuts", icon: "?", onClick: () => setHelpOpen(true) },
             ]}
           />
-          {/* Reserved slot for future presence indicator (P5-10). Keeps top-bar
-              width stable so the eventual addition doesn't reshuffle other items. */}
-          <div className="shell-presence-slot" aria-hidden />
+          {/* Presence placeholder (P5-10). Renders only the local user today;
+              real multi-user data plugs into the same slot when it lands. */}
+          <PresenceIndicator />
         </div>
       </header>
 
