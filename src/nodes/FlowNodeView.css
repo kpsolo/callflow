@@ -58,6 +58,16 @@
   justify-content: space-between;
 }
 
+.fn-node-badge-comment {
+  background: rgba(255, 255, 255, 0.25);
+  color: inherit;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
 .fn-node-start-chip {
   background: currentColor;
   color: inherit;

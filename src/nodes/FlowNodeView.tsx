@@ -5,6 +5,8 @@ import { getNodeType } from "./registry";
 import { renderSummary } from "./summaries";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
+import { useFlowStore } from "@/state/store";
+import { useFlowComments } from "@/api";
 import { pickHeaderText } from "./contrast";
 import "./FlowNodeView.css";
 
@@ -17,6 +19,9 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const visited = useTraceStore((s) => s.visited_node_ids.has(id));
   const issues = useValidation();
   const myIssues = issues.filter((i) => i.node_id === id);
+  const entityId = useFlowStore((s) => s.entity.id);
+  const { unresolvedByAnchor } = useFlowComments(entityId);
+  const commentCount = unresolvedByAnchor.get(`node:${id}`) ?? 0;
   const worst = myIssues.find((i) => i.severity === "error")
     ? "error"
     : myIssues.find((i) => i.severity === "warning")
@@ -62,6 +67,15 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
             aria-label={`${myIssues.length} ${worst}${myIssues.length > 1 ? "s" : ""}`}
           >
             {worst === "error" ? "!" : "?"}
+          </span>
+        )}
+        {commentCount > 0 && (
+          <span
+            className="fn-node-badge fn-node-badge-comment"
+            title={`${commentCount} unresolved comment${commentCount > 1 ? "s" : ""}`}
+            aria-label={`${commentCount} unresolved comments`}
+          >
+            💬 {commentCount}
           </span>
         )}
       </div>

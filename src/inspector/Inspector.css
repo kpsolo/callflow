@@ -73,6 +73,12 @@
   gap: 8px;
 }
 
+.inspector-comments {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
 .inspector-tabs {
   display: flex;
   border-bottom: 1px solid var(--border);

@@ -7,6 +7,8 @@ import { getAtPath, setAtPath } from "./paths";
 import { MenuActionsEditor } from "./MenuActionsEditor";
 import { ForwardRulesEditor } from "./ForwardRulesEditor";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
+import { CommentsPanel } from "./CommentsPanel";
+import { useFlowComments } from "@/api";
 import "./Inspector.css";
 
 export function Inspector() {
@@ -75,7 +77,27 @@ export function Inspector() {
       )}
 
       <InspectorFields fields={fields} data={data} onChange={onChange} />
+
+      <NodeCommentsSection nodeId={node.id} />
     </div>
+  );
+}
+
+function NodeCommentsSection({ nodeId }: { nodeId: string }) {
+  const entityId = useFlowStore((s) => s.entity.id);
+  const { unresolvedByAnchor } = useFlowComments(entityId);
+  const count = unresolvedByAnchor.get(`node:${nodeId}`) ?? 0;
+  return (
+    <section className="inspector-comments">
+      <h3 className="shell-section-title">
+        Comments{count > 0 ? ` (${count} unresolved)` : ""}
+      </h3>
+      <CommentsPanel
+        flowId={entityId}
+        anchor={{ kind: "node", nodeId }}
+        emptyHint="No comments on this node yet."
+      />
+    </section>
   );
 }
 
