@@ -1,0 +1,29 @@
+.presence-stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.presence-stack-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border: 2px solid var(--bg-elev);
+  margin-left: -6px;
+  cursor: default;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.presence-stack-avatar:first-child {
+  margin-left: 0;
+}
+
+.presence-stack-more {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}

@@ -1,0 +1,46 @@
+.lock-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.lock-indicator.is-other {
+  color: var(--warn);
+  border-color: rgba(255, 180, 84, 0.5);
+}
+
+.lock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.lock-dot.is-ok {
+  background: var(--ok);
+}
+
+.lock-indicator.is-other .lock-dot {
+  background: var(--warn);
+}
+
+.lock-takeover {
+  font-size: 10px;
+  padding: 1px 8px;
+  margin-left: 4px;
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #11161f;
+  font-weight: 600;
+}
+
+.lock-takeover:hover {
+  background: #ffc878;
+  border-color: #ffc878;
+}
