@@ -18,6 +18,8 @@ export interface PortDef {
   label?: string;
 }
 
+export type EntityKind = "auto_attendant" | "extension";
+
 export interface NodeTypeDef<K extends NodeKind = NodeKind> {
   kind: K;
   category: NodeCategory;
@@ -31,6 +33,12 @@ export interface NodeTypeDef<K extends NodeKind = NodeKind> {
   /** ROOT menu is special-cased: cannot be created from palette or deleted. */
   paletteHidden?: boolean;
   singletonPerEntity?: boolean;
+  /**
+   * Entity types this node is primarily designed for. When omitted, the node is
+   * considered shared (relevant to both AA and Extension flows). The palette uses
+   * this to demote (not hide) off-pattern items for the current entity.
+   */
+  primaryFor?: EntityKind[];
 }
 
 const IN: PortDef[] = [{ id: "in" }];
@@ -95,6 +103,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     outputs: OUT_NEXT,
     paletteHidden: true,
     singletonPerEntity: true,
+    primaryFor: ["auto_attendant"],
     defaultData: () => ({
       name: "ROOT",
       active_period: "always",
@@ -112,6 +121,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "User-defined sub-menu with optional time-gated activation.",
     inputs: IN,
     outputs: OUT_NEXT,
+    primaryFor: ["auto_attendant"],
     defaultData: () => ({
       name: "Menu",
       active_period: "always",
@@ -124,6 +134,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_transfer: {
     kind: "action_transfer",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Transfer",
     color: C.action,
     description: "Transfer to an internal extension/target node.",
@@ -134,6 +145,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_transfer_e164: {
     kind: "action_transfer_e164",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Transfer to E.164",
     color: C.action,
     description: "Transfer to an external E.164 number.",
@@ -144,6 +156,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_prompt_extension: {
     kind: "action_prompt_extension",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Prompt for Extension",
     color: C.action,
     description: "Collect full extension digits from caller.",
@@ -154,6 +167,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_dial_direct: {
     kind: "action_dial_direct",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Dial Extension Directly",
     color: C.action,
     description: "Matched digit is the first digit of an extension; collect the rest.",
@@ -164,6 +178,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_voicemail: {
     kind: "action_voicemail",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Transfer to Voicemail",
     color: C.action,
     description: "Hand caller to a Voicemail or Fax Mailbox node.",
@@ -174,6 +189,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_dial_by_name: {
     kind: "action_dial_by_name",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Dial-by-Name",
     color: C.action,
     description: "Match caller DTMF against the first 3 letters of published extension names.",
@@ -184,6 +200,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_disconnect: {
     kind: "action_disconnect",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Disconnect",
     color: C.action,
     description: "Optionally play a prompt, then hang up.",
@@ -194,6 +211,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_disa: {
     kind: "action_disa",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "DISA",
     color: C.action,
     description: "Prompt for password; on success allow outgoing dial.",
@@ -204,6 +222,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_queue: {
     kind: "action_queue",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Call Queue",
     color: C.action,
     description: "Hand call to a named Call Queue (referenced; not modeled as flow in MVP).",
@@ -214,6 +233,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   action_goto_menu: {
     kind: "action_goto_menu",
     category: "action",
+    primaryFor: ["auto_attendant"],
     label: "Go to Menu",
     color: C.action,
     description: "Jump to another Menu node.",
@@ -224,6 +244,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   answering_mode_ext: {
     kind: "answering_mode_ext",
     category: "answering",
+    primaryFor: ["extension"],
     label: "Answering Mode (Extension)",
     shortLabel: "Answering Mode",
     color: C.answering,
@@ -246,6 +267,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   answering_mode_aa: {
     kind: "answering_mode_aa",
     category: "answering",
+    primaryFor: ["auto_attendant"],
     label: "Answering Mode (Auto Attendant)",
     shortLabel: "Answering Mode",
     color: C.answering,
@@ -268,6 +290,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   forward_follow_me: {
     kind: "forward_follow_me",
     category: "forwarding",
+    primaryFor: ["extension"],
     label: "Follow-me",
     color: C.forwarding,
     description: "Ordered list of forwarding targets with per-rule time check and timeout.",
@@ -278,6 +301,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   forward_advanced: {
     kind: "forward_advanced",
     category: "forwarding",
+    primaryFor: ["extension"],
     label: "Advanced Forwarding",
     color: C.forwarding,
     description: "Follow-me + per-rule SIP proxy + sequential/simultaneous/random/percentage.",
@@ -293,6 +317,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   forward_sip_uri: {
     kind: "forward_sip_uri",
     category: "forwarding",
+    primaryFor: ["extension"],
     label: "Forward to SIP URI",
     color: C.forwarding,
     description: "Single SIP URI target with optional proxy.",
@@ -303,6 +328,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   forward_simple: {
     kind: "forward_simple",
     category: "forwarding",
+    primaryFor: ["extension"],
     label: "Simple Forwarding",
     color: C.forwarding,
     description: "Forward to a single E.164 or internal extension.",
@@ -313,6 +339,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   screening_rule: {
     kind: "screening_rule",
     category: "screening",
+    primaryFor: ["extension"],
     label: "Screening Rule",
     color: C.screening,
     description: "Conditional rule evaluated in order; first match wins.",

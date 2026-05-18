@@ -5,7 +5,16 @@
       "Bash(npm install *)",
       "Bash(npx tsc *)",
       "Bash(npm run *)",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(gh repo *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://github.com/kpsolo/callflow)",
+      "Bash(curl -s https://api.github.com/repos/kpsolo/callflow)",
+      "Bash(curl -s -I https://github.com/kpsolo/callflow.git)",
+      "Bash(curl -s -o /dev/null -w \"redirected to: %{redirect_url}\\\\nfinal http: %{http_code}\\\\n\" -L https://github.com/kpsolo/callflow)",
+      "Bash(git ls-tree *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat\\(palette\\): filter by entity type \\(demote off-pattern items\\) *)"
     ]
   }
 }

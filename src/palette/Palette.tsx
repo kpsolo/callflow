@@ -1,15 +1,28 @@
 import { useMemo, useState } from "react";
+import { useFlowStore } from "@/state/store";
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
   NODE_TYPE_LIST,
+  type EntityKind,
   type NodeCategory,
   type NodeTypeDef,
 } from "@/nodes/registry";
 import { PALETTE_DRAG_MIME } from "@/canvas/Canvas";
 import "./Palette.css";
 
+const ENTITY_LABEL: Record<EntityKind, string> = {
+  auto_attendant: "Auto Attendants",
+  extension: "Extensions",
+};
+
+function isPrimaryFor(def: NodeTypeDef, entity: EntityKind): boolean {
+  return !def.primaryFor || def.primaryFor.includes(entity);
+}
+
 export function Palette() {
+  const entityType = useFlowStore((s) => s.entity.type);
+
   const grouped = useMemo(() => {
     const out: Record<NodeCategory, NodeTypeDef[]> = {} as Record<NodeCategory, NodeTypeDef[]>;
     for (const cat of CATEGORY_ORDER) out[cat] = [];
@@ -24,22 +37,36 @@ export function Palette() {
     <div className="palette">
       <h2 className="shell-section-title">Palette</h2>
       {CATEGORY_ORDER.map((cat) => (
-        <Section key={cat} category={cat} defs={grouped[cat]} />
+        <Section key={cat} category={cat} defs={grouped[cat]} entityType={entityType} />
       ))}
     </div>
   );
 }
 
-function Section({ category, defs }: { category: NodeCategory; defs: NodeTypeDef[] }) {
+function Section({
+  category,
+  defs,
+  entityType,
+}: {
+  category: NodeCategory;
+  defs: NodeTypeDef[];
+  entityType: EntityKind;
+}) {
   const [open, setOpen] = useState(true);
   if (defs.length === 0) return null;
+
+  // A category is fully off-pattern when none of its visible kinds are primary
+  // for the current entity. We collapse it by default and add an explanatory hint.
+  const anyPrimary = defs.some((d) => isPrimaryFor(d, entityType));
+
   return (
-    <section className="palette-section">
+    <section className={"palette-section" + (anyPrimary ? "" : " is-offpattern")}>
       <button
         type="button"
         className="palette-section-header"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        title={anyPrimary ? undefined : `Mainly used for other entity types`}
       >
         <span>{CATEGORY_LABELS[category]}</span>
         <span className="palette-section-count">{defs.length}</span>
@@ -47,7 +74,7 @@ function Section({ category, defs }: { category: NodeCategory; defs: NodeTypeDef
       {open && (
         <ul className="palette-list">
           {defs.map((def) => (
-            <PaletteItem key={def.kind} def={def} />
+            <PaletteItem key={def.kind} def={def} entityType={entityType} />
           ))}
         </ul>
       )}
@@ -55,18 +82,27 @@ function Section({ category, defs }: { category: NodeCategory; defs: NodeTypeDef
   );
 }
 
-function PaletteItem({ def }: { def: NodeTypeDef }) {
+function PaletteItem({ def, entityType }: { def: NodeTypeDef; entityType: EntityKind }) {
+  const primary = isPrimaryFor(def, entityType);
+  const otherLabels =
+    !primary && def.primaryFor
+      ? def.primaryFor.map((e) => ENTITY_LABEL[e]).join(", ")
+      : undefined;
   return (
     <li>
       <button
         type="button"
-        className="palette-item"
+        className={"palette-item" + (primary ? "" : " is-demoted")}
         draggable
         onDragStart={(e) => {
           e.dataTransfer.setData(PALETTE_DRAG_MIME, def.kind);
           e.dataTransfer.effectAllowed = "move";
         }}
-        title={def.description}
+        title={
+          otherLabels
+            ? `${def.description}\n\nMainly used for: ${otherLabels}`
+            : def.description
+        }
       >
         <span className="palette-item-color" style={{ background: def.color }} aria-hidden />
         <span className="palette-item-label">{def.label}</span>

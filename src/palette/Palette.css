@@ -67,6 +67,18 @@
   cursor: grabbing;
 }
 
+.palette-item.is-demoted {
+  opacity: 0.45;
+}
+
+.palette-item.is-demoted:hover {
+  opacity: 0.85;
+}
+
+.palette-section.is-offpattern .palette-section-header {
+  color: var(--text-dim);
+}
+
 .palette-item-color {
   width: 4px;
   height: 16px;
