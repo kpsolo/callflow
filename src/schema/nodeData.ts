@@ -226,10 +226,73 @@ export const FaxMailboxDataSchema = z.object({
   email_address: EmailSchema.optional(),
 });
 
+/**
+ * Call recording (PortaSwitch MR129).
+ *
+ * Two activation modes per the PortaOne doc:
+ *   - `automatic`  — PortaSIP records every call on this account, regardless
+ *                    of caller action. The "Call recording" feature is on.
+ *   - `on_demand`  — Users start/stop the recording mid-call. Triggered by
+ *                    `allow_manual_start_stop` + DTMF codes (defaults
+ *                    `*44` to start, `*45` to stop) OR by an IP-phone
+ *                    Record button sending a SIP INFO with `Record: On|Off`.
+ *
+ * Two announcement prompts (started / stopped) match the doc's "Call
+ * recording started" / "Call recording stopped" pair, played when
+ * `announce_to_all` is on. Default English announcement; PortaSwitch
+ * supports custom prompts.
+ *
+ * Forwarding extension rules:
+ *   - `auto_record_redirected` — record calls that are forwarded outside
+ *     the PortaSwitch network. Recording attaches to the forwarded leg's CDR.
+ *   - `auto_record_incoming` — record incoming calls before any forward
+ *     decision. When BOTH flags are on, vendor-forwarded calls are
+ *     recorded twice (once per CDR).
+ *
+ * Output format and privacy / transcription flags carry through from
+ * MR129 (Section "Important notes" + "Transcription of call recordings").
+ */
 export const CallRecordingDataSchema = z.object({
-  announce: z.boolean().default(true),
-  announce_prompt: PromptIdSchema.optional(),
+  /** "automatic" — record every call; "on_demand" — caller starts/stops. Default automatic. */
+  mode: z.enum(["automatic", "on_demand"]).optional(),
+
+  // Manual activation (used when mode === "on_demand").
+  allow_manual_start_stop: z.boolean().optional(),
+  /** DTMF prefix to start recording mid-call. PortaOne default is "*44". */
+  start_dtmf_code: z.string().min(1).optional(),
+  /** DTMF prefix to stop recording mid-call. PortaOne default is "*45". */
+  stop_dtmf_code: z.string().min(1).optional(),
+
+  // Announcements.
+  announce_to_all: z.boolean().optional(),
+  /** Played to all parties when recording begins. Doc default: English. */
+  announce_started_prompt: PromptIdSchema.optional(),
+  /** Played to all parties when recording ends (only if started prompt fired). */
+  announce_stopped_prompt: PromptIdSchema.optional(),
+
+  // Coverage scope for forwarded-call scenarios.
+  auto_record_incoming: z.boolean().optional(),
+  auto_record_redirected: z.boolean().optional(),
+
+  // Output.
+  format: z.enum(["wav", "mp3"]).optional(),
+
+  // Delivery & privacy.
   send_to_email: EmailSchema.optional(),
+  /** "Show the call recording to myself only" — hides from colleagues. */
+  private_to_owner: z.boolean().optional(),
+
+  // AI transcription via Add-On Mart (Whisper today).
+  enable_transcription: z.boolean().optional(),
+
+  /**
+   * Back-compat with the previous (pre-MR129-audit) schema. Older fixtures
+   * may still write `announce` + `announce_prompt`. The simulator reads
+   * `announce_to_all` first and falls back to `announce` so JSON exports
+   * created before this change continue to round-trip cleanly.
+   */
+  announce: z.boolean().optional(),
+  announce_prompt: PromptIdSchema.optional(),
 });
 
 export const CondTimeDataSchema = z.object({

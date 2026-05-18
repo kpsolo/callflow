@@ -28,6 +28,7 @@ export function validate(flow: Flow): Issue[] {
   forwardingRules(ctx);
   voicemailEmail(ctx);
   modeWithoutForwarding(ctx);
+  callRecordingConfig(ctx);
 
   return ctx.issues;
 }
@@ -166,6 +167,62 @@ function forwardingRules(ctx: Ctx) {
           node_id: n.id,
         });
       }
+    }
+  }
+}
+
+function callRecordingConfig(ctx: Ctx) {
+  for (const n of ctx.flow.nodes) {
+    if (n.type !== "call_recording") continue;
+    const d = n.data;
+    const mode = d.mode ?? "automatic";
+
+    // On-demand requires the manual-toggle to actually allow starting/stopping;
+    // otherwise the recording never fires for this node.
+    if (mode === "on_demand" && !d.allow_manual_start_stop) {
+      add(ctx, {
+        code: "recording_on_demand_disabled",
+        severity: "warning",
+        message:
+          "Recording mode is 'on_demand' but manual start/stop is not allowed — recording will never start.",
+        node_id: n.id,
+      });
+    }
+
+    // Both auto-record toggles + on-demand mode is a contradiction (the docs say
+    // auto_record_* implies automatic).
+    if (mode === "on_demand" && (d.auto_record_incoming || d.auto_record_redirected)) {
+      add(ctx, {
+        code: "recording_mode_conflict",
+        severity: "warning",
+        message:
+          "Auto-record toggles only apply to 'automatic' mode. Switch mode to 'automatic' or clear the toggles.",
+        node_id: n.id,
+      });
+    }
+
+    // Announce-to-all without any prompt configured falls back to a system default
+    // that we don't model — flag so the author sees a recording without sound.
+    const announceOn = d.announce_to_all ?? d.announce ?? true;
+    const hasPrompt = d.announce_started_prompt ?? d.announce_prompt;
+    if (announceOn && !hasPrompt) {
+      add(ctx, {
+        code: "recording_announce_no_prompt",
+        severity: "warning",
+        message:
+          "Announcement is enabled but no started-prompt is set. PortaSwitch falls back to the English system prompt.",
+        node_id: n.id,
+      });
+    }
+
+    // Stopped-prompt without started-prompt is meaningless (stop never fires).
+    if (d.announce_stopped_prompt && !d.announce_started_prompt && !d.announce_prompt) {
+      add(ctx, {
+        code: "recording_stopped_prompt_orphan",
+        severity: "warning",
+        message: "Stopped prompt is set but no started prompt — the stop event will not announce.",
+        node_id: n.id,
+      });
     }
   }
 }

@@ -405,10 +405,14 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     category: "recording",
     label: "Call Recording",
     color: C.recording,
-    description: "Start recording, optionally play announcement, send to email.",
+    description:
+      "Records the answered leg. Automatic mode records every call; on-demand " +
+      "lets the caller start/stop with DTMF (default *44/*45). Optional " +
+      "started/stopped announcements, wav/mp3 format, email delivery, " +
+      "owner-only privacy, and AI transcription via Whisper.",
     inputs: IN,
     outputs: [{ id: "done", label: "next" }],
-    defaultData: () => ({ announce: true }),
+    defaultData: () => ({}),
   },
   cond_time: {
     kind: "cond_time",

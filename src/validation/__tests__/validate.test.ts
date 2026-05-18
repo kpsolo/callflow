@@ -55,6 +55,33 @@ describe("Validation", () => {
     );
   });
 
+  it("warns when call recording is on-demand but manual start/stop is disabled", () => {
+    resetIds();
+    const flow = mkExtFlow([
+      mkNode("answering_mode_ext", { mode: "ring_only" }),
+      mkNode("call_recording", {
+        mode: "on_demand",
+        allow_manual_start_stop: false,
+      }),
+    ]);
+    const issues = validate(flow);
+    expect(
+      issues.some((i) => i.code === "recording_on_demand_disabled" && i.severity === "warning"),
+    ).toBe(true);
+  });
+
+  it("warns when call recording announcement is on but no started-prompt is set", () => {
+    resetIds();
+    const flow = mkExtFlow([
+      mkNode("answering_mode_ext", { mode: "ring_only" }),
+      mkNode("call_recording", { mode: "automatic", announce_to_all: true }),
+    ]);
+    const issues = validate(flow);
+    expect(
+      issues.some((i) => i.code === "recording_announce_no_prompt" && i.severity === "warning"),
+    ).toBe(true);
+  });
+
   it("warns when forwarding exists but answering mode never triggers Forward", () => {
     resetIds();
     // ring_only does not include Forward; forwarding nodes would be unreachable.

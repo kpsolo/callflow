@@ -487,14 +487,71 @@ function tryForwardOne(ctx: Ctx, target: string, timeout_s: number): Trace {
   return ctx.trace; // continue to next rule
 }
 
+/**
+ * Apply call-recording semantics to an answered leg.
+ *
+ * Two modes mirror PortaSwitch MR129:
+ *
+ *   automatic  — every answered leg is recorded.
+ *   on_demand  — recording happens only when the caller's
+ *                `manual_record` input is "started" or "started_stopped"
+ *                AND the recording node has `allow_manual_start_stop`.
+ *
+ * Announcements honour the doc's two-prompt model. When `announce_to_all`
+ * is set (or the legacy `announce` flag is true for back-compat),
+ * `announce_started_prompt` plays at the start of the recording, and
+ * `announce_stopped_prompt` plays at the end when the recording was
+ * manually stopped before hang-up.
+ *
+ * Trace side-effects:
+ *   - `recording_started` carries format (`wav|mp3`), destination
+ *     (`email=… | local`), and an optional `private` flag.
+ *   - `recording_stopped` fires only for `manual_record === "started_stopped"`.
+ *   - `transcription_queued` fires after `recording_stopped` (or after the
+ *     answer for automatic mode) when `enable_transcription` is on.
+ */
 function applyRecordingIfConfigured(ctx: Ctx) {
-  const rec = ctx.flow.nodes.find((n): n is NodeOf<"call_recording"> => n.type === "call_recording");
+  const rec = ctx.flow.nodes.find(
+    (n): n is NodeOf<"call_recording"> => n.type === "call_recording",
+  );
   if (!rec) return;
-  if (rec.data.announce && rec.data.announce_prompt) playPrompt(ctx, rec.data.announce_prompt);
+  const d = rec.data;
+
+  const mode = d.mode ?? "automatic";
+  const manual = ctx.input.manual_record ?? "off";
+
+  // Skip when on-demand and the caller didn't press start.
+  if (mode === "on_demand") {
+    if (!d.allow_manual_start_stop) return;
+    if (manual === "off") return;
+  }
+
+  // Announcements: prefer the new `announce_to_all` flag; fall back to the
+  // legacy single-flag `announce` for old JSON exports.
+  const announceOn = d.announce_to_all ?? d.announce ?? true;
+  const startedPrompt = d.announce_started_prompt ?? d.announce_prompt;
+  if (announceOn && startedPrompt) playPrompt(ctx, startedPrompt);
+
+  const format = d.format ?? "wav";
+  const destination = d.send_to_email ? `email=${d.send_to_email}` : "local";
+  const privateMark = d.private_to_owner ? " private" : "";
   recordSide(ctx, {
     kind: "recording_started",
-    detail: rec.data.send_to_email ? `→ ${rec.data.send_to_email}` : "local",
+    detail: `format=${format} ${destination}${privateMark}`,
   });
+
+  // Caller stopped the recording before hang-up → emit a stop event.
+  if (manual === "started_stopped") {
+    if (announceOn && d.announce_stopped_prompt) playPrompt(ctx, d.announce_stopped_prompt);
+    recordSide(ctx, { kind: "recording_stopped", detail: `format=${format}` });
+  }
+
+  if (d.enable_transcription) {
+    recordSide(ctx, {
+      kind: "transcription_queued",
+      detail: d.send_to_email ? `→ ${d.send_to_email}` : "stored",
+    });
+  }
 }
 
 // -----------------------------------------------------------------------------
