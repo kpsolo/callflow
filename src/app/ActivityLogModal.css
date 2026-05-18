@@ -1,0 +1,67 @@
+.modal.alm {
+  width: min(680px, 92vw);
+  height: min(560px, 80vh);
+}
+
+.modal.alm footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal.alm footer small {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-list li {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.activity-meta strong {
+  color: var(--text);
+}
+
+.activity-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.activity-kind {
+  color: var(--text);
+}
+
+.activity-detail {
+  color: var(--text-dim);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0 4px;
+}

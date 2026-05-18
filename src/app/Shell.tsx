@@ -21,6 +21,10 @@ import { useResizable } from "./useResizable";
 import { SaveStatus } from "./SaveStatus";
 import { OverflowMenu } from "./OverflowMenu";
 import { PresenceIndicator } from "./PresenceIndicator";
+import { PresenceStack } from "./PresenceStack";
+import { LockIndicator } from "./LockIndicator";
+import { ActivityLogModal } from "./ActivityLogModal";
+import { useActivityRecorder } from "@/state/useActivityRecorder";
 import "./Shell.css";
 
 export function Shell() {
@@ -29,6 +33,10 @@ export function Shell() {
   const [periodsOpen, setPeriodsOpen] = useState(false);
   const [entityOpen, setEntityOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+
+  // Stream structural store changes into the collaboration activity log.
+  useActivityRecorder();
 
   const setTrace = useTraceStore((s) => s.setTrace);
   const exportFlow = useFlowStore((s) => s.exportFlow);
@@ -85,6 +93,7 @@ export function Shell() {
             ))}
           </select>
           <SaveStatus />
+          <LockIndicator />
           <ValidationPill />
         </div>
 
@@ -126,6 +135,8 @@ export function Shell() {
               { label: "Entity settings…", icon: "⚙", onClick: () => setEntityOpen(true) },
               { label: "Time periods…", icon: "⌚", onClick: () => setPeriodsOpen(true) },
               { divider: true, label: "" },
+              { label: "Activity log…", icon: "≡", onClick: () => setActivityOpen(true) },
+              { divider: true, label: "" },
               { label: "Import JSON…", icon: "↓", onClick: () => setImportOpen(true) },
               {
                 label: "Export JSON",
@@ -137,8 +148,9 @@ export function Shell() {
               { label: "Help / shortcuts", icon: "?", onClick: () => setHelpOpen(true) },
             ]}
           />
-          {/* Presence placeholder (P5-10). Renders only the local user today;
-              real multi-user data plugs into the same slot when it lands. */}
+          {/* Other users currently viewing this flow (cross-tab via BroadcastChannel). */}
+          <PresenceStack />
+          {/* The local user identity — click to rename. */}
           <PresenceIndicator />
         </div>
       </header>
@@ -195,6 +207,7 @@ export function Shell() {
       {periodsOpen && <TimePeriodsModal onClose={() => setPeriodsOpen(false)} />}
       {entityOpen && <EntitySettingsModal onClose={() => setEntityOpen(false)} />}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      {activityOpen && <ActivityLogModal onClose={() => setActivityOpen(false)} />}
 
       <section
         className={"shell-simdrawer" + (simOpen ? " is-open" : "")}
