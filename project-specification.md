@@ -41,7 +41,7 @@ hand-writing types is avoided.
 | `primitives.ts` | `PromptIdSchema`, `ExtensionNumberSchema`, `E164Schema`, `SipUriSchema`, `ActivePeriodSchema` (union of `"always"` and any named string), `EmailSchema`, `VoicemailEmailOptionSchema`, `VoicemailGreetingSchema`, `RingPolicySchema`, `AnsweringModeExtSchema` (8 values), `AnsweringModeAaSchema` (8 values), `IncomingCallModeSchema`, `MenuInputKeySchema` (`0-9 * # fax no_input`), `PositionSchema`. |
 | `timePeriod.ts` | `TimePeriodSchema`, `TimePeriodListSchema`, `TimePeriodMapSchema`; pure evaluator `matchesPeriod`, `isAnyPeriodActive`; UX helpers `summarizePeriod`, `summarizeList`, `autoNamePeriod`, `uniqueName`. |
 | `entity.ts` | `AutoAttendantEntitySchema` (id, did, name, directory, optional `time_periods`, optional `preferred_ivr_language`), `ExtensionEntitySchema` (id, extension, name, optional `time_periods`, optional `preferred_ivr_language`), `EntitySchema` discriminated union, `ExtensionDirectoryEntrySchema` (extension, name, published). |
-| `nodeData.ts` | Per-kind data schemas: incoming/outgoing call, menu (`MenuRootDataSchema`, `MenuCustomDataSchema` — name + active_period + prompts + no_input + allow_direct_dial + interdigit_timeout_s + inactive_action_node_id + actions map + retry-loop fields), 11 action kinds, two answering modes, four forwarding kinds + `RingModeSchema` (sequential, simultaneous, random, percentage) + `ForwardRuleSchema` (with optional `percentage_weight` and `sip_proxy`) + advanced flags (`keep_original_cld`, `replace_caller_id_name`), `ScreeningRuleDataSchema`, voicemail, fax_mailbox, call_recording, condition (4), target (4), terminal. |
+| `nodeData.ts` | Per-kind data schemas: incoming/outgoing call, menu (`MenuRootDataSchema`, `MenuCustomDataSchema` — name + active_period + prompts + no_input + allow_direct_dial + interdigit_timeout_s + inactive_action_node_id + actions map + retry-loop fields), 11 action kinds, two answering modes, four forwarding kinds + `RingModeSchema` (sequential, simultaneous, random, percentage) + `ForwardRuleSchema` (with optional `percentage_weight` and `sip_proxy`) + advanced flags (`keep_original_cld`, `replace_caller_id_name`), `ScreeningRuleDataSchema`, voicemail, fax_mailbox, `CallRecordingDataSchema` (MR129: mode automatic/on_demand + allow_manual_start_stop + start/stop DTMF + dual announce prompts + auto_record_incoming/redirected + format wav/mp3 + send_to_email + private_to_owner + enable_transcription, with legacy `announce`/`announce_prompt` fields kept for back-compat), condition (4), target (4), terminal. |
 | `node.ts` | `NODE_KINDS` (39 kinds), `NodeKind` literal union, `FlowNodeSchema` as a Zod discriminated union over `type`, helper types `FlowNode`, `FlowNodeData`, `NodeOf<K>`. |
 | `edge.ts` | `FlowEdgeSchema` (id, source, sourceHandle, target, targetHandle, optional label). |
 | `scenario.ts` | `ScenarioSchema` (name, caller, callee, time, optional active_mode, press_sequence, answering_behavior, optional expected_terminal). |
@@ -170,7 +170,7 @@ Pure TS — no DOM, no React, no `Date.now()`, no `Math.random()`.
 
 ## 13. Tests at a glance
 
-13 test files, **86 tests total**.
+15 test files, **109 tests total**.
 
 | File | Count |
 |---|---|
@@ -179,15 +179,16 @@ Pure TS — no DOM, no React, no `Date.now()`, no `Math.random()`.
 | `nodes/__tests__/registry.test.ts` | 4 |
 | `nodes/__tests__/contrast.test.ts` | 4 |
 | `canvas/__tests__/edgeStyle.test.ts` | 6 |
-| `inspector/__tests__/*` | (none — covered by store and simulator tests) |
 | `state/__tests__/menuEdgeSync.test.ts` | 7 |
-| `validation/__tests__/validate.test.ts` | 8 |
+| `validation/__tests__/validate.test.ts` | 10 |
 | `io/__tests__/exportImport.test.ts` | 4 |
 | `simulator/__tests__/extension.test.ts` | 8 |
 | `simulator/__tests__/autoAttendant.test.ts` | 19 |
 | `simulator/__tests__/forwarding.test.ts` | 9 |
+| `simulator/__tests__/callRecording.test.ts` | 8 |
 | `fixtures/__tests__/acmeHqMultiDept.test.ts` | 3 |
 | `fixtures/__tests__/splitFanIn.test.ts` | 3 |
+| `api/__tests__/localStorageClient.test.ts` | 13 |
 
 ## 14. Build artefacts
 

@@ -7,10 +7,11 @@ one canvas, one inspector, and one deterministic simulator.
 
 > **Status:** MVP, frontend-only SPA. JSON save/load, no PortaSwitch API
 > integration yet. Working demos: drag-and-drop canvas, full simulator,
-> validation, comments / activity / multi-tab presence.
+> validation, comments / activity / multi-tab presence, MR129-shape
+> call recording with on-demand and transcription side-effects.
 >
-> **86 → 99 tests** across the last two milestones. Build is clean
-> (149 kB main bundle, no warnings).
+> **109 tests** across 15 files. Build is clean (149 kB main bundle,
+> no warnings).
 
 ## Who this README is for
 
@@ -137,6 +138,8 @@ Specifically:
   loop matching the PortaSwitch flowchart, all 11 menu actions.
 - **Section 7** — Call forwarding. All 4 forwarding shapes × all 4
   distribution modes (sequential, simultaneous, random, percentage).
+- **Section 7.5** — Call recording (MR129). Modes, dual announcements,
+  format, privacy, transcription, the on-demand `manual_record` input.
 - **Section 9** — Terminal codes (what "answered" vs "forwarded_answered"
   vs "rejected" vs "dropped" mean exactly).
 - **Section 11** — Validation rules. What the editor will flag and why.
@@ -246,7 +249,7 @@ Open PRs at https://github.com/kpsolo/callflow/pulls.
 
 ### Tests at a glance
 
-99 tests across 14 files. Run all: `npm test`. Run one: `npx vitest run <path>`.
+109 tests across 15 files. Run all: `npm test`. Run one: `npx vitest run <path>`.
 
 | Area | Tests | File |
 |---|---|---|
@@ -254,11 +257,12 @@ Open PRs at https://github.com/kpsolo/callflow/pulls.
 | Node registry + contrast picker | 8 | `src/nodes/__tests__/` |
 | Canvas edge styling | 6 | `src/canvas/__tests__/` |
 | Menu ↔ edge sync helpers | 7 | `src/state/__tests__/` |
-| Validation rules | 8 | `src/validation/__tests__/` |
+| Validation rules | 10 | `src/validation/__tests__/` |
 | Export/import | 4 | `src/io/__tests__/` |
 | Simulator: extensions | 8 | `src/simulator/__tests__/extension.test.ts` |
 | Simulator: auto attendants | 19 | `src/simulator/__tests__/autoAttendant.test.ts` |
 | Simulator: forwarding | 9 | `src/simulator/__tests__/forwarding.test.ts` |
+| Simulator: call recording (MR129) | 8 | `src/simulator/__tests__/callRecording.test.ts` |
 | Fixtures | 6 | `src/fixtures/__tests__/` |
 | Collab API | 13 | `src/api/__tests__/` |
 

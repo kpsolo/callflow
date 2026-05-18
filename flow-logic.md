@@ -371,9 +371,74 @@ currently-active subset.
 ### 7.4 Recording on the answered leg
 
 `applyRecordingIfConfigured(ctx)` runs whenever a forward leg or extension
-ring answers. It looks up a `call_recording` node (the flow expects at
-most one), plays the announcement prompt if configured, and emits a
-`recording_started` side-effect with the recipient email if set.
+ring answers. It looks up a single `call_recording` node and applies it
+according to the MR129-mapped fields documented in section 7.5.
+
+### 7.5 Call recording (`call_recording` — MR129)
+
+| Field | Type | Doc reference | Behaviour |
+|---|---|---|---|
+| `mode` | `"automatic" \| "on_demand"` | "Activation modes" | Automatic records every answered leg. On-demand requires the caller's `manual_record` input. Default `automatic`. |
+| `allow_manual_start_stop` | boolean | "On-demand call recording" | Gate for on-demand mode. When false, on-demand never fires. |
+| `start_dtmf_code` / `stop_dtmf_code` | string | "DTMF codes" | PortaSwitch defaults `*44` / `*45`. Stored only; the simulator drives manual recording via `manual_record` (see below) rather than DTMF parsing, because DTMF codes during an active call aren't menu events. |
+| `announce_to_all` | boolean | "Call recording announcement" | Plays "Call recording started" to all parties. Falls back to legacy `announce` flag for older JSON. |
+| `announce_started_prompt` | prompt id | "Call recording announcement" | Played when recording begins. |
+| `announce_stopped_prompt` | prompt id | "Call recording announcement" | Played when recording ends, but only if `manual_record === "started_stopped"`. |
+| `auto_record_incoming` | boolean | "Important notes" | PortaSwitch records all incoming, ignoring forward decisions. Stored in our model; the simulator doesn't currently distinguish "before forward" vs "after forward". |
+| `auto_record_redirected` | boolean | "Important notes" | Records calls forwarded outside the PortaSwitch network. Stored only. |
+| `format` | `"wav" \| "mp3"` | "Important notes" | Annotated in the `recording_started` side-effect's detail. Default `wav`. |
+| `send_to_email` | email | "End users can receive call recordings in the email notifications…" | Annotated in side-effect detail. |
+| `private_to_owner` | boolean | "Show the call recording to myself only" | Annotated in side-effect detail as `private`. |
+| `enable_transcription` | boolean | "Transcription of call recordings" | When true, emits `transcription_queued` side-effect after `recording_started`. |
+
+#### Simulator behaviour
+
+Given an answered leg and one `call_recording` node:
+
+1. Determine effective mode: `mode ?? "automatic"`.
+2. If `on_demand` and either `allow_manual_start_stop` is false or
+   `input.manual_record` is `"off"` (default), **skip recording entirely**.
+3. Play `announce_started_prompt` (or legacy `announce_prompt`) if
+   announcement is enabled.
+4. Emit `recording_started` with detail
+   `format=<wav|mp3> <email=…|local> [private]`.
+5. If `input.manual_record === "started_stopped"`, play
+   `announce_stopped_prompt` and emit `recording_stopped`.
+6. If `enable_transcription`, emit `transcription_queued`.
+
+The `SimulatorInput.manual_record` field is the lever for on-demand:
+
+| Value | Meaning |
+|---|---|
+| `"off"` (default) | Caller never pressed start. |
+| `"started"` | Caller pressed start; recording continued through hang-up. |
+| `"started_stopped"` | Caller started and stopped before hang-up. |
+
+#### Validation rules (recording-specific)
+
+| Code | Severity | Trigger |
+|---|---|---|
+| `recording_on_demand_disabled` | warning | `mode = on_demand` but `allow_manual_start_stop` is false. |
+| `recording_mode_conflict` | warning | On-demand mode plus `auto_record_incoming` or `auto_record_redirected` (the auto-toggles only apply to automatic). |
+| `recording_announce_no_prompt` | warning | `announce_to_all` is on but no `announce_started_prompt` / `announce_prompt` set — PortaSwitch falls back to the English system prompt. |
+| `recording_stopped_prompt_orphan` | warning | Stopped prompt set with no started prompt — the stop announcement will never play. |
+
+#### Known gaps vs. MR129
+
+- **No CDR model.** PortaSwitch only records when a CDR exists for the
+  billed account (e.g., parked-call retrieval on a different account
+  doesn't generate a CDR, so no recording). We don't model CDRs;
+  recordings fire on any answered leg.
+- **External SFTP / Call Cabinet** storage is admin tenant-level
+  configuration, not flow logic. Out of scope.
+- **Codec recognition.** PortaSwitch supports G.711/G.729/G.723/Opus.
+  Codec selection is a service-policy concern, not a flow field.
+- **Attended-transfer recording chain** (records all subsequently
+  transferred calls when started before the transfer) requires a
+  multi-call model we don't have.
+- **DTMF codes are stored but not parsed.** The on-demand path uses an
+  explicit `manual_record` input flag instead. The codes round-trip
+  through JSON for the future server implementation.
 
 ## 8. Voicemail and fax mailbox
 
@@ -404,6 +469,11 @@ most one), plays the announcement prompt if configured, and emits a
 `SideEffect.kind` is one of:
 
 - `recording_started` — `applyRecordingIfConfigured` on any answered leg.
+  Detail: `format=<wav|mp3> <email=…|local> [private]`.
+- `recording_stopped` — caller stopped on-demand recording mid-call.
+  Only fires when `manual_record === "started_stopped"`.
+- `transcription_queued` — call_recording has `enable_transcription`.
+  Fires after `recording_started` (or `recording_stopped` for on-demand).
 - `email_queued` — voicemail with email option set and address present.
 - `fax_stored` — fax_mailbox entry with email address.
 
@@ -430,6 +500,10 @@ Run on every flow change. Code in `src/validation/validate.ts`.
 | `voicemail_email_address` | error | `email_option ≠ "none"` but no `email_address` |
 | `mode_missing_forward` | error | Extension answering mode uses Forward but no forwarding node exists |
 | `forward_unreachable` | warning | Forwarding node present but answering mode never triggers Forward |
+| `recording_on_demand_disabled` | warning | `call_recording.mode = on_demand` but `allow_manual_start_stop` is false |
+| `recording_mode_conflict` | warning | On-demand mode plus `auto_record_incoming` or `auto_record_redirected` |
+| `recording_announce_no_prompt` | warning | Announcement is on but no started prompt is configured |
+| `recording_stopped_prompt_orphan` | warning | Stopped prompt set with no started prompt |
 
 ROOT's `active_period` is **not** forced to `"always"` — PortaOne allows
 time-interval gating with the when-inactive chain. Only singleton + name
@@ -484,7 +558,7 @@ A reverse map for orientation.
 | Simultaneous CANCEL reason | Emitted as a `CANCEL → ... (call completed elsewhere)` trace step |
 | Voicemail greeting / email options | `voicemail.{greeting, email_option, email_address}` |
 | Fax mailbox | `fax_mailbox` |
-| Call recording (announce + email) | `call_recording.{announce, announce_prompt, send_to_email}` + `applyRecordingIfConfigured` |
+| Call recording (MR129 — automatic / on-demand, dual announce, format, privacy, transcription) | `call_recording.{mode, allow_manual_start_stop, start_dtmf_code, stop_dtmf_code, announce_to_all, announce_started_prompt, announce_stopped_prompt, auto_record_incoming, auto_record_redirected, format, send_to_email, private_to_owner, enable_transcription}` + `applyRecordingIfConfigured` (see §7.5) |
 | Extension screening rules | `screening_rule` + `runExtension` first-pass |
 | Hunt group reference / call queue reference | `target_hunt_group_ref`, `action_queue` (referenced only — flows out of MVP scope) |
 
