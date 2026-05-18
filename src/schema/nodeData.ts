@@ -63,15 +63,25 @@ export const MenuCustomDataSchema = MenuRootDataSchema.extend({
   name: z.string().min(1),
 });
 
-export const ActionTransferDataSchema = z.object({
+// Unified Transfer action. The `mode` discriminator picks between routing the
+// call to an internal Target node (extension / hunt group / SIP URI) or placing
+// an outbound call to an E.164 number.
+const ActionTransferExtensionDataSchema = z.object({
+  mode: z.literal("extension"),
   target_node_id: z.string().min(1).optional(),
   play_before_action: PromptIdSchema.optional(),
 });
 
-export const ActionTransferE164DataSchema = z.object({
+const ActionTransferE164DataSchema = z.object({
+  mode: z.literal("e164"),
   number: E164Schema.optional(),
   play_before_action: PromptIdSchema.optional(),
 });
+
+export const ActionTransferDataSchema = z.discriminatedUnion("mode", [
+  ActionTransferExtensionDataSchema,
+  ActionTransferE164DataSchema,
+]);
 
 export const ActionPromptExtensionDataSchema = z.object({
   prompt: PromptIdSchema.optional(),

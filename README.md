@@ -225,7 +225,14 @@ These are documented in detail in
   breaks existing object literals; use `.optional()` + fallback at the
   use site.
 - **CSS variables**, not hex literals, in component CSS. Palette
-  colours on nodes are an exception (set inline from the registry).
+  colours on nodes are an exception (set inline from the registry, but
+  exposed as the `--chip-color` custom property where the stylesheet
+  needs to derive a contrast-safe variant).
+- **Theming follows the browser.** `src/index.css` defines the token
+  palette and pairs it with a `@media (prefers-color-scheme: light)`
+  override; `color-scheme: light dark` lets form controls match. The
+  host portal will eventually drive theme selection explicitly — until
+  then, the embed inherits from the browser/OS preference.
 
 ### How to add a new feature — common recipes
 

@@ -7,6 +7,8 @@ export interface OverflowItem {
   disabled?: boolean;
   divider?: boolean;
   icon?: string;
+  /** When provided, the item is rendered as a toggle and shows a checkmark when true. */
+  checked?: boolean;
 }
 
 export function OverflowMenu({ items }: { items: OverflowItem[] }) {
@@ -50,14 +52,21 @@ export function OverflowMenu({ items }: { items: OverflowItem[] }) {
               <li key={i} role="none">
                 <button
                   type="button"
-                  role="menuitem"
+                  role={it.checked !== undefined ? "menuitemcheckbox" : "menuitem"}
+                  aria-checked={it.checked !== undefined ? it.checked : undefined}
                   disabled={it.disabled}
                   onClick={() => {
                     it.onClick?.();
                     setOpen(false);
                   }}
                 >
-                  {it.icon && <span className="ovm-icon">{it.icon}</span>}
+                  {it.checked !== undefined ? (
+                    <span className="ovm-icon" aria-hidden="true">
+                      {it.checked ? "✓" : ""}
+                    </span>
+                  ) : (
+                    it.icon && <span className="ovm-icon">{it.icon}</span>
+                  )}
                   <span>{it.label}</span>
                 </button>
               </li>

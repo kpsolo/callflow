@@ -216,34 +216,34 @@ const nodes: FlowNode[] = [
 
   // ===== Transfer wrappers (some carry play-before prompts) =====
   // Sales — note these transfers are intended to be recorded for compliance.
-  { id: "tr_sales_new", type: "action_transfer", position: { x: 640, y: 0 }, data: { target_node_id: "ext_201" } },
-  { id: "tr_sales_existing", type: "action_transfer", position: { x: 640, y: 60 }, data: { target_node_id: "ext_202" } },
-  { id: "tr_sales_enterprise", type: "action_transfer", position: { x: 640, y: 120 }, data: { target_node_id: "ext_203" } },
-  { id: "tr_sales_default", type: "action_transfer", position: { x: 640, y: 180 }, data: { target_node_id: "ext_201" } },
+  { id: "tr_sales_new", type: "action_transfer", position: { x: 640, y: 0 }, data: { mode: "extension", target_node_id: "ext_201" } },
+  { id: "tr_sales_existing", type: "action_transfer", position: { x: 640, y: 60 }, data: { mode: "extension", target_node_id: "ext_202" } },
+  { id: "tr_sales_enterprise", type: "action_transfer", position: { x: 640, y: 120 }, data: { mode: "extension", target_node_id: "ext_203" } },
+  { id: "tr_sales_default", type: "action_transfer", position: { x: 640, y: 180 }, data: { mode: "extension", target_node_id: "ext_201" } },
 
   // Support — hunt groups for tiers, single ext for accounts, external for emergency.
-  { id: "tr_sup_tier1", type: "action_transfer", position: { x: 640, y: 240 }, data: { target_node_id: "hg_tier1" } },
-  { id: "tr_sup_tier2", type: "action_transfer", position: { x: 640, y: 300 }, data: { target_node_id: "hg_tier2" } },
-  { id: "tr_sup_accounts", type: "action_transfer", position: { x: 640, y: 360 }, data: { target_node_id: "ext_301" } },
-  { id: "tr_emergency", type: "action_transfer", position: { x: 640, y: 420 }, data: { target_node_id: "ext_emergency_line" } },
+  { id: "tr_sup_tier1", type: "action_transfer", position: { x: 640, y: 240 }, data: { mode: "extension", target_node_id: "hg_tier1" } },
+  { id: "tr_sup_tier2", type: "action_transfer", position: { x: 640, y: 300 }, data: { mode: "extension", target_node_id: "hg_tier2" } },
+  { id: "tr_sup_accounts", type: "action_transfer", position: { x: 640, y: 360 }, data: { mode: "extension", target_node_id: "ext_301" } },
+  { id: "tr_emergency", type: "action_transfer", position: { x: 640, y: 420 }, data: { mode: "extension", target_node_id: "ext_emergency_line" } },
 
   // Engineering
-  { id: "tr_eng_platform", type: "action_transfer", position: { x: 640, y: 480 }, data: { target_node_id: "ext_401" } },
-  { id: "tr_eng_mobile", type: "action_transfer", position: { x: 640, y: 540 }, data: { target_node_id: "ext_402" } },
-  { id: "tr_eng_sre", type: "action_transfer", position: { x: 640, y: 600 }, data: { target_node_id: "ext_403" } },
+  { id: "tr_eng_platform", type: "action_transfer", position: { x: 640, y: 480 }, data: { mode: "extension", target_node_id: "ext_401" } },
+  { id: "tr_eng_mobile", type: "action_transfer", position: { x: 640, y: 540 }, data: { mode: "extension", target_node_id: "ext_402" } },
+  { id: "tr_eng_sre", type: "action_transfer", position: { x: 640, y: 600 }, data: { mode: "extension", target_node_id: "ext_403" } },
 
   // Billing
-  { id: "tr_bill_invoices", type: "action_transfer", position: { x: 640, y: 660 }, data: { target_node_id: "ext_501" } },
-  { id: "tr_bill_payments", type: "action_transfer", position: { x: 640, y: 720 }, data: { target_node_id: "ext_502" } },
-  { id: "tr_bill_disputes", type: "action_transfer", position: { x: 640, y: 780 }, data: { target_node_id: "ext_503" } },
+  { id: "tr_bill_invoices", type: "action_transfer", position: { x: 640, y: 660 }, data: { mode: "extension", target_node_id: "ext_501" } },
+  { id: "tr_bill_payments", type: "action_transfer", position: { x: 640, y: 720 }, data: { mode: "extension", target_node_id: "ext_502" } },
+  { id: "tr_bill_disputes", type: "action_transfer", position: { x: 640, y: 780 }, data: { mode: "extension", target_node_id: "ext_503" } },
 
   // HR
-  { id: "tr_hr_benefits", type: "action_transfer", position: { x: 640, y: 840 }, data: { target_node_id: "ext_601" } },
-  { id: "tr_hr_recruiting", type: "action_transfer", position: { x: 640, y: 900 }, data: { target_node_id: "ext_602" } },
-  { id: "tr_hr_payroll", type: "action_transfer", position: { x: 640, y: 960 }, data: { target_node_id: "ext_603" } },
+  { id: "tr_hr_benefits", type: "action_transfer", position: { x: 640, y: 840 }, data: { mode: "extension", target_node_id: "ext_601" } },
+  { id: "tr_hr_recruiting", type: "action_transfer", position: { x: 640, y: 900 }, data: { mode: "extension", target_node_id: "ext_602" } },
+  { id: "tr_hr_payroll", type: "action_transfer", position: { x: 640, y: 960 }, data: { mode: "extension", target_node_id: "ext_603" } },
 
   // Operator
-  { id: "tr_operator", type: "action_transfer", position: { x: 640, y: 1020 }, data: { target_node_id: "ext_100" } },
+  { id: "tr_operator", type: "action_transfer", position: { x: 640, y: 1020 }, data: { mode: "extension", target_node_id: "ext_100" } },
 
   // Disconnect actions
   {

@@ -17,7 +17,22 @@ interface UiState {
   /** Used by the reverse direction: edge hover flashes the inspector row. */
   flashedMenuKey: string | null;
   flashMenuKey: (key: string | null) => void;
+
+  /** Whether to surface raw node IDs in the inspector header. Off by default —
+   *  IDs are author-facing internals, not part of the everyday editing flow. */
+  showNodeIds: boolean;
+  setShowNodeIds: (v: boolean) => void;
 }
+
+const SHOW_NODE_IDS_KEY = "callflow.ui.showNodeIds";
+
+const readShowNodeIds = (): boolean => {
+  try {
+    return localStorage.getItem(SHOW_NODE_IDS_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
 
 export const useUiStore = create<UiState>((set) => ({
   hoveredMenuKey: null,
@@ -31,5 +46,14 @@ export const useUiStore = create<UiState>((set) => ({
         set((s) => (s.flashedMenuKey === key ? { flashedMenuKey: null } : s));
       }, 700);
     }
+  },
+  showNodeIds: readShowNodeIds(),
+  setShowNodeIds: (v) => {
+    try {
+      localStorage.setItem(SHOW_NODE_IDS_KEY, v ? "1" : "0");
+    } catch {
+      // ignore — storage may be unavailable (private mode, embedded contexts)
+    }
+    set({ showNodeIds: v });
   },
 }));

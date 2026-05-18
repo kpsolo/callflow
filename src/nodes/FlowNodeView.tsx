@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import type { FlowNode, NodeKind } from "@/schema";
 import { getNodeType } from "./registry";
-import { renderSummary } from "./summaries";
+import { renderSummary, summaryRowCount } from "./summaries";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
 import { useFlowStore } from "@/state/store";
@@ -11,6 +11,15 @@ import { pickHeaderText } from "./contrast";
 import "./FlowNodeView.css";
 
 type FlowNodeViewProps = NodeProps<FlowNode["data"]>;
+
+// Layout constants — must match the matching CSS custom properties in index.css.
+// Handle positions are computed from these so dot-center === label-center.
+const HEADER_H = 24;       // --fn-node-header-h
+const ROW_H = 16;          // --fn-node-row-h (body summary rows)
+const PORT_ROW_H = 18;     // --fn-node-port-row-h
+const BODY_PAD_Y = 12;     // 6px top + 6px bottom (--fn-node-pad-y * 2)
+const DIVIDER_H = 1;
+const PORTS_PAD_TOP = 4;
 
 function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const kind = type as NodeKind;
@@ -39,6 +48,15 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
         })
       : null;
 
+  const bodyRows = summaryRowCount(kind, data);
+  const bodyH = bodyRows > 0 ? bodyRows * ROW_H + BODY_PAD_Y : 0;
+  const totalOutputs = def.outputs.length + (dynamicOutputs?.length ?? 0);
+  const hasDivider = bodyH > 0 && totalOutputs > 0;
+
+  // y-center of the i-th port row, measured from the top of the node.
+  const portsTop = HEADER_H + bodyH + (hasDivider ? DIVIDER_H : 0) + PORTS_PAD_TOP;
+  const portTopPx = (i: number) => portsTop + i * PORT_ROW_H + PORT_ROW_H / 2;
+
   return (
     <div
       className={
@@ -55,39 +73,73 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
         style={{ background: def.color, color: pickHeaderText(def.color) }}
       >
         {kind === "menu_root" && (
-          <span className="fn-node-start-chip" aria-label="Start of the call flow">
+          <span
+            className="fn-node-start-chip"
+            style={{ background: pickHeaderText(def.color), color: def.color }}
+            aria-label="Start of the call flow"
+          >
             START
           </span>
         )}
         <span className="fn-node-header-label">{def.shortLabel ?? def.label}</span>
-        {worst && (
-          <span
-            className={`fn-node-badge fn-node-badge-${worst}`}
-            title={myIssues.map((i) => i.message).join("\n")}
-            aria-label={`${myIssues.length} ${worst}${myIssues.length > 1 ? "s" : ""}`}
-          >
-            {worst === "error" ? "!" : "?"}
-          </span>
-        )}
-        {commentCount > 0 && (
-          <span
-            className="fn-node-badge fn-node-badge-comment"
-            title={`${commentCount} unresolved comment${commentCount > 1 ? "s" : ""}`}
-            aria-label={`${commentCount} unresolved comments`}
-          >
-            💬 {commentCount}
+        {(worst || commentCount > 0) && (
+          <span className="fn-node-header-badges">
+            {worst && (
+              <span
+                className={`fn-node-badge fn-node-badge-${worst}`}
+                title={myIssues.map((i) => i.message).join("\n")}
+                aria-label={`${myIssues.length} ${worst}${myIssues.length > 1 ? "s" : ""}`}
+              >
+                {worst === "error" ? "!" : "?"}
+              </span>
+            )}
+            {commentCount > 0 && (
+              <span
+                className="fn-node-badge fn-node-badge-comment"
+                title={`${commentCount} unresolved comment${commentCount > 1 ? "s" : ""}`}
+                aria-label={`${commentCount} unresolved comments`}
+              >
+                💬 {commentCount}
+              </span>
+            )}
           </span>
         )}
       </div>
-      <div className="fn-node-body">{renderSummary(kind, data)}</div>
 
-      {def.inputs.map((p, i) => (
+      {bodyH > 0 && (
+        <div className="fn-node-body">
+          <div className="fn-node-fields">{renderSummary(kind, data)}</div>
+        </div>
+      )}
+
+      {hasDivider && <div className="fn-node-divider" aria-hidden="true" />}
+
+      {totalOutputs > 0 && (
+        <div className="fn-node-ports">
+          {def.outputs.map((p) => (
+            <div className="fn-node-port-row fn-node-port-row--out" key={`out-${p.id}`}>
+              <span className="fn-node-port-row__label">{p.label ?? p.id}</span>
+            </div>
+          ))}
+          {dynamicOutputs?.map((entry) => (
+            <div className="fn-node-port-row fn-node-port-row--out" key={`out-${entry.id}`}>
+              <span className="fn-node-port-row__label fn-node-port-row__label--menu">
+                {entry.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Inputs: today every node has at most one unlabelled input. Anchor it at the
+          header center; if multi-input nodes are introduced later, expand this. */}
+      {def.inputs.map((p) => (
         <Handle
           key={`in-${p.id}`}
           id={p.id}
           type="target"
           position={Position.Left}
-          style={{ top: 24 + i * 14 }}
+          style={{ top: HEADER_H / 2 }}
         />
       ))}
 
@@ -97,10 +149,8 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
           id={p.id}
           type="source"
           position={Position.Right}
-          style={{ top: 24 + i * 14 }}
-        >
-          <span className="fn-node-port-label">{p.label}</span>
-        </Handle>
+          style={{ top: portTopPx(i) }}
+        />
       ))}
 
       {dynamicOutputs?.map((entry, i) => (
@@ -109,10 +159,8 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
           id={entry.id}
           type="source"
           position={Position.Right}
-          style={{ top: 56 + i * 14 }}
-        >
-          <span className="fn-node-port-label fn-node-port-label-menu">{entry.label}</span>
-        </Handle>
+          style={{ top: portTopPx(def.outputs.length + i) }}
+        />
       ))}
     </div>
   );

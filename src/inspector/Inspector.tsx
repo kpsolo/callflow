@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useFlowStore } from "@/state/store";
+import { useUiStore } from "@/state/uiStore";
 import { getNodeType } from "@/nodes/registry";
 import type { NodeKind } from "@/schema";
 import { FIELDS, type FieldDef } from "./fields";
@@ -16,6 +17,7 @@ export function Inspector() {
   const node = useFlowStore((s) => s.nodes.find((n) => n.id === selectedId));
   const updateNodeData = useFlowStore((s) => s.updateNodeData);
   const removeNode = useFlowStore((s) => s.removeNode);
+  const showNodeIds = useUiStore((s) => s.showNodeIds);
 
   const kind = node?.type as NodeKind | undefined;
   const def = kind ? getNodeType(kind) : undefined;
@@ -50,13 +52,13 @@ export function Inspector() {
         <div className="inspector-title">
           <span
             className="inspector-type-chip"
-            style={{ background: def.color }}
+            style={{ ["--chip-color" as string]: def.color }}
             title={def.label}
           >
             {def.label}
           </span>
           <strong className="inspector-name">{nodeName ?? def.label}</strong>
-          <code className="inspector-id">{node.id}</code>
+          {showNodeIds && <code className="inspector-id">{node.id}</code>}
         </div>
         {!def.singletonPerEntity && (
           <button
@@ -121,10 +123,12 @@ function InspectorFields({
   const tabbed = fields.some((f) => !!f.tab);
   const [activeTab, setActiveTab] = useState<NonNullable<FieldDef["tab"]>>("general");
 
+  const isVisible = (f: FieldDef) => !f.visibleWhen || f.visibleWhen(data);
+
   if (!tabbed) {
     return (
       <div className="inspector-fields">
-        {fields.map((f) => (
+        {fields.filter(isVisible).map((f) => (
           <FieldRow
             key={f.key}
             def={f}
@@ -138,7 +142,7 @@ function InspectorFields({
   }
 
   const presentTabs = TAB_ORDER.filter((t) => fields.some((f) => f.tab === t.key));
-  const visibleFields = fields.filter((f) => f.tab === activeTab);
+  const visibleFields = fields.filter((f) => f.tab === activeTab && isVisible(f));
 
   return (
     <>
@@ -242,17 +246,22 @@ function FieldRow({
           onChange={(e) => onChange(path, e.target.checked)}
         />
       ) : def.type === "select" ? (
-        <select
-          value={(value as string | undefined) ?? ""}
-          onChange={(e) => onChange(path, e.target.value || undefined)}
-        >
-          <option value="">—</option>
-          {def.options?.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
+        <>
+          <select
+            value={(value as string | undefined) ?? ""}
+            onChange={(e) => onChange(path, e.target.value || undefined)}
+          >
+            <option value="">—</option>
+            {def.options?.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+          {def.optionDescriptions && typeof value === "string" && def.optionDescriptions[value] && (
+            <span className="inspector-option-description">{def.optionDescriptions[value]}</span>
+          )}
+        </>
       ) : def.type === "readonly" ? (
         <span className="inspector-readonly">{String(value ?? "—")}</span>
       ) : null}

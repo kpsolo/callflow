@@ -25,6 +25,7 @@ import { PresenceStack } from "./PresenceStack";
 import { LockIndicator } from "./LockIndicator";
 import { ActivityLogModal } from "./ActivityLogModal";
 import { useActivityRecorder } from "@/state/useActivityRecorder";
+import { useUiStore } from "@/state/uiStore";
 import "./Shell.css";
 
 export function Shell() {
@@ -54,6 +55,9 @@ export function Shell() {
   const issues = useValidation();
   const exportDisabled = hasErrors(issues);
   useKeyboardShortcuts();
+
+  const showNodeIds = useUiStore((s) => s.showNodeIds);
+  const setShowNodeIds = useUiStore((s) => s.setShowNodeIds);
 
   const inspector = useResizable({
     storageKey: "cfs.inspector.width.v1",
@@ -143,6 +147,12 @@ export function Shell() {
                 icon: "↑",
                 onClick: handleExport,
                 disabled: exportDisabled,
+              },
+              { divider: true, label: "" },
+              {
+                label: "Show node IDs",
+                checked: showNodeIds,
+                onClick: () => setShowNodeIds(!showNodeIds),
               },
               { divider: true, label: "" },
               { label: "Help / shortcuts", icon: "?", onClick: () => setHelpOpen(true) },

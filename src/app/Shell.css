@@ -172,7 +172,7 @@
 .shell-canvas {
   position: relative;
   background:
-    radial-gradient(circle, #1a1f2a 1px, transparent 1px) 0 0 / 20px 20px,
+    radial-gradient(circle, var(--dot-grid) 1px, transparent 1px) 0 0 / 20px 20px,
     var(--bg);
   min-height: 0;
 }

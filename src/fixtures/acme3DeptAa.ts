@@ -114,19 +114,19 @@ export const acme3DeptAa: Flow = (() => {
       id: "tgt_alice",
       type: "action_transfer",
       position: { x: 840, y: 60 },
-      data: { target_node_id: "ext_201" },
+      data: { mode: "extension", target_node_id: "ext_201" },
     },
     {
       id: "tgt_bob",
       type: "action_transfer",
       position: { x: 840, y: 200 },
-      data: { target_node_id: "ext_202" },
+      data: { mode: "extension", target_node_id: "ext_202" },
     },
     {
       id: "tgt_carol",
       type: "action_transfer",
       position: { x: 840, y: 340 },
-      data: { target_node_id: "ext_301" },
+      data: { mode: "extension", target_node_id: "ext_301" },
     },
     {
       id: "ext_201",

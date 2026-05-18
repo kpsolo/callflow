@@ -42,7 +42,10 @@ export function inferEdges(nodes: FlowNode[]): FlowEdge[] {
         break;
       }
       case "action_transfer":
-        add(n.id, "next", n.data.target_node_id);
+        // E.164 transfers don't link to a node — they place an outbound call.
+        if (n.data.mode === "extension") {
+          add(n.id, "next", n.data.target_node_id);
+        }
         break;
       case "action_voicemail":
         add(n.id, "next", n.data.mailbox_node_id);

@@ -1,5 +1,5 @@
 .fn-node {
-  min-width: 160px;
+  min-width: 168px;
   max-width: 240px;
   background: var(--bg-elev);
   border: 1.5px solid var(--border);
@@ -25,6 +25,51 @@
   opacity: 0.35;
 }
 
+.fn-node-header {
+  height: var(--fn-node-header-h);
+  padding: 0 var(--fn-node-pad-x);
+  border-radius: 4px 4px 0 0;
+  /* `color` is set inline by FlowNodeView.tsx via pickHeaderText() so the
+     header text passes WCAG AA on light category colours (action orange,
+     answering amber, condition yellow, etc.). */
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fn-node-header-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fn-node-header-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.fn-node-start-chip {
+  /* `background` and `color` are set inline from FlowNodeView.tsx:
+       background = pickHeaderText(def.color)   // inverse of header bg
+       color      = def.color                   // header bg
+     This pairs the chip with the same contrast guarantee the header already has,
+     so "START" is legible across all category colours. */
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
 .fn-node-badge {
   display: inline-grid;
   place-items: center;
@@ -44,20 +89,6 @@
   background: var(--warn);
 }
 
-.fn-node-header {
-  padding: 4px 8px;
-  border-radius: 4px 4px 0 0;
-  /* `color` is set inline by FlowNodeView.tsx via pickHeaderText() so the
-     header text passes WCAG AA on light category colours (action orange,
-     answering amber, condition yellow, etc.). */
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .fn-node-badge-comment {
   background: rgba(255, 255, 255, 0.25);
   color: inherit;
@@ -65,60 +96,109 @@
   padding: 1px 6px;
   font-size: 10px;
   font-weight: 600;
-  margin-left: 4px;
-}
-
-.fn-node-start-chip {
-  background: currentColor;
-  color: inherit;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 999px;
-  margin-right: 6px;
-  border: 1px solid currentColor;
-  white-space: nowrap;
-  /* Invert the background relative to text so the chip stays legible regardless
-     of the picked header text color. */
-  mix-blend-mode: difference;
+  width: auto;
+  height: auto;
 }
 
 .fn-node-body {
-  padding: 6px 8px 8px;
-  color: var(--text-dim);
+  padding: var(--fn-node-pad-y) var(--fn-node-pad-x);
   line-height: 1.35;
 }
 
-.fn-node-body strong {
+.fn-node-fields {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: baseline;
+}
+
+.fn-node-field__key {
+  color: var(--text-dim);
+  text-align: right;
+  font-weight: 500;
+  font-size: 11px;
+  white-space: nowrap;
+  line-height: var(--fn-node-row-h);
+}
+
+.fn-node-field__value {
   color: var(--text);
   font-weight: 500;
-}
-
-.fn-node-row {
-  display: flex;
-  gap: 6px;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  line-height: var(--fn-node-row-h);
 }
 
-.fn-node-row span {
+.fn-node-chip {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: baseline;
 }
 
-.fn-node-port-label {
-  position: absolute;
-  left: 10px;
+.fn-node-chip--on {
+  color: var(--ok);
+  border-color: rgba(89, 208, 147, 0.4);
+}
+
+.fn-node-chip--off {
+  color: var(--text-dim);
+}
+
+.fn-node-chip--warn {
+  color: var(--warn);
+  border-color: rgba(255, 180, 84, 0.4);
+}
+
+.fn-node-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+.fn-node-ports {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 6px;
+}
+
+.fn-node-port-row {
+  height: var(--fn-node-port-row-h);
+  display: flex;
+  align-items: center;
+  padding: 0 calc(var(--fn-node-pad-x) + 4px);
+  position: relative;
+}
+
+.fn-node-port-row--out {
+  justify-content: flex-end;
+}
+
+.fn-node-port-row__label {
   font-size: 10px;
   color: var(--text-dim);
-  pointer-events: none;
   white-space: nowrap;
-  transform: translateY(-50%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.fn-node-port-label-menu {
+.fn-node-port-row__label--menu {
   color: var(--text);
 }
 

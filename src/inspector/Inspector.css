@@ -27,8 +27,20 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  background: var(--chip-color);
   color: #11161f;
   white-space: nowrap;
+}
+
+/* In light mode the solid category-coloured chip drops below WCAG AA on the
+   darker hues (e.g. menu purple). Switch to a soft tinted-pill: a light wash
+   of the category colour as background with the saturated hue as text, which
+   gives consistent contrast across every category. */
+@media (prefers-color-scheme: light) {
+  .inspector-type-chip {
+    background: color-mix(in srgb, var(--chip-color) 18%, #ffffff);
+    color: color-mix(in srgb, var(--chip-color) 80%, #000000);
+  }
 }
 
 .inspector-name {
@@ -125,6 +137,18 @@
 
 .inspector-field input[type="checkbox"] {
   justify-self: start;
+}
+
+.inspector-option-description {
+  grid-column: 2;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-dim);
+  padding: 6px 8px;
+  background: var(--bg-elev);
+  border-left: 2px solid var(--accent-dim);
+  border-radius: 0 4px 4px 0;
 }
 
 .inspector-readonly {

@@ -18,10 +18,20 @@ export interface FieldDef {
   /** Dotted path for nested data, e.g. "no_input.timeout_s" */
   path?: string;
   options?: readonly string[];
+  /**
+   * Per-option human description for `select` fields. The Inspector renders the
+   * description for the currently selected value below the dropdown.
+   */
+  optionDescriptions?: Record<string, string>;
   placeholder?: string;
   min?: number;
   max?: number;
   description?: string;
+  /**
+   * Predicate to hide the field based on sibling values. Use for discriminator
+   * patterns (e.g., only show `number` when `mode === "e164"`).
+   */
+  visibleWhen?: (data: Record<string, unknown>) => boolean;
   /**
    * For complex node types (menus), which inspector tab this field belongs in.
    * `undefined` = no tab grouping; the Inspector falls back to a flat layout.
@@ -114,8 +124,32 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text", tab: "errors" },
     { key: "max_fails_prompt", label: "Max-fails prompt", type: "text", tab: "errors" },
   ],
-  action_transfer_e164: [
-    { key: "number", label: "E.164 number", type: "text", placeholder: "+18005551234" },
+  action_transfer: [
+    {
+      key: "mode",
+      label: "Transfer to",
+      type: "select",
+      options: ["extension", "e164"],
+      optionDescriptions: {
+        extension:
+          "Route the call to an internal Target node — an extension, hunt group, SIP URI, or hunt-group reference. The chosen Target is set by connecting this node's output on the canvas.",
+        e164: "Place an outbound call to an E.164 number (e.g. +18005551234). The outcome is answered → forwarded_answered, or no-answer → forwarded_unanswered.",
+      },
+    },
+    {
+      key: "target_node_id",
+      label: "Target node id",
+      type: "text",
+      placeholder: "(set by drawing an edge from this node)",
+      visibleWhen: (d) => d.mode !== "e164",
+    },
+    {
+      key: "number",
+      label: "E.164 number",
+      type: "text",
+      placeholder: "+18005551234",
+      visibleWhen: (d) => d.mode === "e164",
+    },
     { key: "play_before_action", label: "Play before action", type: "text" },
   ],
   action_prompt_extension: [

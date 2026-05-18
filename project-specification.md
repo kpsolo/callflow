@@ -14,6 +14,7 @@ the working tree at the time of writing.
 | `tsconfig.json` / `tsconfig.app.json` / `tsconfig.node.json` | TS project references; strict mode, `noUnusedLocals/Parameters`, `noFallthroughCasesInSwitch`, path alias for `@/*`. |
 | `eslint.config.js` | Flat config, `tseslint` + react hooks + react refresh. |
 | `index.html` | Vite entry; mounts `/src/main.tsx`. |
+| `src/index.css` | Global tokens + base resets. Defines the `--bg / --bg-elev / --bg-elev-2 / --border / --text / --text-dim / --accent / --accent-dim / --danger / --warn / --info / --ok / --dot-grid` palette plus flow-node geometry vars (`--fn-node-*`). Sets `color-scheme: light dark` and provides a `@media (prefers-color-scheme: light)` override that swaps the palette for light values. Until the host portal drives theme selection explicitly, the embed follows the browser/OS preference. |
 | `.prettierrc.json` / `.gitignore` | Standard. |
 
 ## 2. App shell (`src/app/`)
@@ -22,13 +23,13 @@ Top-level UI composition.
 
 | File | Role |
 |---|---|
-| `Shell.tsx` | Three-cluster top bar (entity switcher / save status / validation pill — `▶ Run simulator` — undo/redo group + overflow menu + presence), CSS-grid body (palette / canvas / resizer / inspector), bottom simulator drawer. |
+| `Shell.tsx` | Three-cluster top bar (entity switcher / save status / validation pill — `▶ Run simulator` — undo/redo group + overflow menu + presence), CSS-grid body (palette / canvas / resizer / inspector), bottom simulator drawer. Overflow menu includes the **Show node IDs** view toggle (wired to `uiStore.showNodeIds`). |
 | `Shell.css` | Layout + brand + sim button + undo group + help dl + presence slot. |
 | `useKeyboardShortcuts.ts` | Global hook: `Ctrl+Z` undo, `Ctrl+Shift+Z` redo, `Ctrl+D` duplicate, `Del`/`Backspace` remove selected, all gated against editable focus targets. |
 | `useResizable.ts` | Generic edge-aware resizer hook with `localStorage` persistence and min/max clamps. Currently consumed by the inspector divider; reusable. |
 | `WelcomeBanner.tsx`, `WelcomeBanner.css` | Dismissible four-step tour, persists dismissal in `localStorage` (`cfs.welcome.dismissed.v1`). |
 | `SaveStatus.tsx`, `SaveStatus.css` | Pill that reads `store.dirty` + `store.lastSavedAt`; ticks every 10s for the "Saved Xs ago" wording. |
-| `OverflowMenu.tsx`, `OverflowMenu.css` | Generic `⋯` dropdown for secondary actions; click-away and Escape close. |
+| `OverflowMenu.tsx`, `OverflowMenu.css` | Generic `⋯` dropdown for secondary actions; click-away and Escape close. `OverflowItem` supports an optional `checked` boolean which renders the item as a `menuitemcheckbox` with a ✓ glyph (used for view toggles like "Show node IDs"). |
 | `PresenceIndicator.tsx`, `PresenceIndicator.css` | Single-user avatar with hashed-palette colour; rename inline; localStorage-only today. Placeholder for multi-user presence. |
 
 ## 3. Schema (`src/schema/`)
@@ -87,7 +88,7 @@ Three stores, each tightly scoped.
 | `store.ts` | Main `FlowStore` (zustand with `temporal` middleware): entity, nodes, edges, scenarios, selectedNodeId, `loadCounter` (fits canvas on load), `dirty`, `lastSavedAt`. Mutating actions: `onNodesChange`, `onEdgesChange`, `onConnect`, `addNode`, `updateNodeData`, `removeNode`, `duplicateNode`, `removeEdge`, `setSelected`, `setEntity`, `loadFlow`, `exportFlow`, `clearFlow`, `replaceLayout`, `markSaved`. Dirty flag set on structural changes; cleared on `loadFlow` / `clearFlow` / `markSaved`. Temporal `partialize` skips `selectedNodeId` so undo doesn't shuffle selection. |
 | `menuEdgeSync.ts` | Three pure helpers keeping `data.actions` and edges in sync: `projectMenuEdges`, `applyMenuConnectToActions`, `applyMenuEdgeRemovalToActions`. Edge IDs deterministic `menu_<src>_<key>`. |
 | `traceStore.ts` | Holds the most recent simulator trace + a `visited_node_ids` set for canvas path-highlight. |
-| `uiStore.ts` | Ephemeral cross-pane UI state: `hoveredMenuKey` (inspector→canvas highlight), `flashedMenuKey` (canvas→inspector flash, auto-clears after 700 ms). |
+| `uiStore.ts` | Ephemeral cross-pane UI state: `hoveredMenuKey` (inspector→canvas highlight), `flashedMenuKey` (canvas→inspector flash, auto-clears after 700 ms), plus the persisted `showNodeIds` view preference (off by default; mirrored to `localStorage` under `callflow.ui.showNodeIds`). |
 | `__tests__/menuEdgeSync.test.ts` | 7 tests: projection, replacement of prior menu edges, no-op on non-menu handles, prompt preservation, removal. |
 
 ## 6. Canvas (`src/canvas/`)
@@ -112,8 +113,8 @@ Three stores, each tightly scoped.
 
 | File | Role |
 |---|---|
-| `Inspector.tsx` | Dispatcher. Looks up the selected node, builds field list from `FIELDS[kind]`, renders header (color-chip type label + editable name + monospace id + Delete button). For node kinds whose fields declare a `tab`, renders a tab strip (General / Prompts / Actions / Errors) and filters to the active tab; otherwise renders flat. |
-| `Inspector.css` | Header chip + name + id + fields layout + tab strip + actions-map / rules-list / action-row CSS. |
+| `Inspector.tsx` | Dispatcher. Looks up the selected node, builds field list from `FIELDS[kind]`, renders header (color-chip type label + editable name + Delete button; the monospace node-id chip is opt-in via `uiStore.showNodeIds`, which is toggled from the Shell overflow menu). The chip exposes the category colour as the `--chip-color` CSS custom property so the stylesheet can derive a contrast-safe variant per theme. For node kinds whose fields declare a `tab`, renders a tab strip (General / Prompts / Actions / Errors) and filters to the active tab; otherwise renders flat. |
+| `Inspector.css` | Header chip + name + id + fields layout + tab strip + actions-map / rules-list / action-row CSS. In light mode the solid category-coloured type chip would drop below WCAG AA on darker hues (e.g. menu purple), so a `@media (prefers-color-scheme: light)` block uses `color-mix` to render it as a soft tinted pill (light wash background + saturated hue text). |
 | `fields.ts` | `FieldDef[]` per kind: `key`, `label`, `type` (`text`, `number`, `toggle`, `select`, `email`, `actions-map`, `rules-list`, `active-period`, `readonly`), optional `path` (dotted), `options`, `placeholder`, `min`/`max`, `tab` for menus. |
 | `paths.ts` | `getAtPath` / `setAtPath` for dotted keys (e.g. `no_input.timeout_s`). |
 | `MenuActionsEditor.tsx` | Two-line rows per input key: line 1 = target select + speaker icon for `play_before_action` + remove; line 2 = `<kind label> → <resolved target>`. Reads target options from the store and derives a "resolved" pointer (target_node_id, target_menu_node_id, mailbox_node_id, number, uri, extension). Hover row → `uiStore.setHoveredMenuKey`. |

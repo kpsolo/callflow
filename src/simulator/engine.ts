@@ -731,16 +731,16 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       return terminate(ctx, "voicemail_left");
     }
     case "action_transfer": {
+      if (node.data.mode === "e164") {
+        const num = node.data.number ?? "<unset>";
+        step(ctx, node.id, node.type, `Transfer to E.164 ${num}`);
+        const r = answeringFor(ctx, num);
+        if (r === "answer") return terminate(ctx, "forwarded_answered", `Answered by ${num}`);
+        return terminate(ctx, "forwarded_unanswered", `${num} unreachable`);
+      }
       const tgt = node.data.target_node_id;
       if (!tgt) return terminate(ctx, "dropped", "Transfer target missing");
       return runNode(ctx, ctx.nodesById.get(tgt) ?? node);
-    }
-    case "action_transfer_e164": {
-      const num = node.data.number ?? "<unset>";
-      step(ctx, node.id, node.type, `Transfer to E.164 ${num}`);
-      const r = answeringFor(ctx, num);
-      if (r === "answer") return terminate(ctx, "forwarded_answered", `Answered by ${num}`);
-      return terminate(ctx, "forwarded_unanswered", `${num} unreachable`);
     }
     case "action_goto_menu": {
       const tgt = node.data.target_menu_node_id;

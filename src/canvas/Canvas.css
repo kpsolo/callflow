@@ -65,10 +65,23 @@
 
 .react-flow__edge-path {
   stroke: var(--text-dim);
-  stroke-width: 1.5;
+  stroke-width: 2;
 }
 
+/* Selection highlight must override inline `style.stroke` set by styleEdges()
+   in edgeStyle.ts, hence !important. */
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: var(--accent);
-  stroke-width: 2;
+  stroke: var(--accent) !important;
+  stroke-width: 4 !important;
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 4px rgba(79, 140, 255, 0.6));
+}
+
+.react-flow__edge.selected .react-flow__edge-text {
+  fill: var(--accent) !important;
+  font-weight: 600;
+}
+
+.react-flow__edge.selected .react-flow__edge-textbg {
+  fill: rgba(79, 140, 255, 0.18) !important;
 }

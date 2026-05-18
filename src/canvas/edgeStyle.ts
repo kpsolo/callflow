@@ -29,8 +29,8 @@ const DIGIT_PALETTE: Record<string, string> = {
 };
 
 const DEFAULT_STROKE = "#6b7280"; // matches --text-dim-ish
-const STROKE_WIDTH_DEFAULT = 1.5;
-const STROKE_WIDTH_EMPHASIS = 2;
+const STROKE_WIDTH_DEFAULT = 2;
+const STROKE_WIDTH_EMPHASIS = 2.5;
 
 export interface EdgeStyleProps {
   style: React.CSSProperties;

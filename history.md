@@ -285,6 +285,41 @@ Each item flagged "deferred" in the UX pass summary was then implemented:
 
 Final numbers: **86 tests**, main bundle **128 kB**, no warnings.
 
+## 11a. Light theme + inspector polish (2026-05-18)
+
+The studio embeds into a host portal that owns chrome/theme selection;
+on its own the SPA was hard-coded dark. Small pass to make it portal-
+ready and tighten the inspector header.
+
+1. **Light palette via `prefers-color-scheme`.** `src/index.css`
+   declares the token palette under `:root`, switches
+   `color-scheme: dark` → `light dark`, and adds a
+   `@media (prefers-color-scheme: light)` block that overrides every
+   token (`--bg`, `--bg-elev*`, `--border`, `--text`, `--text-dim`,
+   accent/danger/warn/info/ok, plus a new `--dot-grid` token). The
+   canvas backdrop dot grid in `Shell.css` was the one hardcoded hex
+   left over — it now reads `var(--dot-grid)` so it flips with the
+   theme. The portal will drive theme selection explicitly later; until
+   then the embed follows the browser preference.
+2. **Contrast-safe type chip.** The inspector header's category chip
+   used dark text on the registry colour, which dropped below WCAG AA
+   on the darker hues (menu purple `#9d4edd` at 4.36:1). Inspector.tsx
+   now exposes the colour as the `--chip-color` CSS custom property
+   instead of an inline `background:` style; Inspector.css keeps the
+   solid pill in dark mode and, in light mode, derives a soft tinted
+   pill via `color-mix(in srgb, var(--chip-color) 18%, white)` for the
+   background and `color-mix(... 80%, black)` for the text. Same
+   approach works uniformly across every category colour.
+3. **Hide the raw node id by default.** `uiStore` gains a persisted
+   `showNodeIds` flag (off by default; mirrored to `localStorage` under
+   `callflow.ui.showNodeIds`). The `<code>` chip in the inspector
+   header renders only when the flag is on. The Shell overflow menu
+   gets a new **Show node IDs** toggle, exposed by extending
+   `OverflowItem` with an optional `checked` boolean (rendered as a
+   `menuitemcheckbox` with a ✓ glyph). When the host portal is ready to
+   drive this from outside, `useUiStore.getState().setShowNodeIds(...)`
+   is the single entry point.
+
 ## 12. Decision log
 
 Decisions worth carrying forward:
