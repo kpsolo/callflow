@@ -4,6 +4,43 @@
   gap: 8px;
 }
 
+.palette-search {
+  position: relative;
+}
+
+.palette-search-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.palette-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.palette-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.palette-search-results {
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-item-cat {
+  display: block;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 1px;
+}
+
 .palette-section {
   border-radius: 4px;
 }
@@ -77,6 +114,20 @@
 
 .palette-section.is-offpattern .palette-section-header {
   color: var(--text-dim);
+}
+
+/* While the user is dragging a connection out of a node's handle, palette items
+   become valid drop targets: releasing on one creates a new connected node of
+   that kind. Highlight on hover so the affordance is clear. */
+.palette--connect-armed .palette-item {
+  border-color: rgba(255, 209, 102, 0.4);
+}
+
+.palette--connect-armed .palette-item:hover {
+  border-color: #ffd166;
+  background: var(--bg-elev);
+  box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.35);
+  transform: translateX(2px);
 }
 
 .palette-item-color {

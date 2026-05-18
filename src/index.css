@@ -12,6 +12,11 @@
   --info: #4fbcff;
   --ok: #59d093;
   --dot-grid: #1a1f2a;
+  /* Text colour for pills/badges whose background is a status token
+     (var(--ok|warn|info|danger)) or a saturated category fill. Flips with
+     the theme so it always contrasts: dark on the light-hued dark-theme
+     tokens, light on the deeper light-theme tokens. */
+  --text-on-status: #11161f;
 
   /* Flow node internal metrics — shared between FlowNodeView.css and the JS
      in FlowNodeView.tsx that positions React Flow handles. Keep CSS and JS
@@ -43,13 +48,18 @@
     --border: #d4d8e0;
     --text: #11161f;
     --text-dim: #5a6371;
-    --accent: #2f6fe0;
+    /* Status / accent tokens darkened from the dark-theme palette so they meet
+       WCAG AA (≥4.5:1) when used as foreground text on --bg-elev-2 chips and
+       on --bg surfaces. Dark-theme equivalents (saturated mid-tones) would
+       fall to ~3.8:1 here. */
+    --accent: #2964cf;
     --accent-dim: #c7d8f7;
-    --danger: #d23355;
-    --warn: #b07000;
-    --info: #1f8fd0;
-    --ok: #1f8a5a;
+    --danger: #b62244;
+    --warn: #8a5800;
+    --info: #1372a8;
+    --ok: #137a4d;
     --dot-grid: #d4d8e0;
+    --text-on-status: #ffffff;
   }
 }
 

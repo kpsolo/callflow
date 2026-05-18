@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Check, MoreHorizontal } from "lucide-react";
 import "./OverflowMenu.css";
 
 export interface OverflowItem {
@@ -6,7 +7,7 @@ export interface OverflowItem {
   onClick?: () => void;
   disabled?: boolean;
   divider?: boolean;
-  icon?: string;
+  icon?: ReactNode;
   /** When provided, the item is rendered as a toggle and shows a checkmark when true. */
   checked?: boolean;
 }
@@ -41,7 +42,7 @@ export function OverflowMenu({ items }: { items: OverflowItem[] }) {
         aria-haspopup="menu"
         aria-label="More actions"
       >
-        ⋯
+        <MoreHorizontal size={16} aria-hidden />
       </button>
       {open && (
         <ul className="ovm-list" role="menu">
@@ -62,7 +63,7 @@ export function OverflowMenu({ items }: { items: OverflowItem[] }) {
                 >
                   {it.checked !== undefined ? (
                     <span className="ovm-icon" aria-hidden="true">
-                      {it.checked ? "✓" : ""}
+                      {it.checked ? <Check size={14} /> : null}
                     </span>
                   ) : (
                     it.icon && <span className="ovm-icon">{it.icon}</span>

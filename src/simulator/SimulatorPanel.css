@@ -91,7 +91,7 @@
   text-transform: none;
   letter-spacing: 0;
   font-weight: 600;
-  color: #11161f;
+  color: var(--text-on-status);
   border-radius: 3px;
   padding: 2px 6px;
   font-size: 11px;

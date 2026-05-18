@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { ReactFlowProvider } from "reactflow";
 import { useStore } from "zustand";
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Download,
+  HelpCircle,
+  List,
+  Settings,
+  Upload,
+  X,
+} from "lucide-react";
 import { Palette } from "@/palette/Palette";
 import { Canvas } from "@/canvas/Canvas";
 import { Inspector } from "@/inspector/Inspector";
@@ -136,15 +147,31 @@ export function Shell() {
           </div>
           <OverflowMenu
             items={[
-              { label: "Entity settings…", icon: "⚙", onClick: () => setEntityOpen(true) },
-              { label: "Time periods…", icon: "⌚", onClick: () => setPeriodsOpen(true) },
+              {
+                label: "Entity settings…",
+                icon: <Settings size={14} />,
+                onClick: () => setEntityOpen(true),
+              },
+              {
+                label: "Time periods…",
+                icon: <Clock size={14} />,
+                onClick: () => setPeriodsOpen(true),
+              },
               { divider: true, label: "" },
-              { label: "Activity log…", icon: "≡", onClick: () => setActivityOpen(true) },
+              {
+                label: "Activity log…",
+                icon: <List size={14} />,
+                onClick: () => setActivityOpen(true),
+              },
               { divider: true, label: "" },
-              { label: "Import JSON…", icon: "↓", onClick: () => setImportOpen(true) },
+              {
+                label: "Import JSON…",
+                icon: <Upload size={14} />,
+                onClick: () => setImportOpen(true),
+              },
               {
                 label: "Export JSON",
-                icon: "↑",
+                icon: <Download size={14} />,
                 onClick: handleExport,
                 disabled: exportDisabled,
               },
@@ -155,7 +182,11 @@ export function Shell() {
                 onClick: () => setShowNodeIds(!showNodeIds),
               },
               { divider: true, label: "" },
-              { label: "Help / shortcuts", icon: "?", onClick: () => setHelpOpen(true) },
+              {
+                label: "Help / shortcuts",
+                icon: <HelpCircle size={14} />,
+                onClick: () => setHelpOpen(true),
+              },
             ]}
           />
           {/* Other users currently viewing this flow (cross-tab via BroadcastChannel). */}
@@ -199,7 +230,7 @@ export function Shell() {
         />
 
         <aside className="shell-inspector" aria-label="Inspector">
-          <Inspector />
+          <Inspector onEditEntity={() => setEntityOpen(true)} />
         </aside>
       </div>
 
@@ -230,7 +261,15 @@ export function Shell() {
           aria-expanded={simOpen}
           title={simOpen ? "Collapse simulator" : "Expand simulator"}
         >
-          {simOpen ? "▼ Hide" : "▲ Simulator"}
+          {simOpen ? (
+            <>
+              <ChevronDown size={14} aria-hidden /> Hide
+            </>
+          ) : (
+            <>
+              <ChevronUp size={14} aria-hidden /> Simulator
+            </>
+          )}
         </button>
         {simOpen && (
           <div className="shell-simdrawer-body">
@@ -249,7 +288,7 @@ function HelpModal({ onClose }: { onClose: () => void }) {
         <header>
           <strong>Keyboard shortcuts</strong>
           <button type="button" onClick={onClose} aria-label="Close">
-            ×
+            <X size={14} aria-hidden />
           </button>
         </header>
         <div className="modal-body">

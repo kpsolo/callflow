@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import type { Entity } from "@/schema";
 import "./EntitySettingsModal.css";
@@ -30,7 +31,7 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
         <header>
           <strong>Entity settings — {entity.name}</strong>
           <button type="button" onClick={onClose} aria-label="Close">
-            ×
+            <X size={14} aria-hidden />
           </button>
         </header>
 
@@ -170,7 +171,7 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
                       }
                       aria-label="Remove entry"
                     >
-                      ×
+                      <X size={14} aria-hidden />
                     </button>
                   </li>
                 ))}

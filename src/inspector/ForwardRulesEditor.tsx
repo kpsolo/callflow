@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
 
@@ -80,16 +81,23 @@ export function ForwardRulesEditor({
           {typedRules.map((r, i) => (
             <li key={r.id ?? i} className="rules-list-row">
               <div className="rules-list-row-top">
-                <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} title="Move up">
-                  ↑
+                <button
+                  type="button"
+                  onClick={() => move(i, i - 1)}
+                  disabled={i === 0}
+                  title="Move up"
+                  aria-label="Move up"
+                >
+                  <ChevronUp size={14} aria-hidden />
                 </button>
                 <button
                   type="button"
                   onClick={() => move(i, i + 1)}
                   disabled={i === typedRules.length - 1}
                   title="Move down"
+                  aria-label="Move down"
                 >
-                  ↓
+                  <ChevronDown size={14} aria-hidden />
                 </button>
                 <label className="rules-list-enabled">
                   <input
@@ -103,8 +111,9 @@ export function ForwardRulesEditor({
                   type="button"
                   onClick={() => onChange(typedRules.filter((_, j) => j !== i))}
                   title="Remove rule"
+                  aria-label="Remove rule"
                 >
-                  ×
+                  <X size={14} aria-hidden />
                 </button>
               </div>
               <label className="inspector-field">

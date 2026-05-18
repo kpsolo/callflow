@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Volume2, VolumeX, X } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import { getNodeType } from "@/nodes/registry";
 import type { NodeKind } from "@/schema";
@@ -75,7 +76,7 @@ function ActionRow({ inputKey, action, targetOptions, onChange, onRemove }: Acti
             aria-pressed={playOn}
             title={playOn ? `Play before action: ${action.play_before_action}` : "No prompt"}
           >
-            {playOn ? "🔊" : "🔈"}
+            {playOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
           </button>
 
           <button
@@ -85,7 +86,7 @@ function ActionRow({ inputKey, action, targetOptions, onChange, onRemove }: Acti
             aria-label={`Remove input ${inputKey}`}
             title="Remove"
           >
-            ×
+            <X size={14} aria-hidden />
           </button>
         </div>
 

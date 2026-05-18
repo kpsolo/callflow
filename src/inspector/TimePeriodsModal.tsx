@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { X } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import {
   autoNamePeriod,
@@ -91,7 +92,7 @@ export function TimePeriodsModal({ onClose }: { onClose: () => void }) {
         <header>
           <strong>Time periods — {entity.name}</strong>
           <button type="button" onClick={onClose} aria-label="Close">
-            ×
+            <X size={14} aria-hidden />
           </button>
         </header>
 
@@ -186,8 +187,9 @@ export function TimePeriodsModal({ onClose }: { onClose: () => void }) {
                             ? "A period needs at least one sub-period"
                             : "Remove"
                         }
+                        aria-label="Remove"
                       >
-                        ×
+                        <X size={14} aria-hidden />
                       </button>
                     </div>
                     <TimePeriodEditor

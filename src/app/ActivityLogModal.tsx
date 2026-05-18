@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { useCollab, type ActivityEvent, type ActivityKind } from "@/api";
 import { useFlowStore } from "@/state/store";
 import "./ActivityLogModal.css";
@@ -83,7 +84,7 @@ export function ActivityLogModal({ onClose }: { onClose: () => void }) {
         <header>
           <strong>Activity log — {flowId}</strong>
           <button type="button" onClick={onClose} aria-label="Close">
-            ×
+            <X size={14} aria-hidden />
           </button>
         </header>
         <div className="modal-body">

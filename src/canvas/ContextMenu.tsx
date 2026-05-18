@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import "./ContextMenu.css";
 
 export interface ContextMenuItem {
   label: string;
-  icon?: string;
+  icon?: ReactNode;
   shortcut?: string;
   onClick?: () => void;
   disabled?: boolean;

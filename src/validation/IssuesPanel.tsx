@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useValidation } from "./useValidation";
 import { useFlowStore } from "@/state/store";
 import "./IssuesPanel.css";
@@ -44,7 +45,12 @@ export function ValidationSummary() {
   const issues = useValidation();
   const err = issues.filter((i) => i.severity === "error").length;
   const warn = issues.filter((i) => i.severity === "warning").length;
-  if (err === 0 && warn === 0) return <span className="vs vs-ok">✓ No issues</span>;
+  if (err === 0 && warn === 0)
+    return (
+      <span className="vs vs-ok">
+        <Check size={12} aria-hidden /> No issues
+      </span>
+    );
   return (
     <span className="vs">
       {err > 0 && <span className="vs-err">{err} error{err > 1 ? "s" : ""}</span>}

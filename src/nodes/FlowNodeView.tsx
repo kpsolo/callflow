@@ -1,11 +1,13 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
+import { MessageCircle, Trash2 } from "lucide-react";
 import type { FlowNode, NodeKind } from "@/schema";
 import { getNodeType } from "./registry";
 import { renderSummary, summaryRowCount } from "./summaries";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
 import { useFlowStore } from "@/state/store";
+import { useUiStore } from "@/state/uiStore";
 import { useFlowComments } from "@/api";
 import { pickHeaderText } from "./contrast";
 import "./FlowNodeView.css";
@@ -29,6 +31,9 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const issues = useValidation();
   const myIssues = issues.filter((i) => i.node_id === id);
   const entityId = useFlowStore((s) => s.entity.id);
+  const removeNode = useFlowStore((s) => s.removeNode);
+  const isDropTarget = useUiStore((s) => s.dropTargetNodeId === id);
+  const canDelete = !def.singletonPerEntity;
   const { unresolvedByAnchor } = useFlowComments(entityId);
   const commentCount = unresolvedByAnchor.get(`node:${id}`) ?? 0;
   const worst = myIssues.find((i) => i.severity === "error")
@@ -62,12 +67,29 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
       className={
         "fn-node" +
         (selected ? " is-selected" : "") +
+        (isDropTarget ? " is-drop-target" : "") +
         (traceActive ? (visited ? " is-visited" : " is-dimmed") : "")
       }
       style={{ borderColor: def.color }}
       role="group"
       aria-label={`${def.label} node`}
     >
+      {canDelete && (
+        <button
+          type="button"
+          className="fn-node-trash nodrag"
+          onClick={(e) => {
+            e.stopPropagation();
+            removeNode(id);
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          title="Delete node"
+          aria-label={`Delete ${def.label} node`}
+        >
+          <Trash2 size={12} aria-hidden />
+        </button>
+      )}
       <div
         className="fn-node-header"
         style={{ background: def.color, color: pickHeaderText(def.color) }}
@@ -99,7 +121,7 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
                 title={`${commentCount} unresolved comment${commentCount > 1 ? "s" : ""}`}
                 aria-label={`${commentCount} unresolved comments`}
               >
-                💬 {commentCount}
+                <MessageCircle size={11} aria-hidden /> {commentCount}
               </span>
             )}
           </span>

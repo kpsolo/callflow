@@ -9,27 +9,39 @@ import { MenuActionsEditor } from "./MenuActionsEditor";
 import { ForwardRulesEditor } from "./ForwardRulesEditor";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
 import { CommentsPanel } from "./CommentsPanel";
+import { EntityInspector } from "./EntityInspector";
 import { useFlowComments } from "@/api";
 import "./Inspector.css";
 
-export function Inspector() {
+export interface InspectorProps {
+  /** Callback fired when the empty-state "Edit…" button is clicked. */
+  onEditEntity?: () => void;
+}
+
+export function Inspector({ onEditEntity }: InspectorProps = {}) {
+  // Subscribe to selectedNodeId and nodes independently, then derive the
+  // matched node via useMemo. The earlier shape — `useFlowStore((s) =>
+  // s.nodes.find((n) => n.id === selectedId))` — captured `selectedId` in
+  // a closure stored by Zustand's subscription, so when `setSelected` fired
+  // the cached selector still searched for the previous id and could yield
+  // a stale node until another unrelated state change forced a refresh.
   const selectedId = useFlowStore((s) => s.selectedNodeId);
-  const node = useFlowStore((s) => s.nodes.find((n) => n.id === selectedId));
+  const nodes = useFlowStore((s) => s.nodes);
   const updateNodeData = useFlowStore((s) => s.updateNodeData);
   const removeNode = useFlowStore((s) => s.removeNode);
   const showNodeIds = useUiStore((s) => s.showNodeIds);
+
+  const node = useMemo(
+    () => (selectedId ? nodes.find((n) => n.id === selectedId) : undefined),
+    [nodes, selectedId],
+  );
 
   const kind = node?.type as NodeKind | undefined;
   const def = kind ? getNodeType(kind) : undefined;
   const fields = useMemo<FieldDef[]>(() => (kind && FIELDS[kind]) ?? [], [kind]);
 
   if (!node || !def || !kind) {
-    return (
-      <div className="inspector">
-        <h2 className="shell-section-title">Inspector</h2>
-        <p className="shell-placeholder">Select a node to edit its fields.</p>
-      </div>
-    );
+    return <EntityInspector onEditEntity={onEditEntity} />;
   }
 
   const data = node.data as Record<string, unknown>;

@@ -17,22 +17,22 @@
 
 .vp.is-ok {
   color: var(--ok);
-  border-color: rgba(89, 208, 147, 0.4);
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
 }
 
 .vp.is-warn {
   color: var(--warn);
-  border-color: rgba(255, 180, 84, 0.4);
+  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
 }
 
 .vp.is-err {
   color: var(--danger);
-  border-color: rgba(255, 85, 119, 0.4);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
 }
 
 .vp-count {
   background: currentColor;
-  color: #11161f;
+  color: var(--text-on-status);
   font-weight: 700;
   border-radius: 999px;
   padding: 0 6px;

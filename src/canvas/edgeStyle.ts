@@ -11,6 +11,9 @@ import type { Edge } from "reactflow";
  *   menu:fax | "fax"            dotted blue (event-triggered)
  *   "inactive"                  dashed warn (menu-inactive fallback)
  *   anything else               solid grey
+ *
+ * Every labelled edge also gets a solid pill background (canvas-bg fill,
+ * 1px stroke in the edge colour) so labels stay legible where edges cross.
  */
 
 const DIGIT_PALETTE: Record<string, string> = {
@@ -32,6 +35,10 @@ const DEFAULT_STROKE = "#6b7280"; // matches --text-dim-ish
 const STROKE_WIDTH_DEFAULT = 2;
 const STROKE_WIDTH_EMPHASIS = 2.5;
 
+/** Canvas background colour — labelBgStyle.fill should match. Kept in sync
+ *  with `--bg` in src/index.css so label pills "punch out" the dot grid. */
+const LABEL_BG_FILL = "#0f1115";
+
 export interface EdgeStyleProps {
   style: React.CSSProperties;
   labelStyle?: React.CSSProperties;
@@ -39,7 +46,16 @@ export interface EdgeStyleProps {
   animated?: boolean;
 }
 
+interface EdgeStyleInternal extends EdgeStyleProps {
+  /** Drives the label-pill border colour. */
+  accentColor: string;
+}
+
 export function getEdgeStyle(edge: Edge): EdgeStyleProps {
+  return getEdgeStyleInternal(edge);
+}
+
+function getEdgeStyleInternal(edge: Edge): EdgeStyleInternal {
   const handle = edge.sourceHandle ?? "";
 
   // Digit key from a menu (menu:1, menu:#, etc.)
@@ -50,6 +66,7 @@ export function getEdgeStyle(edge: Edge): EdgeStyleProps {
       return {
         style: { stroke: color, strokeWidth: STROKE_WIDTH_EMPHASIS },
         labelStyle: { fill: color, fontWeight: 600 },
+        accentColor: color,
       };
     }
     if (key === "no_input") return noInputStyle();
@@ -63,56 +80,74 @@ export function getEdgeStyle(edge: Edge): EdgeStyleProps {
   // Forwarding outcome / screening outcome / generic next — solid grey default.
   return {
     style: { stroke: DEFAULT_STROKE, strokeWidth: STROKE_WIDTH_DEFAULT },
+    accentColor: DEFAULT_STROKE,
   };
 }
 
-function inactiveStyle(): EdgeStyleProps {
+function inactiveStyle(): EdgeStyleInternal {
   // Dashed warn-orange — fallback flow when a menu is closed (after-hours, etc.).
+  const color = "#ffb454";
   return {
     style: {
-      stroke: "#ffb454",
+      stroke: color,
       strokeWidth: STROKE_WIDTH_EMPHASIS,
       strokeDasharray: "6 4",
     },
-    labelStyle: { fill: "#ffb454", fontWeight: 600 },
-    labelBgStyle: { fill: "rgba(255,180,84,0.12)" },
+    labelStyle: { fill: color, fontWeight: 600 },
+    accentColor: color,
   };
 }
 
-function noInputStyle(): EdgeStyleProps {
+function noInputStyle(): EdgeStyleInternal {
+  const color = "#facc15";
   return {
     style: {
-      stroke: "#facc15",
+      stroke: color,
       strokeWidth: STROKE_WIDTH_DEFAULT,
       strokeDasharray: "2 4",
     },
-    labelStyle: { fill: "#facc15" },
+    labelStyle: { fill: color },
+    accentColor: color,
   };
 }
 
-function faxStyle(): EdgeStyleProps {
+function faxStyle(): EdgeStyleInternal {
+  const color = "#60a5fa";
   return {
     style: {
-      stroke: "#60a5fa",
+      stroke: color,
       strokeWidth: STROKE_WIDTH_DEFAULT,
       strokeDasharray: "2 4",
     },
-    labelStyle: { fill: "#60a5fa" },
+    labelStyle: { fill: color },
+    accentColor: color,
   };
 }
 
 /**
  * Apply styles to every edge in an array. Cheap to call from React.useMemo;
- * preserves existing `id`, `source`, `target`, etc.
+ * preserves existing `id`, `source`, `target`, etc. Also stamps every edge with
+ * a label-pill (`labelBgStyle` + padding + radius + `labelShowBg`) so labels
+ * are readable where edges overlap.
  */
 export function styleEdges(edges: Edge[]): Edge[] {
   return edges.map((e) => {
-    const s = getEdgeStyle(e);
+    const s = getEdgeStyleInternal(e);
     return {
       ...e,
       style: { ...(e.style ?? {}), ...s.style },
       labelStyle: { ...(e.labelStyle ?? {}), ...(s.labelStyle ?? {}) },
-      labelBgStyle: { ...(e.labelBgStyle ?? {}), ...(s.labelBgStyle ?? {}) },
+      // Solid pill: canvas-bg fill + 1px stroke in the edge colour. Renders
+      // as an SVG <rect> by React Flow's <EdgeText>.
+      labelBgStyle: {
+        fill: LABEL_BG_FILL,
+        stroke: s.accentColor,
+        strokeWidth: 1,
+        ...(e.labelBgStyle ?? {}),
+      },
+      labelBgPadding: e.labelBgPadding ?? [6, 3],
+      labelBgBorderRadius: e.labelBgBorderRadius ?? 8,
+      labelShowBg: e.labelShowBg ?? true,
       animated: s.animated ?? e.animated,
     };
   });

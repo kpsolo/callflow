@@ -53,7 +53,7 @@
 .comment-tag {
   margin-left: auto;
   background: var(--ok);
-  color: #11161f;
+  color: var(--text-on-status);
   border-radius: 999px;
   font-size: 9px;
   font-weight: 700;

@@ -91,6 +91,63 @@
   border-top: 1px solid var(--border);
 }
 
+/* Entity-level empty-state inspector (no node selected). */
+.entity-inspector-edit {
+  font-size: 11px;
+  padding: 2px 10px;
+}
+
+.entity-inspector-facts {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 6px 10px;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.entity-inspector-facts dt {
+  color: var(--text-dim);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+  align-self: center;
+}
+
+.entity-inspector-facts dd {
+  margin: 0;
+  color: var(--text);
+  min-width: 0;
+  word-break: break-word;
+}
+
+.entity-inspector-facts code {
+  font-family: ui-monospace, monospace;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+.entity-inspector-id {
+  color: var(--text-dim);
+}
+
+.entity-inspector-ok {
+  color: var(--ok, #59d093);
+}
+
+.entity-inspector-warn {
+  color: var(--warn, #ffb454);
+}
+
+.entity-inspector-err {
+  color: var(--danger, #ff5577);
+}
+
 .inspector-tabs {
   display: flex;
   border-bottom: 1px solid var(--border);

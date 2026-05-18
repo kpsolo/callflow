@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { X } from "lucide-react";
 import { parseAndValidate } from "./exportImport";
 import type { Flow } from "@/schema";
 import "./ImportDialog.css";
@@ -38,7 +39,7 @@ export function ImportDialog({
         <header>
           <strong>Import flow JSON</strong>
           <button type="button" onClick={onClose} aria-label="Close">
-            ×
+            <X size={14} aria-hidden />
           </button>
         </header>
 

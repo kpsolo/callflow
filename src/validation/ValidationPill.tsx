@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Check, X } from "lucide-react";
 import { useValidation } from "./useValidation";
 import { IssuesPanel } from "./IssuesPanel";
 import "./ValidationPill.css";
@@ -52,7 +53,9 @@ export function ValidationPill() {
         }
       >
         {clean ? (
-          <>✓ Clean</>
+          <>
+            <Check size={12} aria-hidden /> Clean
+          </>
         ) : (
           <>
             {err > 0 && <span className="vp-count">{err}</span>}
@@ -66,7 +69,7 @@ export function ValidationPill() {
           <header>
             <strong>Validation</strong>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close">
-              ×
+              <X size={14} aria-hidden />
             </button>
           </header>
           <IssuesPanel />

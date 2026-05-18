@@ -63,6 +63,57 @@
   border-radius: 4px;
 }
 
+/* Collapsed-state icon: a small button parked in the bottom-right that
+   expands the mini-map back. Sits where the mini-map's bottom-right corner
+   would be so the affordance is in the same place. */
+.canvas-minimap-toggle {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.canvas-minimap-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* Collapse "×" parked over the mini-map's top-right corner. */
+.canvas-minimap-collapse {
+  position: absolute;
+  /* React Flow's default minimap is ~200×150 in bottom-right with 16px
+     panel offset. We anchor relative to the wrapper, just clearing the
+     mini-map's top-right. */
+  bottom: 156px;
+  right: 12px;
+  z-index: 5;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.canvas-minimap-collapse:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
 .react-flow__edge-path {
   stroke: var(--text-dim);
   stroke-width: 2;

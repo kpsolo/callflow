@@ -52,6 +52,21 @@ export interface FlowStore {
   onConnect: (conn: Connection) => void;
 
   addNode: (kind: NodeKind, position: { x: number; y: number }) => string;
+  /**
+   * Add a new node "as a child of" `sourceNodeId` — place it right of the source
+   * (with collision-nudge), and if a sensible source handle is available, wire
+   * an edge to it in the same history step.
+   *
+   * Returns `{ nodeId, edgeId }` where `edgeId` is `null` when no edge was
+   * created (e.g., source has no free output, target kind has no input, or the
+   * source is a menu node and the caller is expected to follow up with a key
+   * pick). The node is always created.
+   */
+  addNodeConnectedTo: (
+    kind: NodeKind,
+    sourceNodeId: string,
+    sourceHandle: string | null,
+  ) => { nodeId: string; edgeId: string | null };
   /** Replaces the node's data wholesale — caller composes the full next object. */
   updateNodeData: (id: string, data: Record<string, unknown>) => void;
   removeNode: (id: string) => void;
@@ -177,6 +192,115 @@ export const useFlowStore = create<FlowStore>()(
         };
         set({ nodes: [...get().nodes, node], selectedNodeId: id, dirty: true });
         return id;
+      },
+
+      addNodeConnectedTo: (kind, sourceNodeId, sourceHandle) => {
+        const state = get();
+        const source = state.nodes.find((n) => n.id === sourceNodeId);
+        if (!source) {
+          // Source vanished — fall back to placing at a default origin.
+          const id = state.addNode(kind, { x: 0, y: 0 });
+          return { nodeId: id, edgeId: null };
+        }
+        const def = getNodeType(kind);
+        const sourceDef = getNodeType(source.type as NodeKind);
+        const isMenuSource =
+          source.type === "menu_root" || source.type === "menu_custom";
+
+        // Placement: right of source with collision nudge-down. Uses the same
+        // ranksep/nodesep that dagre auto-layout applies, so manually-placed
+        // children sit on the same visual grid as auto-laid-out ones.
+        const RANKSEP = 260;
+        const NODESEP = 40;
+        const approxW = 200;
+        const approxH = 80;
+        let position = { x: source.position.x + RANKSEP, y: source.position.y };
+        const overlapsExisting = (p: { x: number; y: number }) =>
+          state.nodes.some(
+            (n) =>
+              Math.abs(n.position.x - p.x) < approxW &&
+              Math.abs(n.position.y - p.y) < approxH,
+          );
+        let guard = 0;
+        while (overlapsExisting(position) && guard < 20) {
+          position = { x: position.x, y: position.y + NODESEP };
+          guard += 1;
+        }
+
+        // Build the new node first so we know its id when (optionally) wiring.
+        const newId = genId(kind.slice(0, 4));
+        const newNode: Node<FlowNode["data"]> = {
+          id: newId,
+          type: kind,
+          position,
+          data: def.defaultData(),
+        };
+        const nextNodes = [...state.nodes, newNode];
+
+        // Decide whether to also create an edge in this same commit.
+        const targetInputs = def.inputs;
+        const dragKindHasInput = targetInputs.length > 0;
+
+        let resolvedHandle: string | null = sourceHandle;
+        let canConnect = dragKindHasInput;
+
+        if (canConnect) {
+          if (resolvedHandle === null) {
+            // Menu sources: caller is expected to follow up with a key pick.
+            if (isMenuSource) {
+              canConnect = false;
+            } else if (sourceDef.outputs.length === 0) {
+              canConnect = false;
+            } else {
+              // Default to the first output; if that handle is already wired,
+              // walk through the rest looking for a free one. If everything's
+              // taken, give up (place-only).
+              const usedHandles = new Set(
+                state.edges
+                  .filter((e) => e.source === sourceNodeId)
+                  .map((e) => e.sourceHandle ?? ""),
+              );
+              const freePort = sourceDef.outputs.find(
+                (p) => !usedHandles.has(p.id),
+              );
+              if (freePort) {
+                resolvedHandle = freePort.id;
+              } else {
+                canConnect = false;
+              }
+            }
+          }
+        }
+
+        if (!canConnect) {
+          set({ nodes: nextNodes, selectedNodeId: newId, dirty: true });
+          return { nodeId: newId, edgeId: null };
+        }
+
+        const edgeId = genId("e");
+        const newEdge: Edge = {
+          id: edgeId,
+          source: sourceNodeId,
+          sourceHandle: resolvedHandle,
+          target: newId,
+          targetHandle: "in",
+        };
+        const edgesAfter = rfAddEdge(newEdge, state.edges);
+        // Mirror onConnect's menu-actions sync so dragging a menu handle to the
+        // palette doesn't desync data.actions from the new edge.
+        const nodesAfter = applyMenuConnectToActions(nextNodes, {
+          source: sourceNodeId,
+          target: newId,
+          sourceHandle: resolvedHandle,
+        });
+
+        set({
+          nodes: nodesAfter,
+          edges: edgesAfter,
+          selectedNodeId: newId,
+          dirty: true,
+        });
+        return { nodeId: newId, edgeId };
       },
 
       updateNodeData: (id, data) => {
