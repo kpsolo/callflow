@@ -94,6 +94,10 @@
   white-space: nowrap;
 }
 
+.fn-node-header-icon {
+  flex: 0 0 auto;
+}
+
 .fn-node-header-badges {
   display: inline-flex;
   align-items: center;

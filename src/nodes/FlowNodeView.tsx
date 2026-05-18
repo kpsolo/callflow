@@ -3,6 +3,7 @@ import { Handle, Position, type NodeProps } from "reactflow";
 import { MessageCircle, Trash2 } from "lucide-react";
 import type { FlowNode, NodeKind } from "@/schema";
 import { getNodeType } from "./registry";
+import { getNodeIcon } from "./icons";
 import { renderSummary, summaryRowCount } from "./summaries";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
@@ -26,6 +27,7 @@ const PORTS_PAD_TOP = 4;
 function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const kind = type as NodeKind;
   const def = getNodeType(kind);
+  const Icon = getNodeIcon(kind);
   const traceActive = useTraceStore((s) => s.trace != null);
   const visited = useTraceStore((s) => s.visited_node_ids.has(id));
   const issues = useValidation();
@@ -103,6 +105,7 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
             START
           </span>
         )}
+        <Icon size={12} className="fn-node-header-icon" />
         <span className="fn-node-header-label">{def.shortLabel ?? def.label}</span>
         {(worst || commentCount > 0) && (
           <span className="fn-node-header-badges">

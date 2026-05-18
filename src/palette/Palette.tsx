@@ -9,6 +9,7 @@ import {
   type NodeCategory,
   type NodeTypeDef,
 } from "@/nodes/registry";
+import { getNodeIcon } from "@/nodes/icons";
 import { PALETTE_DRAG_MIME } from "@/canvas/Canvas";
 import "./Palette.css";
 
@@ -167,6 +168,7 @@ function PaletteItem({
   showCategory?: boolean;
 }) {
   const primary = isPrimaryFor(def, entityType);
+  const Icon = getNodeIcon(def.kind);
   return (
     <li>
       <button
@@ -181,6 +183,7 @@ function PaletteItem({
         title={paletteTooltip(def, entityType)}
       >
         <span className="palette-item-color" style={{ background: def.color }} aria-hidden />
+        <Icon size={14} style={{ color: def.color }} className="palette-item-icon" />
         <span className="palette-item-label">
           {def.label}
           {showCategory && (
