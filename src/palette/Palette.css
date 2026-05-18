@@ -11,7 +11,7 @@
 .palette-search-input {
   width: 100%;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: 13px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -34,7 +34,7 @@
 
 .palette-item-cat {
   display: block;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -92,7 +92,7 @@
   border-radius: 4px;
   cursor: grab;
   text-align: left;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .palette-item:hover {

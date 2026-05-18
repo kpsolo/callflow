@@ -11,7 +11,7 @@
 
 .modal.alm footer small {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .activity-list {
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .activity-kind {
@@ -59,7 +59,7 @@
 .activity-detail {
   color: var(--text-dim);
   font-family: ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 2px;

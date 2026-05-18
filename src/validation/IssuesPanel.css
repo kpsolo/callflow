@@ -1,5 +1,5 @@
 .issues-empty {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-dim);
   display: flex;
   align-items: center;
@@ -35,7 +35,7 @@
   background: transparent;
   border: 1px solid var(--border);
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .issues-row-error button {
@@ -51,7 +51,7 @@
 }
 
 .issues-sev {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
@@ -72,11 +72,11 @@
 .issues-code {
   font-family: ui-monospace, monospace;
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .vs {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 

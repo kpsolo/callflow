@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   Map as MapIcon,
   Maximize2,
+  Minimize2,
   Plus,
   Trash2,
   X,
@@ -450,7 +451,7 @@ export function Canvas() {
               aria-label="Hide mini-map"
               aria-expanded={true}
             >
-              <X size={14} aria-hidden />
+              <Minimize2 size={14} aria-hidden />
             </button>
           </>
         )}

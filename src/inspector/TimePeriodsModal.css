@@ -28,7 +28,7 @@
 
 .tpm-add-row button {
   flex: 1 1 auto;
-  font-size: 11px;
+  font-size: 13px;
   padding: 4px 8px;
 }
 
@@ -36,7 +36,7 @@
   display: inline-block;
   margin-left: 6px;
   padding: 1px 6px;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-radius: 999px;
@@ -48,7 +48,7 @@
   color: var(--text-dim);
   font-style: italic;
   font-weight: normal;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .tpm-list ul {
@@ -84,7 +84,7 @@
 
 .tpm-list li button small {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .tpm-detail {
@@ -110,19 +110,19 @@
 }
 
 .tpm-rename span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
 .tpm-rename input {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   background: var(--bg);
 }
 
 .tpm-explain {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   line-height: 1.5;
 }
@@ -142,17 +142,17 @@
   grid-template-columns: 110px 1fr auto;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
 .tpm-subperiod-header small {
   color: var(--text);
   font-family: ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .tpm-add-sub {
   align-self: flex-start;
-  font-size: 11px;
+  font-size: 13px;
 }

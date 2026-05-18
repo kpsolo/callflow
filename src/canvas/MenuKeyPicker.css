@@ -14,7 +14,7 @@
 }
 
 .menu-key-picker__title {
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted, #8a93a3);

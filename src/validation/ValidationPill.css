@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -36,7 +36,7 @@
   font-weight: 700;
   border-radius: 999px;
   padding: 0 6px;
-  font-size: 10px;
+  font-size: 12px;
   min-width: 16px;
   text-align: center;
 }
@@ -69,6 +69,6 @@
   background: transparent;
   border: none;
   color: var(--text-dim);
-  font-size: 16px;
+  font-size: 18px;
   padding: 0 4px;
 }

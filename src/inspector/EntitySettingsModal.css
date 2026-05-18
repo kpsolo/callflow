@@ -11,7 +11,7 @@
 }
 
 .esm-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   padding-top: 4px;
   display: flex;
@@ -27,7 +27,7 @@
 
 .esm-hint {
   color: var(--text-dim);
-  font-size: 10px;
+  font-size: 12px;
   font-style: italic;
   font-weight: normal;
 }
@@ -73,6 +73,6 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }

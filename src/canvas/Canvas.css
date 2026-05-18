@@ -23,7 +23,7 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 12px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   pointer-events: none;
   backdrop-filter: blur(4px);
@@ -60,7 +60,8 @@
 .react-flow__minimap {
   background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 /* Collapsed-state icon: a small button parked in the bottom-right that
@@ -74,7 +75,7 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -88,7 +89,7 @@
   border-color: var(--accent);
 }
 
-/* Collapse "×" parked over the mini-map's top-right corner. */
+/* Collapse button parked over the mini-map's top-right corner. */
 .canvas-minimap-collapse {
   position: absolute;
   /* React Flow's default minimap is ~200×150 in bottom-right with 16px
@@ -100,13 +101,24 @@
   width: 20px;
   height: 20px;
   padding: 0;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: 3px;
   color: var(--text-dim);
   cursor: pointer;
+  
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, border-color 100ms ease, color 100ms ease;
+}
+
+/* Show the collapse button when hovering over the mini-map or the button itself */
+.react-flow__minimap:hover + .canvas-minimap-collapse,
+.canvas-minimap-collapse:hover {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .canvas-minimap-collapse:hover {

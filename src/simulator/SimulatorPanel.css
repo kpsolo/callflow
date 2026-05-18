@@ -8,7 +8,7 @@
 
 .simpanel-section {
   margin: 0 0 8px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -28,7 +28,7 @@
 }
 
 .simpanel-field > span {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
 }
 
@@ -94,7 +94,7 @@
   color: var(--text-on-status);
   border-radius: 3px;
   padding: 2px 6px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .simpanel-steps {
@@ -105,7 +105,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 11px;
+  font-size: 13px;
   font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .simpanel-sub {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-dim);
   margin-top: 6px;
 }

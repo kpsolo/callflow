@@ -29,7 +29,7 @@
 .modal header button {
   background: transparent;
   border: none;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--text-dim);
 }
 
@@ -57,13 +57,13 @@
 
 .import-hint {
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .modal-body textarea {
   width: 100%;
   font-family: ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   resize: vertical;
 }
 
@@ -71,7 +71,7 @@
   background: rgba(255, 180, 84, 0.1);
   border-left: 3px solid var(--warn);
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text);
 }
 
@@ -79,12 +79,12 @@
   background: rgba(255, 85, 119, 0.1);
   border-left: 3px solid var(--danger);
   padding: 6px 24px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text);
   margin: 0;
 }
 
 .import-preview {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text-dim);
 }

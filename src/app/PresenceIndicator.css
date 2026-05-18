@@ -13,7 +13,7 @@
   height: 26px;
   border-radius: 50%;
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
   border: 1px solid var(--border);
@@ -28,6 +28,6 @@
 
 .presence-edit {
   width: 120px;
-  font-size: 11px;
+  font-size: 13px;
   padding: 2px 6px;
 }
