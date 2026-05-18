@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFlowStore } from "@/state/store";
 import { getNodeType } from "@/nodes/registry";
 import type { NodeKind } from "@/schema";
@@ -74,6 +74,33 @@ export function Inspector() {
         <p className="shell-placeholder">No editable fields for this node type.</p>
       )}
 
+      <InspectorFields fields={fields} data={data} onChange={onChange} />
+    </div>
+  );
+}
+
+const TAB_ORDER: Array<{ key: NonNullable<FieldDef["tab"]>; label: string }> = [
+  { key: "general", label: "General" },
+  { key: "prompts", label: "Prompts" },
+  { key: "actions", label: "Actions" },
+  { key: "errors", label: "Errors" },
+];
+
+function InspectorFields({
+  fields,
+  data,
+  onChange,
+}: {
+  fields: FieldDef[];
+  data: Record<string, unknown>;
+  onChange: (path: string, value: unknown) => void;
+}) {
+  // If no field declares a tab, render the flat layout (most node types).
+  const tabbed = fields.some((f) => !!f.tab);
+  const [activeTab, setActiveTab] = useState<NonNullable<FieldDef["tab"]>>("general");
+
+  if (!tabbed) {
+    return (
       <div className="inspector-fields">
         {fields.map((f) => (
           <FieldRow
@@ -85,7 +112,40 @@ export function Inspector() {
           />
         ))}
       </div>
-    </div>
+    );
+  }
+
+  const presentTabs = TAB_ORDER.filter((t) => fields.some((f) => f.tab === t.key));
+  const visibleFields = fields.filter((f) => f.tab === activeTab);
+
+  return (
+    <>
+      <nav className="inspector-tabs" role="tablist" aria-label="Node settings">
+        {presentTabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={t.key === activeTab}
+            className={"inspector-tab" + (t.key === activeTab ? " is-active" : "")}
+            onClick={() => setActiveTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+      <div className="inspector-fields" role="tabpanel">
+        {visibleFields.map((f) => (
+          <FieldRow
+            key={f.key}
+            def={f}
+            value={getAtPath(data, f.path ?? f.key)}
+            data={data}
+            onChange={onChange}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 

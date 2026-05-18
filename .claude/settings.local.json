@@ -20,7 +20,8 @@
       "Bash(git commit -m 'feat\\(canvas\\): edge styling vocabulary + distinct inactive style *)",
       "Bash(git commit -m 'feat\\(inspector\\): redesign menu actions editor + cross-pane highlight *)",
       "Bash(git commit -m 'feat\\(topbar\\): reorganize — sim button + validation pill + save status + overflow *)",
-      "Bash(git commit -m 'polish: WCAG header contrast, minimap colors, dismissible hints, inspector chip *)"
+      "Bash(git commit -m 'polish: WCAG header contrast, minimap colors, dismissible hints, inspector chip *)",
+      "Bash(git commit -m 'feat\\(inspector\\): tab menu node settings into General/Prompts/Actions/Errors *)"
     ]
   }
 }

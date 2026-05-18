@@ -22,6 +22,11 @@ export interface FieldDef {
   min?: number;
   max?: number;
   description?: string;
+  /**
+   * For complex node types (menus), which inspector tab this field belongs in.
+   * `undefined` = no tab grouping; the Inspector falls back to a flat layout.
+   */
+  tab?: "general" | "prompts" | "actions" | "errors";
 }
 
 const ANSWERING_EXT_MODES = [
@@ -68,44 +73,46 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "unblock_code_required", label: "Require unblock code (IVR)", type: "toggle" },
   ],
   menu_root: [
-    { key: "name", label: "Name", type: "readonly" },
-    { key: "active_period", label: "Active period", type: "active-period" },
-    { key: "intro_prompt", label: "Intro prompt", type: "text" },
-    { key: "menu_prompt", label: "Menu prompt", type: "text" },
-    {
-      key: "no_input.timeout_s",
-      label: "No-input timeout (s)",
-      type: "number",
-      min: 1,
-      max: 60,
-    },
-    { key: "allow_direct_dial", label: "Allow direct extension dial", type: "toggle" },
+    { key: "name", label: "Name", type: "readonly", tab: "general" },
+    { key: "active_period", label: "Active period", type: "active-period", tab: "general" },
+    { key: "allow_direct_dial", label: "Allow direct extension dial", type: "toggle", tab: "general" },
     {
       key: "interdigit_timeout_s",
       label: "Interdigit timeout (s)",
       type: "number",
       min: 1,
       max: 30,
+      tab: "general",
     },
-    { key: "actions", label: "Menu actions", type: "actions-map" },
-    { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10 },
-    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text" },
-    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text" },
-    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text" },
+    { key: "intro_prompt", label: "Intro prompt", type: "text", tab: "prompts" },
+    { key: "menu_prompt", label: "Menu prompt", type: "text", tab: "prompts" },
+    { key: "actions", label: "Menu actions", type: "actions-map", tab: "actions" },
+    {
+      key: "no_input.timeout_s",
+      label: "No-input timeout (s)",
+      type: "number",
+      min: 1,
+      max: 60,
+      tab: "errors",
+    },
+    { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10, tab: "errors" },
+    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text", tab: "errors" },
+    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text", tab: "errors" },
+    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text", tab: "errors" },
   ],
   menu_custom: [
-    { key: "name", label: "Name", type: "text" },
-    { key: "active_period", label: "Active period", type: "active-period" },
-    { key: "intro_prompt", label: "Intro prompt", type: "text" },
-    { key: "menu_prompt", label: "Menu prompt", type: "text" },
-    { key: "no_input.timeout_s", label: "No-input timeout (s)", type: "number" },
-    { key: "allow_direct_dial", label: "Allow direct extension dial", type: "toggle" },
-    { key: "interdigit_timeout_s", label: "Interdigit timeout (s)", type: "number" },
-    { key: "actions", label: "Menu actions", type: "actions-map" },
-    { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10 },
-    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text" },
-    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text" },
-    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text" },
+    { key: "name", label: "Name", type: "text", tab: "general" },
+    { key: "active_period", label: "Active period", type: "active-period", tab: "general" },
+    { key: "allow_direct_dial", label: "Allow direct extension dial", type: "toggle", tab: "general" },
+    { key: "interdigit_timeout_s", label: "Interdigit timeout (s)", type: "number", tab: "general" },
+    { key: "intro_prompt", label: "Intro prompt", type: "text", tab: "prompts" },
+    { key: "menu_prompt", label: "Menu prompt", type: "text", tab: "prompts" },
+    { key: "actions", label: "Menu actions", type: "actions-map", tab: "actions" },
+    { key: "no_input.timeout_s", label: "No-input timeout (s)", type: "number", tab: "errors" },
+    { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10, tab: "errors" },
+    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text", tab: "errors" },
+    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text", tab: "errors" },
+    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text", tab: "errors" },
   ],
   action_transfer_e164: [
     { key: "number", label: "E.164 number", type: "text", placeholder: "+18005551234" },
