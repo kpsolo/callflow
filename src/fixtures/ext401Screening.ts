@@ -1,5 +1,6 @@
 import type { Flow } from "@/schema";
 import { inferEdges } from "./inferEdges";
+import { splitFanIn } from "./splitFanIn";
 
 export const ext401Screening: Flow = (() => {
   const f: Flow = {
@@ -118,5 +119,8 @@ export const ext401Screening: Flow = (() => {
     // Recording is attached implicitly by the simulator on any answered leg; show it as a dotted hook off the answering mode.
     { id: "v_e6", source: "am", sourceHandle: "answered", target: "rec", targetHandle: "in", label: "recorded" },
   ];
+  const split = splitFanIn(f.nodes, f.edges);
+  f.nodes = split.nodes;
+  f.edges = split.edges;
   return f;
 })();

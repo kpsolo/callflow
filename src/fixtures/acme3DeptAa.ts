@@ -1,5 +1,6 @@
 import type { Flow } from "@/schema";
 import { inferEdges } from "./inferEdges";
+import { splitFanIn } from "./splitFanIn";
 
 export const acme3DeptAa: Flow = (() => {
   const f: Flow = {
@@ -187,6 +188,8 @@ export const acme3DeptAa: Flow = (() => {
     },
   ],
   };
-  f.edges = inferEdges(f.nodes);
+  const split = splitFanIn(f.nodes, inferEdges(f.nodes));
+  f.nodes = split.nodes;
+  f.edges = split.edges;
   return f;
 })();

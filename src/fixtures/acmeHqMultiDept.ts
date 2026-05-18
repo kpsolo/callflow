@@ -1,5 +1,6 @@
 import type { Flow, FlowNode } from "@/schema";
 import { inferEdges } from "./inferEdges";
+import { splitFanIn } from "./splitFanIn";
 
 /**
  * Acme Corp HQ — multi-department Auto Attendant.
@@ -378,8 +379,10 @@ export const acmeHqMultiDept: Flow = {
       { extension: "603", name: "Mona HR Payroll", published: false },
     ],
   },
-  nodes,
-  edges: inferEdges(nodes),
+  // splitFanIn duplicates voicemail/disconnect terminals when too many menus
+  // point at them, so the rendered graph reads cleanly instead of every
+  // department dumping into one node.
+  ...splitFanIn(nodes, inferEdges(nodes)),
   scenarios: [
     {
       name: "Business hours · press 1 1 → Alice (Sales new customer)",

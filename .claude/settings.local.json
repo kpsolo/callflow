@@ -15,7 +15,8 @@
       "Bash(git checkout *)",
       "Bash(git add *)",
       "Bash(git commit -m 'feat\\(palette\\): filter by entity type \\(demote off-pattern items\\) *)",
-      "Bash(git commit -m 'feat\\(canvas\\): anchor ROOT visually with START chip + dagre upper-left align *)"
+      "Bash(git commit -m 'feat\\(canvas\\): anchor ROOT visually with START chip + dagre upper-left align *)",
+      "Bash(git commit -m 'feat\\(fixtures\\): splitFanIn de-clutters terminals with many inbound edges *)"
     ]
   }
 }
