@@ -27,7 +27,13 @@
       "Bash(git commit -m 'perf\\(build\\): split vendor chunks \\(reactflow, dagre, zod, zustand, react\\) *)",
       "Bash(git commit -m 'feat\\(store\\): bidirectional menu-action <-> canvas-edge sync *)",
       "Bash(git commit -m 'feat\\(action_nop\\): Do Nothing action — explicitly inert key on a menu *)",
-      "Bash(git commit -m 'feat\\(presence\\): minimal user-presence placeholder in top bar \\(P5-10\\) *)"
+      "Bash(git commit -m 'feat\\(presence\\): minimal user-presence placeholder in top bar \\(P5-10\\) *)",
+      "Bash(git commit -m 'feat\\(api\\): CollabClient interface + LocalStorageClient implementation *)",
+      "Bash(git commit -m 'feat\\(collab\\): identity, lock indicator, multi-tab presence in top bar *)",
+      "Bash(git commit -m 'feat\\(comments\\): anchored comments on nodes + per-node badge + Inspector section *)",
+      "Bash(git commit -m 'feat\\(activity\\): structural-change recorder + log viewer *)",
+      "Bash(git commit -m 'docs\\(collaboration\\): architecture, default backend, swap-in guide *)",
+      "Bash(git commit -m 'docs\\(readme\\): repo entry point for BAs and devs working on the MVP *)"
     ]
   }
 }
