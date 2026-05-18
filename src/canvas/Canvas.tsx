@@ -15,6 +15,7 @@ import { getNodeType, type NodeTypeDef } from "@/nodes/registry";
 import type { FlowNode, NodeKind } from "@/schema";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 import { styleEdges } from "./edgeStyle";
+import { useUiStore } from "@/state/uiStore";
 import "./Canvas.css";
 
 export const PALETTE_DRAG_MIME = "application/x-callflow-node-kind";
@@ -33,15 +34,36 @@ export function Canvas() {
   const removeEdge = useFlowStore((s) => s.removeEdge);
   const clearFlow = useFlowStore((s) => s.clearFlow);
   const loadCounter = useFlowStore((s) => s.loadCounter);
+  const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
+  const hoveredMenuKey = useUiStore((s) => s.hoveredMenuKey);
+  const flashMenuKey = useUiStore((s) => s.flashMenuKey);
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
 
   // Apply the edge-style vocabulary (solid/dashed/dotted + per-digit colour)
-  // before handing edges to React Flow. Pure transformation, memoised on the
-  // edge array reference.
-  const styledEdges = useMemo(() => styleEdges(edges), [edges]);
+  // before handing edges to React Flow. When the user hovers a menu-action row
+  // in the inspector, the matching outgoing edge gets bumped to a thicker stroke
+  // and brought above siblings.
+  const styledEdges = useMemo(() => {
+    const styled = styleEdges(edges);
+    if (!hoveredMenuKey || !selectedNodeId) return styled;
+    const wantedHandle = `menu:${hoveredMenuKey}`;
+    return styled.map((e) => {
+      const isHighlight = e.source === selectedNodeId && e.sourceHandle === wantedHandle;
+      if (!isHighlight) return e;
+      return {
+        ...e,
+        zIndex: 1000,
+        style: {
+          ...(e.style ?? {}),
+          strokeWidth: 4,
+          filter: "drop-shadow(0 0 4px var(--accent))",
+        },
+      };
+    });
+  }, [edges, hoveredMenuKey, selectedNodeId]);
 
   const onInit = useCallback((rf: ReactFlowInstance) => {
     instanceRef.current = rf;
@@ -201,6 +223,11 @@ export function Canvas() {
         onNodeContextMenu={onNodeContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
         onPaneContextMenu={onPaneContextMenu}
+        onEdgeMouseEnter={(_, edge) => {
+          // If the hovered edge is a menu action, flash the matching inspector row.
+          const sh = edge.sourceHandle ?? "";
+          if (sh.startsWith("menu:")) flashMenuKey(sh.slice("menu:".length));
+        }}
         nodeTypes={reactFlowNodeTypes}
         snapToGrid
         snapGrid={[10, 10]}
