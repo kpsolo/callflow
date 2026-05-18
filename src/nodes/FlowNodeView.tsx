@@ -45,6 +45,11 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
       aria-label={`${def.label} node`}
     >
       <div className="fn-node-header" style={{ background: def.color }}>
+        {kind === "menu_root" && (
+          <span className="fn-node-start-chip" aria-label="Start of the call flow">
+            START
+          </span>
+        )}
         <span className="fn-node-header-label">{def.shortLabel ?? def.label}</span>
         {worst && (
           <span

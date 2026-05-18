@@ -56,6 +56,19 @@
   justify-content: space-between;
 }
 
+.fn-node-start-chip {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-right: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
 .fn-node-body {
   padding: 6px 8px 8px;
   color: var(--text-dim);
