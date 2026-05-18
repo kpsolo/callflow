@@ -20,6 +20,11 @@ import {
   emptyFlow,
 } from "@/schema";
 import { getNodeType } from "@/nodes/registry";
+import {
+  applyMenuConnectToActions,
+  applyMenuEdgeRemovalToActions,
+  projectMenuEdges,
+} from "./menuEdgeSync";
 
 let idSeq = 1;
 function genId(prefix = "n"): string {
@@ -126,16 +131,40 @@ export const useFlowStore = create<FlowStore>()(
       },
       onEdgesChange: (changes) => {
         const isStructural = changes.some((c) => c.type !== "select");
+        // Edges being removed → also drop the matching data.actions[key] on the
+        // source menu, otherwise the inspector and exported JSON drift.
+        let nodes = get().nodes;
+        if (isStructural) {
+          const beforeEdges = get().edges;
+          for (const c of changes) {
+            if (c.type === "remove") {
+              const e = beforeEdges.find((x) => x.id === c.id);
+              if (e) nodes = applyMenuEdgeRemovalToActions(nodes, e);
+            }
+          }
+        }
         set({
           edges: applyEdgeChanges(changes, get().edges),
+          nodes,
           ...(isStructural ? { dirty: true } : {}),
         });
       },
-      onConnect: (conn) =>
-        set({
-          edges: rfAddEdge({ ...conn, id: genId("e") }, get().edges),
-          dirty: true,
-        }),
+      onConnect: (conn) => {
+        const edges = rfAddEdge({ ...conn, id: genId("e") }, get().edges);
+        // If the user dragged from a `menu:<key>` handle, write the connection
+        // back into the source menu's data.actions so the inspector stays in
+        // sync with the canvas. React Flow's Connection type allows null
+        // source/target during the drag; we only act on completed connects.
+        const nodes =
+          conn.source && conn.target
+            ? applyMenuConnectToActions(get().nodes, {
+                source: conn.source,
+                target: conn.target,
+                sourceHandle: conn.sourceHandle,
+              })
+            : get().nodes;
+        set({ edges, nodes, dirty: true });
+      },
 
       addNode: (kind, position) => {
         const def = getNodeType(kind);
@@ -150,13 +179,19 @@ export const useFlowStore = create<FlowStore>()(
         return id;
       },
 
-      updateNodeData: (id, data) =>
-        set({
-          nodes: get().nodes.map((n) =>
-            n.id === id ? { ...n, data: data as typeof n.data } : n,
-          ),
-          dirty: true,
-        }),
+      updateNodeData: (id, data) => {
+        const nextNodes = get().nodes.map((n) =>
+          n.id === id ? { ...n, data: data as typeof n.data } : n,
+        );
+        const updated = nextNodes.find((n) => n.id === id);
+        let edges = get().edges;
+        // If the user edited a menu's actions map in the inspector, re-project
+        // edges so the canvas reflects the change immediately.
+        if (updated && (updated.type === "menu_root" || updated.type === "menu_custom")) {
+          edges = projectMenuEdges(updated, edges);
+        }
+        set({ nodes: nextNodes, edges, dirty: true });
+      },
 
       removeNode: (id) => {
         const node = get().nodes.find((n) => n.id === id);
