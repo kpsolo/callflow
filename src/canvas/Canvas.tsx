@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -14,6 +14,7 @@ import { layoutDagre } from "./autoLayout";
 import { getNodeType, type NodeTypeDef } from "@/nodes/registry";
 import type { FlowNode, NodeKind } from "@/schema";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
+import { styleEdges } from "./edgeStyle";
 import "./Canvas.css";
 
 export const PALETTE_DRAG_MIME = "application/x-callflow-node-kind";
@@ -36,6 +37,11 @@ export function Canvas() {
   const instanceRef = useRef<ReactFlowInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
+
+  // Apply the edge-style vocabulary (solid/dashed/dotted + per-digit colour)
+  // before handing edges to React Flow. Pure transformation, memoised on the
+  // edge array reference.
+  const styledEdges = useMemo(() => styleEdges(edges), [edges]);
 
   const onInit = useCallback((rf: ReactFlowInstance) => {
     instanceRef.current = rf;
@@ -180,7 +186,7 @@ export function Canvas() {
     <div className="canvas-wrapper" ref={wrapperRef}>
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={styledEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
