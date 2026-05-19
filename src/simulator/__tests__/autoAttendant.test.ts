@@ -375,4 +375,37 @@ describe("Auto Attendant simulator (§13.2)", () => {
     const t = simulate(flow, { ...baseInput, press_sequence: [] });
     expect(t.terminal).toBe("disconnected");
   });
+
+  describe("Consolidated polymorphic action_transfer", () => {
+    it("transfers to extension directly", () => {
+      const flow = mkAaFlow([
+        mkNode("menu_root", { actions: { "1": { target_node_id: "tr" } } }, "root"),
+        mkNode("action_transfer", { mode: "extension", extension: "205" }, "tr"),
+      ]);
+      const t = simulate(flow, { ...baseInput, press_sequence: ["1"] });
+      expect(t.terminal).toBe("answered");
+      expect(t.terminal_detail).toContain("ext 205");
+      expect(t.steps.some(s => s.message.includes("Ringing extension 205"))).toBe(true);
+    });
+
+    it("transfers to hunt group directly", () => {
+      const flow = mkAaFlow([
+        mkNode("menu_root", { actions: { "1": { target_node_id: "tr" } } }, "root"),
+        mkNode("action_transfer", { mode: "hunt_group", hunt_group_id: "hg_sales", label: "Sales Team" }, "tr"),
+      ]);
+      const t = simulate(flow, { ...baseInput, press_sequence: ["1"] });
+      expect(t.terminal).toBe("answered");
+      expect(t.terminal_detail).toContain("hunt group Sales Team");
+    });
+
+    it("transfers to SIP URI directly", () => {
+      const flow = mkAaFlow([
+        mkNode("menu_root", { actions: { "1": { target_node_id: "tr" } } }, "root"),
+        mkNode("action_transfer", { mode: "sip_uri", uri: "sip:alice@pbx.com" }, "tr"),
+      ]);
+      const t = simulate(flow, { ...baseInput, press_sequence: ["1"] });
+      expect(t.terminal).toBe("answered");
+      expect(t.terminal_detail).toContain("sip:alice@pbx.com");
+    });
+  });
 });

@@ -25,7 +25,12 @@ const headlines: { [K in NodeKind]?: HeadlineFn<K> } = {
   target_hunt_group_ref: (d) => d.label || d.hunt_group_id || null,
   forward_simple: (d) => d.target_number || null,
   forward_sip_uri: (d) => d.target_uri || null,
-  action_transfer: (d) => (d.mode === "e164" ? d.number || null : null),
+  action_transfer: (d) => {
+    if (d.mode === "extension") return d.extension || d.target_node_id || null;
+    if (d.mode === "hunt_group") return d.label || d.hunt_group_id || null;
+    if (d.mode === "sip_uri") return d.uri || null;
+    return d.number || null;
+  },
   action_queue: (d) => d.queue_name || null,
 };
 

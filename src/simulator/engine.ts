@@ -731,16 +731,48 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       return terminate(ctx, "voicemail_left");
     }
     case "action_transfer": {
-      if (node.data.mode === "e164") {
+      playPrompt(ctx, node.data.play_before_action);
+      const mode = node.data.mode;
+
+      if (mode === "extension") {
+        const ext = node.data.extension;
+        if (ext) {
+          step(ctx, node.id, node.type, `Ringing extension ${ext}`);
+          const r = answeringFor(ctx, ext);
+          if (r === "answer") {
+            applyRecordingIfConfigured(ctx);
+            return terminate(ctx, "answered", `ext ${ext}`);
+          }
+          if (r === "busy") return terminate(ctx, "rejected", `ext ${ext} busy`);
+          if (r === "fail") return terminate(ctx, "dropped", `ext ${ext} network fail`);
+          return terminate(ctx, "dropped", `ext ${ext} no answer`);
+        }
+        const tgt = node.data.target_node_id;
+        if (!tgt) return terminate(ctx, "dropped", "Transfer target missing");
+        return runNode(ctx, ctx.nodesById.get(tgt) ?? node);
+      }
+      if (mode === "hunt_group") {
+        const hg = node.data.label ?? node.data.hunt_group_id ?? "<unset>";
+        step(ctx, node.id, node.type, `Hunt group ${hg}`);
+        const r = answeringFor(ctx, node.data.hunt_group_id ?? "");
+        if (r === "answer") return terminate(ctx, "answered", `hunt group ${hg}`);
+        return terminate(ctx, "dropped", `hunt group ${hg} no answer`);
+      }
+      if (mode === "sip_uri") {
+        const uri = node.data.uri ?? "<unset>";
+        step(ctx, node.id, node.type, `Dialing SIP URI ${uri}`);
+        const r = answeringFor(ctx, uri);
+        if (r === "answer") return terminate(ctx, "answered", uri);
+        return terminate(ctx, "dropped", `${uri} unreachable`);
+      }
+      if (mode === "e164") {
         const num = node.data.number ?? "<unset>";
         step(ctx, node.id, node.type, `Transfer to E.164 ${num}`);
         const r = answeringFor(ctx, num);
         if (r === "answer") return terminate(ctx, "forwarded_answered", `Answered by ${num}`);
         return terminate(ctx, "forwarded_unanswered", `${num} unreachable`);
       }
-      const tgt = node.data.target_node_id;
-      if (!tgt) return terminate(ctx, "dropped", "Transfer target missing");
-      return runNode(ctx, ctx.nodesById.get(tgt) ?? node);
+      return terminate(ctx, "dropped", `Invalid transfer mode`);
     }
     case "action_nop": {
       // "Do Nothing": play an optional prompt and return control to the parent

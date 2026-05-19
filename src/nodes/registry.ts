@@ -138,10 +138,10 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     label: "Transfer",
     color: C.action,
     description:
-      "Transfer the call. Choose between routing to an internal Target node (extension, hunt group, SIP URI) or placing an outbound call to an E.164 number.",
+      "Transfer the call. Choose between routing to an internal target (extension, hunt group, SIP URI) or placing an outbound call to an E.164 number.",
     inputs: IN,
-    outputs: OUT_NEXT,
-    defaultData: () => ({ mode: "extension" }),
+    outputs: NO_PORTS,
+    defaultData: () => ({ mode: "extension", extension: "100" }),
   },
   action_prompt_extension: {
     kind: "action_prompt_extension",
@@ -441,6 +441,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Internal extension target.",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: () => ({ extension: "100" }),
   },
   target_hunt_group_ref: {
@@ -451,6 +452,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Reference to a Hunt Group entity (full editor deferred).",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: () => ({ hunt_group_id: "hg_1" }),
   },
   target_external: {
@@ -461,6 +463,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "External E.164 number target.",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: () => ({ number: "+10000000000" }),
   },
   target_sip_uri: {
@@ -471,6 +474,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Direct SIP endpoint target.",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: () => ({ uri: "sip:user@example.com" }),
   },
   term_answered: termDef("term_answered", "Answered"),

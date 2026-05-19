@@ -95,7 +95,9 @@ export type ActivityKind =
   | "lock_taken_over"
   | "comment_added"
   | "comment_resolved"
-  | "comment_deleted";
+  | "comment_deleted"
+  | "manual_checkpoint"
+  | "version_restored";
 
 export interface ActivityEvent {
   id: string;

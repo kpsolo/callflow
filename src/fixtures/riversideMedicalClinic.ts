@@ -46,7 +46,6 @@ const def = <T>(d: T) => d;
 const COL_ROOT = 0;
 const COL_MENU = 480;
 const COL_TRANSFER = 960;
-const COL_TARGET = 1440;
 const COL_SINK = 1920;
 
 const nodes: FlowNode[] = [
@@ -125,19 +124,19 @@ const nodes: FlowNode[] = [
     id: "tr_pharmacy",
     type: "action_transfer",
     position: { x: COL_MENU, y: 880 },
-    data: { mode: "extension", target_node_id: "ext_pharmacy" },
+    data: { mode: "extension", extension: "400" },
   },
   {
     id: "tr_nurse_triage",
     type: "action_transfer",
     position: { x: COL_MENU, y: 1100 },
-    data: { mode: "extension", target_node_id: "hg_nurses" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_nurse_triage", label: "Nurse triage" },
   },
   {
     id: "tr_receptionist",
     type: "action_transfer",
     position: { x: COL_MENU, y: 1320 },
-    data: { mode: "extension", target_node_id: "ext_reception" },
+    data: { mode: "extension", extension: "500" },
   },
   {
     id: "a_disc_emergency_reminder",
@@ -153,71 +152,37 @@ const nodes: FlowNode[] = [
     id: "tr_new_appt",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 0 },
-    data: { mode: "extension", target_node_id: "hg_appt_desk", play_before_action: "p_new_patient_intro" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk", play_before_action: "p_new_patient_intro" },
   },
   {
     id: "tr_reschedule",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 220 },
-    data: { mode: "extension", target_node_id: "hg_appt_desk" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_cancel",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 440 },
-    data: { mode: "extension", target_node_id: "hg_appt_desk" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_appt_desk",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 660 },
-    data: { mode: "extension", target_node_id: "hg_appt_desk" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_bill_questions",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 880 },
-    data: { mode: "extension", target_node_id: "ext_billing" },
+    data: { mode: "extension", extension: "300" },
   },
   {
     id: "tr_bill_payment",
     type: "action_transfer",
     position: { x: COL_TRANSFER, y: 1100 },
-    data: { mode: "extension", target_node_id: "ext_billing" },
-  },
-
-  // ===== Targets =====
-  // hg_appt_desk gets 4 inbound transfers and is cloned by splitFanIn; the
-  // original sits at y=0 and clones cascade ~210 px below — keep room below it.
-  {
-    id: "hg_appt_desk",
-    type: "target_hunt_group_ref",
-    position: { x: COL_TARGET, y: 0 },
-    data: { hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
-  },
-  {
-    id: "ext_billing",
-    type: "target_extension",
-    position: { x: COL_TARGET, y: 880 },
-    data: { extension: "300" },
-  },
-  {
-    id: "ext_pharmacy",
-    type: "target_extension",
-    position: { x: COL_TARGET, y: 1100 },
-    data: { extension: "400" },
-  },
-  {
-    id: "hg_nurses",
-    type: "target_hunt_group_ref",
-    position: { x: COL_TARGET, y: 1240 },
-    data: { hunt_group_id: "hg_nurse_triage", label: "Nurse triage" },
-  },
-  {
-    id: "ext_reception",
-    type: "target_extension",
-    position: { x: COL_TARGET, y: 1400 },
-    data: { extension: "500" },
+    data: { mode: "extension", extension: "300" },
   },
 
   // ===== Voicemail / fax / compliance =====

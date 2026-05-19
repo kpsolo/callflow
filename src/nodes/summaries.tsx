@@ -25,18 +25,38 @@ const summaries: { [K in NodeKind]?: SummaryFn<K> } = {
       <Row k="Inputs" v={Object.keys(d.actions).length || "—"} />
     </>
   ),
-  action_transfer: (d) =>
-    d.mode === "e164" ? (
+  action_transfer: (d) => {
+    if (d.mode === "extension") {
+      return (
+        <>
+          <Row k="Mode" v={<Chip>Extension</Chip>} />
+          <Row k="Target" v={d.extension ?? d.target_node_id ?? "—"} />
+        </>
+      );
+    }
+    if (d.mode === "hunt_group") {
+      return (
+        <>
+          <Row k="Mode" v={<Chip>Hunt Group</Chip>} />
+          <Row k="Target" v={d.hunt_group_id ?? "—"} />
+        </>
+      );
+    }
+    if (d.mode === "sip_uri") {
+      return (
+        <>
+          <Row k="Mode" v={<Chip>SIP URI</Chip>} />
+          <Row k="Target" v={d.uri ?? "—"} />
+        </>
+      );
+    }
+    return (
       <>
         <Row k="Mode" v={<Chip>E.164</Chip>} />
         <Row k="Number" v={d.number ?? "—"} />
       </>
-    ) : (
-      <>
-        <Row k="Mode" v={<Chip>extension</Chip>} />
-        <Row k="Target" v={d.target_node_id ?? "—"} />
-      </>
-    ),
+    );
+  },
   action_prompt_extension: (d) => <Row k="Timeout" v={`${d.timeout_s}s`} />,
   action_dial_direct: (d) => <Row k="Digit" v={d.first_digit ?? "—"} />,
   action_queue: (d) => <Row k="Queue" v={d.queue_name ?? "—"} />,

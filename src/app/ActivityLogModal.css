@@ -1,12 +1,26 @@
 .modal.alm {
   width: min(680px, 92vw);
-  height: min(560px, 80vh);
+  height: min(620px, 85vh);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal.alm .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .modal.alm footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev-1);
 }
 
 .modal.alm footer small {
@@ -14,23 +28,95 @@
   font-size: 12px;
 }
 
+/* Checkpoint Bar */
+.activity-checkpoint-bar {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.activity-checkpoint-bar input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.activity-checkpoint-bar input:focus {
+  border-color: var(--primary);
+}
+
+.activity-checkpoint-bar .checkpoint-btn {
+  background: var(--primary, #4f8cff);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.activity-checkpoint-bar .checkpoint-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.activity-checkpoint-bar .checkpoint-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Activity Items */
 .activity-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
-.activity-list li {
+.activity-item {
   background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 6px 10px;
+  border-radius: 6px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+  position: relative;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+}
+
+.activity-item:hover {
+  border-color: var(--border-hover, #666);
+}
+
+.activity-item.is-checkpoint {
+  border-left: 4px solid #06d6a0; /* Emerald left-border for manual versions */
+  background: rgba(6, 214, 160, 0.03);
+}
+
+.activity-item.is-restore {
+  border-left: 4px solid #ffd166; /* Gold left-border for restores */
+  background: rgba(255, 209, 102, 0.03);
+}
+
+.activity-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .activity-meta {
@@ -45,15 +131,66 @@
   color: var(--text);
 }
 
+.activity-meta small {
+  color: var(--text-muted, #888);
+}
+
+/* Badges */
+.checkpoint-badge {
+  background: rgba(6, 214, 160, 0.15);
+  color: #06d6a0;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.restore-badge {
+  background: rgba(255, 209, 102, 0.15);
+  color: #f5b041;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* Restore Button */
+.activity-restore-btn {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.activity-restore-btn:hover {
+  background: var(--bg-elev-3);
+  border-color: var(--primary, #4f8cff);
+  color: var(--primary, #4f8cff);
+}
+
+/* Body and Details */
 .activity-body {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: 14px;
 }
 
 .activity-kind {
   color: var(--text);
+  font-weight: 500;
 }
 
 .activity-detail {
@@ -62,6 +199,7 @@
   font-size: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 0 4px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  word-break: break-all;
 }

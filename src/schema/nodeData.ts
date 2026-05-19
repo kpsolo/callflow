@@ -68,7 +68,21 @@ export const MenuCustomDataSchema = MenuRootDataSchema.extend({
 // an outbound call to an E.164 number.
 const ActionTransferExtensionDataSchema = z.object({
   mode: z.literal("extension"),
-  target_node_id: z.string().min(1).optional(),
+  extension: ExtensionNumberSchema.optional(),
+  target_node_id: z.string().optional(), // back-compat
+  play_before_action: PromptIdSchema.optional(),
+});
+
+const ActionTransferHuntGroupDataSchema = z.object({
+  mode: z.literal("hunt_group"),
+  hunt_group_id: z.string().optional(),
+  label: z.string().optional(),
+  play_before_action: PromptIdSchema.optional(),
+});
+
+const ActionTransferSipUriDataSchema = z.object({
+  mode: z.literal("sip_uri"),
+  uri: SipUriSchema.optional(),
   play_before_action: PromptIdSchema.optional(),
 });
 
@@ -80,6 +94,8 @@ const ActionTransferE164DataSchema = z.object({
 
 export const ActionTransferDataSchema = z.discriminatedUnion("mode", [
   ActionTransferExtensionDataSchema,
+  ActionTransferHuntGroupDataSchema,
+  ActionTransferSipUriDataSchema,
   ActionTransferE164DataSchema,
 ]);
 

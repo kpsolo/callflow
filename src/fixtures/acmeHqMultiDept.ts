@@ -49,7 +49,6 @@ const def = <T>(d: T) => d;
 const COL_ROOT = 0;
 const COL_MENU = 480;
 const COL_TRANSFER = 960;
-const COL_TARGET = 1440;
 const COL_SINK = 1920;
 
 // ---- nodes ----------------------------------------------------------------
@@ -233,62 +232,40 @@ const nodes: FlowNode[] = [
   // (header + 3-field inline editor + 1 output port pill), so 220 px leaves a
   // ~40 px gap between cards.
   // Sales — note these transfers are intended to be recorded for compliance.
-  { id: "tr_sales_new", type: "action_transfer", position: { x: COL_TRANSFER, y: 0 }, data: { mode: "extension", target_node_id: "ext_201" } },
-  { id: "tr_sales_existing", type: "action_transfer", position: { x: COL_TRANSFER, y: 220 }, data: { mode: "extension", target_node_id: "ext_202" } },
-  { id: "tr_sales_enterprise", type: "action_transfer", position: { x: COL_TRANSFER, y: 440 }, data: { mode: "extension", target_node_id: "ext_203" } },
-  { id: "tr_sales_default", type: "action_transfer", position: { x: COL_TRANSFER, y: 660 }, data: { mode: "extension", target_node_id: "ext_201" } },
+  { id: "tr_sales_new", type: "action_transfer", position: { x: COL_TRANSFER, y: 0 }, data: { mode: "extension", extension: "201" } },
+  { id: "tr_sales_existing", type: "action_transfer", position: { x: COL_TRANSFER, y: 220 }, data: { mode: "extension", extension: "202" } },
+  { id: "tr_sales_enterprise", type: "action_transfer", position: { x: COL_TRANSFER, y: 440 }, data: { mode: "extension", extension: "203" } },
+  { id: "tr_sales_default", type: "action_transfer", position: { x: COL_TRANSFER, y: 660 }, data: { mode: "extension", extension: "201" } },
 
   // Support — hunt groups for tiers, single ext for accounts, external for emergency.
-  { id: "tr_sup_tier1", type: "action_transfer", position: { x: COL_TRANSFER, y: 880 }, data: { mode: "extension", target_node_id: "hg_tier1" } },
-  { id: "tr_sup_tier2", type: "action_transfer", position: { x: COL_TRANSFER, y: 1100 }, data: { mode: "extension", target_node_id: "hg_tier2" } },
-  { id: "tr_sup_accounts", type: "action_transfer", position: { x: COL_TRANSFER, y: 1320 }, data: { mode: "extension", target_node_id: "ext_301" } },
-  { id: "tr_emergency", type: "action_transfer", position: { x: COL_TRANSFER, y: 1540 }, data: { mode: "extension", target_node_id: "ext_emergency_line" } },
+  { id: "tr_sup_tier1", type: "action_transfer", position: { x: COL_TRANSFER, y: 880 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier1", label: "Support Tier 1" } },
+  { id: "tr_sup_tier2", type: "action_transfer", position: { x: COL_TRANSFER, y: 1100 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier2", label: "Support Tier 2" } },
+  { id: "tr_sup_accounts", type: "action_transfer", position: { x: COL_TRANSFER, y: 1320 }, data: { mode: "extension", extension: "301" } },
+  { id: "tr_emergency", type: "action_transfer", position: { x: COL_TRANSFER, y: 1540 }, data: { mode: "e164", number: "+18005551111" } },
 
   // Engineering
-  { id: "tr_eng_platform", type: "action_transfer", position: { x: COL_TRANSFER, y: 1760 }, data: { mode: "extension", target_node_id: "ext_401" } },
-  { id: "tr_eng_mobile", type: "action_transfer", position: { x: COL_TRANSFER, y: 1980 }, data: { mode: "extension", target_node_id: "ext_402" } },
-  { id: "tr_eng_sre", type: "action_transfer", position: { x: COL_TRANSFER, y: 2200 }, data: { mode: "extension", target_node_id: "ext_403" } },
+  { id: "tr_eng_platform", type: "action_transfer", position: { x: COL_TRANSFER, y: 1760 }, data: { mode: "extension", extension: "401" } },
+  { id: "tr_eng_mobile", type: "action_transfer", position: { x: COL_TRANSFER, y: 1980 }, data: { mode: "extension", extension: "402" } },
+  { id: "tr_eng_sre", type: "action_transfer", position: { x: COL_TRANSFER, y: 2200 }, data: { mode: "extension", extension: "403" } },
 
   // Billing
-  { id: "tr_bill_invoices", type: "action_transfer", position: { x: COL_TRANSFER, y: 2420 }, data: { mode: "extension", target_node_id: "ext_501" } },
-  { id: "tr_bill_payments", type: "action_transfer", position: { x: COL_TRANSFER, y: 2640 }, data: { mode: "extension", target_node_id: "ext_502" } },
-  { id: "tr_bill_disputes", type: "action_transfer", position: { x: COL_TRANSFER, y: 2860 }, data: { mode: "extension", target_node_id: "ext_503" } },
+  { id: "tr_bill_invoices", type: "action_transfer", position: { x: COL_TRANSFER, y: 2420 }, data: { mode: "extension", extension: "501" } },
+  { id: "tr_bill_payments", type: "action_transfer", position: { x: COL_TRANSFER, y: 2640 }, data: { mode: "extension", extension: "502" } },
+  { id: "tr_bill_disputes", type: "action_transfer", position: { x: COL_TRANSFER, y: 2860 }, data: { mode: "extension", extension: "503" } },
 
   // HR
-  { id: "tr_hr_benefits", type: "action_transfer", position: { x: COL_TRANSFER, y: 3080 }, data: { mode: "extension", target_node_id: "ext_601" } },
-  { id: "tr_hr_recruiting", type: "action_transfer", position: { x: COL_TRANSFER, y: 3300 }, data: { mode: "extension", target_node_id: "ext_602" } },
-  { id: "tr_hr_payroll", type: "action_transfer", position: { x: COL_TRANSFER, y: 3520 }, data: { mode: "extension", target_node_id: "ext_603" } },
+  { id: "tr_hr_benefits", type: "action_transfer", position: { x: COL_TRANSFER, y: 3080 }, data: { mode: "extension", extension: "601" } },
+  { id: "tr_hr_recruiting", type: "action_transfer", position: { x: COL_TRANSFER, y: 3300 }, data: { mode: "extension", extension: "602" } },
+  { id: "tr_hr_payroll", type: "action_transfer", position: { x: COL_TRANSFER, y: 3520 }, data: { mode: "extension", extension: "603" } },
 
   // Operator + holiday disconnect
-  { id: "tr_operator", type: "action_transfer", position: { x: COL_TRANSFER, y: 3740 }, data: { mode: "extension", target_node_id: "ext_100" } },
+  { id: "tr_operator", type: "action_transfer", position: { x: COL_TRANSFER, y: 3740 }, data: { mode: "extension", extension: "100" } },
   {
     id: "a_disc_holiday",
     type: "action_disconnect",
     position: { x: COL_TRANSFER, y: 3960 },
     data: { play_before_action: "p_holiday_closing" },
   },
-
-  // ===== Target nodes (extensions + hunt groups + external) =====
-  // Target cards (target_extension / target_external) are ~72 px tall (headlined
-  // header + single inline field, no outputs), so a 140 px step gives ~70 px
-  // gap. The hunt-group cards are ~102 px and still fit comfortably.
-  { id: "ext_201", type: "target_extension", position: { x: COL_TARGET, y: 0 }, data: { extension: "201" } },
-  { id: "ext_202", type: "target_extension", position: { x: COL_TARGET, y: 140 }, data: { extension: "202" } },
-  { id: "ext_203", type: "target_extension", position: { x: COL_TARGET, y: 280 }, data: { extension: "203" } },
-  { id: "hg_tier1", type: "target_hunt_group_ref", position: { x: COL_TARGET, y: 600 }, data: { hunt_group_id: "hg_support_tier1", label: "Support Tier 1" } },
-  { id: "hg_tier2", type: "target_hunt_group_ref", position: { x: COL_TARGET, y: 760 }, data: { hunt_group_id: "hg_support_tier2", label: "Support Tier 2" } },
-  { id: "ext_301", type: "target_extension", position: { x: COL_TARGET, y: 920 }, data: { extension: "301" } },
-  { id: "ext_emergency_line", type: "target_external", position: { x: COL_TARGET, y: 1080 }, data: { number: "+18005551111" } },
-  { id: "ext_401", type: "target_extension", position: { x: COL_TARGET, y: 1240 }, data: { extension: "401" } },
-  { id: "ext_402", type: "target_extension", position: { x: COL_TARGET, y: 1380 }, data: { extension: "402" } },
-  { id: "ext_403", type: "target_extension", position: { x: COL_TARGET, y: 1520 }, data: { extension: "403" } },
-  { id: "ext_501", type: "target_extension", position: { x: COL_TARGET, y: 1660 }, data: { extension: "501" } },
-  { id: "ext_502", type: "target_extension", position: { x: COL_TARGET, y: 1800 }, data: { extension: "502" } },
-  { id: "ext_503", type: "target_extension", position: { x: COL_TARGET, y: 1940 }, data: { extension: "503" } },
-  { id: "ext_601", type: "target_extension", position: { x: COL_TARGET, y: 2080 }, data: { extension: "601" } },
-  { id: "ext_602", type: "target_extension", position: { x: COL_TARGET, y: 2220 }, data: { extension: "602" } },
-  { id: "ext_603", type: "target_extension", position: { x: COL_TARGET, y: 2360 }, data: { extension: "603" } },
-  { id: "ext_100", type: "target_extension", position: { x: COL_TARGET, y: 2500 }, data: { extension: "100" } },
 
   // ===== Voicemail / fax / compliance =====
   {
@@ -428,7 +405,7 @@ export const acmeHqMultiDept: Flow = {
       time: "2026-05-18T22:00:00-07:00",
       press_sequence: ["2"],
       answering_behavior: [],
-      expected_terminal: "answered",
+      expected_terminal: "forwarded_answered",
     },
     {
       name: "Holiday · press 0 → holiday announcement + disconnect",

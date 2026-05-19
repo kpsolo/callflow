@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, RotateCcw, Bookmark } from "lucide-react";
 import { useCollab, type ActivityEvent, type ActivityKind } from "@/api";
 import { useFlowStore } from "@/state/store";
 import "./ActivityLogModal.css";
@@ -26,6 +26,8 @@ const KIND_LABEL: Record<ActivityKind, string> = {
   comment_added: "left a comment",
   comment_resolved: "resolved a comment",
   comment_deleted: "deleted a comment",
+  manual_checkpoint: "created checkpoint",
+  version_restored: "restored a past version",
 };
 
 function formatPayload(kind: ActivityKind, payload?: Record<string, unknown>): string {
@@ -49,6 +51,9 @@ function formatPayload(kind: ActivityKind, payload?: Record<string, unknown>): s
     case "comment_resolved":
     case "comment_deleted":
       return (payload.commentId as string)?.slice(0, 8) ?? "";
+    case "manual_checkpoint":
+    case "version_restored":
+      return (payload.description as string) ?? "";
     default:
       return "";
   }
@@ -70,6 +75,7 @@ export function ActivityLogModal({ onClose }: { onClose: () => void }) {
   const collab = useCollab();
   const flowId = useFlowStore((s) => s.entity.id);
   const [events, setEvents] = useState<ActivityEvent[]>([]);
+  const [checkpointDesc, setCheckpointDesc] = useState("");
 
   useEffect(() => {
     return collab.observeActivity(flowId, setEvents);
@@ -78,40 +84,131 @@ export function ActivityLogModal({ onClose }: { onClose: () => void }) {
   // Newest first.
   const reversed = [...events].reverse();
 
+  const handleCreateCheckpoint = () => {
+    const desc = checkpointDesc.trim();
+    if (!desc) return;
+    collab.recordActivity({
+      flowId,
+      kind: "manual_checkpoint",
+      payload: { description: desc },
+    });
+    setCheckpointDesc("");
+  };
+
+  const handleRestore = (e: ActivityEvent) => {
+    const snapshot = e.payload?.snapshot;
+    if (!snapshot) return;
+
+    const actionText = `${KIND_LABEL[e.kind] ?? e.kind}${
+      formatPayload(e.kind, e.payload) ? ` (${formatPayload(e.kind, e.payload)})` : ""
+    }`;
+    const confirmRestore = window.confirm(
+      `Are you sure you want to restore the flow to this point?\n\n` +
+        `Point: ${actionText}\n` +
+        `Saved by: ${e.actorDisplayName} (${relativeTime(e.at)})\n\n` +
+        `Any current unsaved changes will be lost.`
+    );
+    if (!confirmRestore) return;
+
+    // Restore flow state
+    useFlowStore.getState().loadFlow(snapshot as any);
+
+    // Record the restore activity event so it's logged in history
+    collab.recordActivity({
+      flowId,
+      kind: "version_restored",
+      payload: {
+        description: `Restored to state from ${relativeTime(e.at)} (${e.actorDisplayName})`,
+      },
+    });
+
+    onClose();
+  };
+
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Activity log">
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Version history & change log">
       <div className="modal alm">
         <header>
-          <strong>Activity log — {flowId}</strong>
+          <strong>Version History & Change Log — {flowId}</strong>
           <button type="button" onClick={onClose} aria-label="Close">
             <X size={14} aria-hidden />
           </button>
         </header>
         <div className="modal-body">
+          {/* Manual checkpoint creation bar */}
+          <div className="activity-checkpoint-bar">
+            <input
+              type="text"
+              placeholder="Enter version description or checkpoint label..."
+              value={checkpointDesc}
+              onChange={(e) => setCheckpointDesc(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateCheckpoint();
+              }}
+            />
+            <button
+              type="button"
+              className="checkpoint-btn"
+              disabled={!checkpointDesc.trim()}
+              onClick={handleCreateCheckpoint}
+            >
+              <Bookmark size={14} style={{ marginRight: 4 }} />
+              Create Checkpoint
+            </button>
+          </div>
+
           {reversed.length === 0 ? (
             <p className="shell-placeholder">No activity recorded for this flow yet.</p>
           ) : (
             <ul className="activity-list">
-              {reversed.map((e) => (
-                <li key={e.id}>
-                  <div className="activity-meta">
-                    <strong>{e.actorDisplayName}</strong>
-                    <small title={e.at}>{relativeTime(e.at)}</small>
-                  </div>
-                  <div className="activity-body">
-                    <span className={`activity-kind kind-${e.kind}`}>
-                      {KIND_LABEL[e.kind] ?? e.kind}
-                    </span>
-                    <code className="activity-detail">{formatPayload(e.kind, e.payload)}</code>
-                  </div>
-                </li>
-              ))}
+              {reversed.map((e) => {
+                const isManual = e.kind === "manual_checkpoint";
+                const isRestore = e.kind === "version_restored";
+                const hasSnapshot = !!e.payload?.snapshot;
+
+                return (
+                  <li
+                    key={e.id}
+                    className={`activity-item ${isManual ? "is-checkpoint" : ""} ${
+                      isRestore ? "is-restore" : ""
+                    }`}
+                  >
+                    <div className="activity-item-header">
+                      <div className="activity-meta">
+                        <strong>{e.actorDisplayName}</strong>
+                        <small title={e.at}>{relativeTime(e.at)}</small>
+                        {isManual && <span className="checkpoint-badge">Manual Version</span>}
+                        {isRestore && <span className="restore-badge">Restored</span>}
+                      </div>
+                      {hasSnapshot && (
+                        <button
+                          type="button"
+                          className="activity-restore-btn"
+                          onClick={() => handleRestore(e)}
+                          title="Restore the call flow to this state"
+                        >
+                          <RotateCcw size={12} style={{ marginRight: 4 }} />
+                          Restore
+                        </button>
+                      )}
+                    </div>
+                    <div className="activity-body">
+                      <span className={`activity-kind kind-${e.kind}`}>
+                        {KIND_LABEL[e.kind] ?? e.kind}
+                      </span>
+                      {formatPayload(e.kind, e.payload) && (
+                        <code className="activity-detail">{formatPayload(e.kind, e.payload)}</code>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
         <footer>
           <small>
-            Activity is persisted in <code>localStorage</code> (last 200 events).
+            Version history is automatically capped at a rolling buffer of <strong>100 actions</strong>.
           </small>
           <button type="button" onClick={onClose}>
             Close

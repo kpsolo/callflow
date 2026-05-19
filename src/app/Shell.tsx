@@ -205,7 +205,7 @@ export function Shell() {
               },
               { divider: true, label: "" },
               {
-                label: "Versions",
+                label: "Node UI",
                 icon: <Layers size={14} />,
                 children: [
                   {

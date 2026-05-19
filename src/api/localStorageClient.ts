@@ -11,6 +11,7 @@ import type {
   Unsubscribe,
   User,
 } from "./types";
+import { useFlowStore } from "@/state/store";
 
 /**
  * In-browser implementation of `CollabClient` that gives a single user
@@ -49,7 +50,7 @@ const PRESENCE_HEARTBEAT_MS = 5_000;
 const PRESENCE_EXPIRY_MS = 15_000;
 const LOCK_HEARTBEAT_MS = 30_000;
 const LOCK_EXPIRY_MS = 120_000;
-const ACTIVITY_RING_BUFFER = 200;
+const ACTIVITY_RING_BUFFER = 100;
 
 // ─── Internal: cross-tab message envelope ────────────────────────────────
 
@@ -428,6 +429,36 @@ export class LocalStorageClient implements CollabClient {
     payload?: Record<string, unknown>;
   }): void {
     const me = this.currentUser();
+    
+    // Check if this is a kind that alters the flow state
+    const structuralKinds: ActivityKind[] = [
+      "flow_loaded",
+      "flow_imported",
+      "flow_cleared",
+      "node_added",
+      "node_removed",
+      "node_duplicated",
+      "node_renamed",
+      "node_data_changed",
+      "edge_added",
+      "edge_removed",
+      "menu_action_retargeted",
+      "forwarding_rule_changed",
+      "time_period_changed",
+      "entity_renamed",
+      "manual_checkpoint",
+      "version_restored",
+    ];
+
+    let snapshot: unknown = undefined;
+    if (structuralKinds.includes(input.kind)) {
+      try {
+        snapshot = useFlowStore.getState().exportFlow();
+      } catch {
+        // Safe fallback if store is not initialized or in a non-react environment like unit tests
+      }
+    }
+
     const event: ActivityEvent = {
       id: uuid(),
       flowId: input.flowId,
@@ -435,7 +466,10 @@ export class LocalStorageClient implements CollabClient {
       actorDisplayName: me.displayName,
       at: nowIso(),
       kind: input.kind,
-      payload: input.payload,
+      payload: {
+        ...input.payload,
+        ...(snapshot ? { snapshot } : {}),
+      },
     };
     const list = readJson<ActivityEvent[]>(k.activity(input.flowId), []);
     const next = [...list, event].slice(-ACTIVITY_RING_BUFFER);

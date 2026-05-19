@@ -125,7 +125,7 @@ describe("LocalStorageClient — activity", () => {
     const list = await c.listActivity(FLOW_ID);
     expect(list).toHaveLength(2);
     expect(list[1].kind).toBe("node_added");
-    expect(list[1].payload).toEqual({ nodeId: "n1" });
+    expect(list[1].payload).toMatchObject({ nodeId: "n1" });
   });
 
   it("observeActivity fires after recordActivity", async () => {

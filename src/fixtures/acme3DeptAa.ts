@@ -8,7 +8,6 @@ import { splitFanIn } from "./splitFanIn";
 const COL_ROOT = 0;
 const COL_MENU = 480;
 const COL_TRANSFER = 960;
-const COL_TARGET = 1440;
 
 export const acme3DeptAa: Flow = (() => {
   const f: Flow = {
@@ -110,19 +109,19 @@ export const acme3DeptAa: Flow = (() => {
       id: "tgt_alice",
       type: "action_transfer",
       position: { x: COL_TRANSFER, y: 40 },
-      data: { mode: "extension", target_node_id: "ext_201" },
+      data: { mode: "extension", extension: "201" },
     },
     {
       id: "tgt_bob",
       type: "action_transfer",
       position: { x: COL_TRANSFER, y: 360 },
-      data: { mode: "extension", target_node_id: "ext_202" },
+      data: { mode: "extension", extension: "202" },
     },
     {
       id: "tgt_carol",
       type: "action_transfer",
       position: { x: COL_TRANSFER, y: 680 },
-      data: { mode: "extension", target_node_id: "ext_301" },
+      data: { mode: "extension", extension: "301" },
     },
     {
       id: "vm",
@@ -136,24 +135,6 @@ export const acme3DeptAa: Flow = (() => {
         email_option: "forward_as_attachment",
         email_address: "voicemail@acme.example",
       },
-    },
-    {
-      id: "ext_201",
-      type: "target_extension",
-      position: { x: COL_TARGET, y: 40 },
-      data: { extension: "201" },
-    },
-    {
-      id: "ext_202",
-      type: "target_extension",
-      position: { x: COL_TARGET, y: 360 },
-      data: { extension: "202" },
-    },
-    {
-      id: "ext_301",
-      type: "target_extension",
-      position: { x: COL_TARGET, y: 680 },
-      data: { extension: "301" },
     },
   ],
   edges: [],
