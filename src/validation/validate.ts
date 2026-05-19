@@ -1,4 +1,6 @@
 import type { Flow, FlowNode, NodeOf } from "@/schema";
+import type { Node } from "reactflow";
+import { estimateNodeDimensions } from "../canvas/autoLayout";
 
 export type Severity = "error" | "warning" | "info";
 
@@ -15,7 +17,7 @@ interface Ctx {
   issues: Issue[];
 }
 
-export function validate(flow: Flow): Issue[] {
+export function validate(flow: Flow, rawNodes?: Node[]): Issue[] {
   const ctx: Ctx = {
     flow,
     byId: new Map(flow.nodes.map((n) => [n.id, n])),
@@ -29,9 +31,11 @@ export function validate(flow: Flow): Issue[] {
   voicemailEmail(ctx);
   modeWithoutForwarding(ctx);
   callRecordingConfig(ctx);
+  nodeOverlaps(ctx, rawNodes);
 
   return ctx.issues;
 }
+
 
 function add(ctx: Ctx, issue: Issue) {
   ctx.issues.push(issue);
@@ -267,6 +271,49 @@ function modeWithoutForwarding(ctx: Ctx) {
   }
 }
 
+function nodeOverlaps(ctx: Ctx, rawNodes?: Node[]) {
+  if (!rawNodes || rawNodes.length < 2) return;
+
+  for (let i = 0; i < rawNodes.length; i++) {
+    const nodeA = rawNodes[i];
+    const sizeA = {
+      width: nodeA.width && nodeA.width > 0 ? nodeA.width : estimateNodeDimensions(nodeA).width,
+      height: nodeA.height && nodeA.height > 0 ? nodeA.height : estimateNodeDimensions(nodeA).height,
+    };
+
+    for (let j = i + 1; j < rawNodes.length; j++) {
+      const nodeB = rawNodes[j];
+      const sizeB = {
+        width: nodeB.width && nodeB.width > 0 ? nodeB.width : estimateNodeDimensions(nodeB).width,
+        height: nodeB.height && nodeB.height > 0 ? nodeB.height : estimateNodeDimensions(nodeB).height,
+      };
+
+      // Calculate the visual bounds and distance
+      const dx = Math.abs(nodeA.position.x - nodeB.position.x);
+      const dy = Math.abs(nodeA.position.y - nodeB.position.y);
+
+      const overlapX = dx < (sizeA.width + sizeB.width) / 2;
+      const overlapY = dy < (sizeA.height + sizeB.height) / 2;
+
+      if (overlapX && overlapY) {
+        add(ctx, {
+          code: "node_overlap",
+          severity: "warning",
+          message: `This node overlaps with another node (${nodeB.id}). Click 'Auto-layout' to fix.`,
+          node_id: nodeA.id,
+        });
+        add(ctx, {
+          code: "node_overlap",
+          severity: "warning",
+          message: `This node overlaps with another node (${nodeA.id}). Click 'Auto-layout' to fix.`,
+          node_id: nodeB.id,
+        });
+      }
+    }
+  }
+}
+
 export function hasErrors(issues: Issue[]): boolean {
   return issues.some((i) => i.severity === "error");
 }
+

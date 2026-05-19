@@ -11,5 +11,5 @@ export function useValidation(): Issue[] {
   void nodes;
   void edges;
   void entity;
-  return useMemo(() => validate(exportFlow()), [exportFlow, nodes, edges, entity]);
+  return useMemo(() => validate(exportFlow(), nodes), [exportFlow, nodes, edges, entity]);
 }
