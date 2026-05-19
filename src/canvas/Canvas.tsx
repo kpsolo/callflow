@@ -38,26 +38,7 @@ const edgeTypes = { flow: FlowEdge } as const;
 
 export const PALETTE_DRAG_MIME = "application/x-callflow-node-kind";
 
-const HINT_KEY = "cfs.canvas.hints.v1";
 
-type HintFlag = "contextMenu" | "dragDrop" | "zoom";
-
-function readHintFlags(): Record<HintFlag, boolean> {
-  if (typeof window === "undefined") {
-    return { contextMenu: false, dragDrop: false, zoom: false };
-  }
-  try {
-    const raw = window.localStorage.getItem(HINT_KEY);
-    const parsed = raw ? JSON.parse(raw) : null;
-    return {
-      contextMenu: !!parsed?.contextMenu,
-      dragDrop: !!parsed?.dragDrop,
-      zoom: !!parsed?.zoom,
-    };
-  } catch {
-    return { contextMenu: false, dragDrop: false, zoom: false };
-  }
-}
 
 export function Canvas() {
   const nodes = useFlowStore((s) => s.nodes);
@@ -88,22 +69,6 @@ export function Canvas() {
   const instanceRef = useRef<ReactFlowInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
-  const [hintFlags, setHintFlags] = useState(() => readHintFlags());
-
-  const markHint = useCallback((flag: HintFlag) => {
-    setHintFlags((prev) => {
-      if (prev[flag]) return prev;
-      const next = { ...prev, [flag]: true };
-      try {
-        window.localStorage.setItem(HINT_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore quota errors */
-      }
-      return next;
-    });
-  }, []);
-
-  const allHintsSeen = hintFlags.contextMenu && hintFlags.dragDrop && hintFlags.zoom;
 
   // Apply the edge-style vocabulary (solid/dashed/dotted + per-digit colour)
   // before handing edges to React Flow. When the user hovers a menu-action row
@@ -188,7 +153,6 @@ export function Canvas() {
       }
       const targetId = useUiStore.getState().dropTargetNodeId;
       setDropTargetNodeId(null);
-      markHint("dragDrop");
       recordRecentNodeKind(kind);
 
       if (!targetId) {
@@ -226,7 +190,7 @@ export function Canvas() {
         });
       }
     },
-    [addNode, addNodeConnectedTo, markHint, setDropTargetNodeId, setPendingMenuPick, recordRecentNodeKind],
+    [addNode, addNodeConnectedTo, setDropTargetNodeId, setPendingMenuPick, recordRecentNodeKind],
   );
 
   // --- Flavour B: drag a node connector and release over a palette item.
@@ -278,7 +242,6 @@ export function Canvas() {
   const onNodeContextMenu = useCallback(
     (e: React.MouseEvent, node: Node<FlowNode["data"]>) => {
       e.preventDefault();
-      markHint("contextMenu");
       setSelected(node.id);
       const def = getNodeType(node.type as NodeKind);
       const items = nodeMenuItems(node, def, {
@@ -298,13 +261,12 @@ export function Canvas() {
       });
       setMenu({ x: e.clientX, y: e.clientY, items });
     },
-    [duplicateNode, removeNode, setSelected, markHint],
+    [duplicateNode, removeNode, setSelected],
   );
 
   const onEdgeContextMenu = useCallback(
     (e: React.MouseEvent, edge: Edge) => {
       e.preventDefault();
-      markHint("contextMenu");
       setMenu({
         x: e.clientX,
         y: e.clientY,
@@ -318,13 +280,12 @@ export function Canvas() {
         ],
       });
     },
-    [removeEdge, markHint],
+    [removeEdge],
   );
 
   const onPaneContextMenu = useCallback(
     (e: React.MouseEvent | MouseEvent) => {
       e.preventDefault();
-      markHint("contextMenu");
       const mouseEvent = e as React.MouseEvent;
       const flowPos = instanceRef.current?.screenToFlowPosition({
         x: mouseEvent.clientX,
@@ -391,7 +352,6 @@ export function Canvas() {
       clearFlow,
       handleAutoLayout,
       handleFitView,
-      markHint,
       mergeIdenticalTerminals,
     ],
   );
@@ -400,11 +360,6 @@ export function Canvas() {
     <div
       className="canvas-wrapper"
       ref={wrapperRef}
-      onWheel={(e) => {
-        // Wheel + Ctrl (or just wheel inside React Flow) zooms; mark the hint
-        // as seen on first such interaction.
-        if (e.deltaY !== 0) markHint("zoom");
-      }}
     >
       <ReactFlow
         nodes={nodes}
@@ -490,15 +445,7 @@ export function Canvas() {
             Fit
           </button>
         </div>
-        {!allHintsSeen && (
-          <div className="canvas-hint" role="status" aria-live="polite">
-            <span className={hintFlags.contextMenu ? "is-done" : ""}>Right-click</span>
-            {" · "}
-            <span className={hintFlags.dragDrop ? "is-done" : ""}>drag from Palette</span>
-            {" · "}
-            <span className={hintFlags.zoom ? "is-done" : ""}>scroll to zoom</span>
-          </div>
-        )}
+
       </ReactFlow>
       {menu && <ContextMenu menu={menu} onClose={() => setMenu(null)} />}
       <MenuKeyPicker />

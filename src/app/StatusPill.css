@@ -9,6 +9,7 @@
   background: var(--bg-elev-2);
   color: var(--text);
   cursor: pointer;
+  --status-color: var(--text);
 }
 
 .sp.sp--static {
@@ -20,17 +21,20 @@
 }
 
 .sp--ok {
-  color: var(--ok);
+  --status-color: var(--ok);
+  color: var(--status-color);
   border-color: color-mix(in srgb, var(--ok) 40%, transparent);
 }
 
 .sp--warn {
-  color: var(--warn);
+  --status-color: var(--warn);
+  color: var(--status-color);
   border-color: color-mix(in srgb, var(--warn) 40%, transparent);
 }
 
 .sp--err {
-  color: var(--danger);
+  --status-color: var(--danger);
+  color: var(--status-color);
   border-color: color-mix(in srgb, var(--danger) 40%, transparent);
 }
 
@@ -46,7 +50,7 @@
 }
 
 .sp-count {
-  background: currentColor;
+  background: var(--status-color);
   color: var(--text-on-status);
   font-weight: 700;
   border-radius: 999px;
