@@ -68,7 +68,7 @@ Timing constants live in `COLLAB_TIMING`:
 | `PRESENCE_EXPIRY_MS` | 15,000 | When a peer is dropped from the presence list. |
 | `LOCK_HEARTBEAT_MS` | 30,000 | How often the holder refreshes the lock. |
 | `LOCK_EXPIRY_MS` | 120,000 | When an idle lock auto-expires. |
-| `ACTIVITY_RING_BUFFER` | 200 | Per-flow ring buffer cap. |
+| `ACTIVITY_RING_BUFFER` | 100 | Per-flow ring buffer cap. |
 
 ### What works in the default backend
 - Single user across multiple tabs of the same origin.
@@ -199,14 +199,21 @@ changes (clicking a different node in the canvas) are pushed via
 looking at. Avatars are de-duped by user id when one user has multiple
 tabs open.
 
-### Activity log (`ActivityLogModal`, `useActivityRecorder`)
+### Version history & change log (`ActivityLogModal`, `useActivityRecorder`)
 `useActivityRecorder` is a no-mutation observer attached to the Zustand
 store. On every change it diffs the previous snapshot against the new
 one and emits structured events: `node_added`, `node_removed`,
 `node_renamed`, `edge_added`, `menu_action_retargeted`, etc.
 
-The viewer is reachable from the top-bar overflow `⋯ → Activity log…`.
-Newest first. Ring buffer of 200 most recent per flow.
+Every structure-altering event automatically captures the current flow
+state (`Flow` schema) and stores it in `payload.snapshot` inside `localStorage`.
+
+The viewer is reachable from the top-bar overflow `⋯ → Activity log & Version History…`.
+It supports:
+- **Automatic snapshots**: Auto-recorded on node/edge creation, modification, or removal.
+- **Manual checkpoints**: Custom-labeled checkpoints bookmarked by users.
+- **Instant Rollback**: Inline "Restore" buttons allow double-confirmed restoration of any past flow state.
+- **Strict Cap**: Ring buffer of 100 most recent events per flow.
 
 ## Testing
 
