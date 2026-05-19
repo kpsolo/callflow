@@ -5,8 +5,10 @@ import type { NodeKind } from "@/schema";
 import "./NodeInlineEditor.css";
 
 // Field types we can comfortably render inside a node card. The richer editors
-// (action maps, forwarding-rule lists, active-period pickers) remain in the
-// sidebar Inspector — surfacing them inline would balloon the node footprint.
+// (action maps, forwarding-rule lists) remain in the sidebar Inspector —
+// surfacing them inline would balloon the node footprint. The "active-period"
+// type renders as a compact <select> here (no "Edit periods…" button or
+// summary line — those stay in the sidebar).
 const INLINE_TYPES = new Set<FieldDef["type"]>([
   "text",
   "email",
@@ -14,6 +16,7 @@ const INLINE_TYPES = new Set<FieldDef["type"]>([
   "toggle",
   "select",
   "readonly",
+  "active-period",
 ]);
 
 const MAX_FIELDS = 6;
@@ -83,7 +86,12 @@ function InlineField({
         {def.label}
       </span>
       <span className="fn-inline-control">
-        {def.type === "text" || def.type === "email" ? (
+        {def.type === "active-period" ? (
+          <InlineActivePeriod
+            value={(value as string | undefined) ?? "always"}
+            onChange={(v) => onChange(path, v)}
+          />
+        ) : def.type === "text" || def.type === "email" ? (
           <input
             type={def.type === "email" ? "email" : "text"}
             value={(value as string | undefined) ?? ""}
@@ -123,5 +131,30 @@ function InlineField({
         ) : null}
       </span>
     </div>
+  );
+}
+
+function InlineActivePeriod({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const periods = useFlowStore((s) => s.entity.time_periods ?? {});
+  const names = Object.keys(periods).sort();
+  const known = value === "always" || names.includes(value);
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="always">always</option>
+      {names.map((n) => (
+        <option key={n} value={n}>
+          {n}
+        </option>
+      ))}
+      {!known && (
+        <option value={value}>{value} (not defined)</option>
+      )}
+    </select>
   );
 }
