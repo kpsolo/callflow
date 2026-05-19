@@ -742,12 +742,6 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       if (!tgt) return terminate(ctx, "dropped", "Transfer target missing");
       return runNode(ctx, ctx.nodesById.get(tgt) ?? node);
     }
-    case "action_goto_menu": {
-      const tgt = node.data.target_menu_node_id;
-      const m = tgt ? ctx.nodesById.get(tgt) : undefined;
-      if (m && (m.type === "menu_root" || m.type === "menu_custom")) return runMenu(ctx, m);
-      return terminate(ctx, "dropped", "Goto menu target missing");
-    }
     case "action_nop": {
       // "Do Nothing": play an optional prompt and return control to the parent
       // menu without counting as an invalid attempt. If we've somehow arrived

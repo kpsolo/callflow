@@ -11,7 +11,6 @@ import {
   PhoneOff,
   ShieldCheck,
   ListOrdered,
-  CornerDownRight,
   Slash,
   ToggleLeft,
   Sliders,
@@ -25,7 +24,6 @@ import {
   Clock,
   User,
   ExternalLink,
-  CheckCircle2,
   XCircle,
   Ban,
   Mail,
@@ -35,10 +33,11 @@ import {
   PhoneCall,
   MailCheck,
   HelpCircle,
+  type LucideIcon,
 } from "lucide-react";
 import type { NodeKind } from "@/schema";
 
-const ICON_MAP: Record<NodeKind, React.ComponentType<{ size?: number; className?: string }>> = {
+const ICON_MAP: Record<NodeKind, LucideIcon> = {
   incoming_call: PhoneIncoming,
   outgoing_call: PhoneOutgoing,
   menu_root: FolderTree,
@@ -51,7 +50,6 @@ const ICON_MAP: Record<NodeKind, React.ComponentType<{ size?: number; className?
   action_disconnect: PhoneOff,
   action_disa: ShieldCheck,
   action_queue: ListOrdered,
-  action_goto_menu: CornerDownRight,
   action_nop: Slash,
   answering_mode_ext: ToggleLeft,
   answering_mode_aa: Sliders,
@@ -79,6 +77,6 @@ const ICON_MAP: Record<NodeKind, React.ComponentType<{ size?: number; className?
   term_dropped: XCircle,
 };
 
-export function getNodeIcon(kind: NodeKind): React.ComponentType<{ size?: number; className?: string }> {
+export function getNodeIcon(kind: NodeKind): LucideIcon {
   return ICON_MAP[kind] || HelpCircle;
 }

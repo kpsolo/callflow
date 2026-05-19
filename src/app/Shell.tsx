@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReactFlowProvider } from "reactflow";
 import { useStore } from "zustand";
 import {
@@ -7,8 +7,11 @@ import {
   Clock,
   Download,
   HelpCircle,
+  Layers,
   List,
   Settings,
+  Undo2,
+  Redo2,
   Upload,
   X,
 } from "lucide-react";
@@ -17,7 +20,9 @@ import { Canvas } from "@/canvas/Canvas";
 import { Inspector } from "@/inspector/Inspector";
 import { TimePeriodsModal } from "@/inspector/TimePeriodsModal";
 import { EntitySettingsModal } from "@/inspector/EntitySettingsModal";
-import { ValidationPill } from "@/validation/ValidationPill";
+import { StatusPill } from "./StatusPill";
+import { SaveButton } from "./SaveButton";
+import { restoreAutosave, restoreSavedForEntity } from "./useAutosave";
 import { SimulatorPanel } from "@/simulator/SimulatorPanel";
 import { ImportDialog } from "@/io/ImportDialog";
 import { downloadJson } from "@/io/exportImport";
@@ -29,11 +34,7 @@ import { FIXTURES } from "@/fixtures";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 import { WelcomeBanner } from "./WelcomeBanner";
 import { useResizable } from "./useResizable";
-import { SaveStatus } from "./SaveStatus";
 import { OverflowMenu } from "./OverflowMenu";
-import { PresenceIndicator } from "./PresenceIndicator";
-import { PresenceStack } from "./PresenceStack";
-import { LockIndicator } from "./LockIndicator";
 import { ActivityLogModal } from "./ActivityLogModal";
 import { useActivityRecorder } from "@/state/useActivityRecorder";
 import { useUiStore } from "@/state/uiStore";
@@ -49,6 +50,11 @@ export function Shell() {
 
   // Stream structural store changes into the collaboration activity log.
   useActivityRecorder();
+  // Restore the most recent Save (localStorage today, server later) on first
+  // mount. No continuous autosave — persistence is explicit via the Save button.
+  useEffect(() => {
+    restoreAutosave();
+  }, []);
 
   const setTrace = useTraceStore((s) => s.setTrace);
   const exportFlow = useFlowStore((s) => s.exportFlow);
@@ -69,6 +75,8 @@ export function Shell() {
 
   const showNodeIds = useUiStore((s) => s.showNodeIds);
   const setShowNodeIds = useUiStore((s) => s.setShowNodeIds);
+  const nodeVersion = useUiStore((s) => s.nodeVersion);
+  const setNodeVersion = useUiStore((s) => s.setNodeVersion);
 
   const inspector = useResizable({
     storageKey: "cfs.inspector.width.v1",
@@ -86,7 +94,7 @@ export function Shell() {
   return (
     <div className="shell">
       <header className="shell-topbar">
-        {/* LEFT — entity switcher, save status, validation pill */}
+        {/* LEFT — entity switcher + open-simulator + lock indicator */}
         <div className="shell-topbar-cluster">
           <strong className="shell-brand">Call Flow Studio</strong>
           <span className="shell-divider" aria-hidden />
@@ -95,7 +103,16 @@ export function Shell() {
             value={matchedFixture?.label ?? "__custom__"}
             onChange={(e) => {
               const f = FIXTURES.find((x) => x.label === e.target.value);
-              if (f) loadFlow(f.flow);
+              if (!f) return;
+              // Prefer the user's saved version of this entity over the
+              // pristine fixture, so picking the same entry twice doesn't
+              // wipe their work.
+              if (!restoreSavedForEntity(f.flow.entity.id)) {
+                loadFlow(f.flow);
+              }
+              // Reset undo history — keeping it across a fixture switch would
+              // let Ctrl+Z revert into a different entity, which is confusing.
+              useFlowStore.temporal.getState().clear();
             }}
           >
             {!matchedFixture && (
@@ -107,13 +124,6 @@ export function Shell() {
               </option>
             ))}
           </select>
-          <SaveStatus />
-          <LockIndicator />
-          <ValidationPill />
-        </div>
-
-        {/* CENTER — primary action (Run simulator) */}
-        <div className="shell-topbar-cluster">
           <button
             type="button"
             className={"shell-sim-btn" + (simOpen ? " is-on" : "")}
@@ -121,28 +131,40 @@ export function Shell() {
             aria-pressed={simOpen}
             title="Open the simulator drawer"
           >
-            ▶ Run simulator
+            Open simulator
           </button>
         </div>
 
-        {/* RIGHT — undo/redo group, overflow, presence placeholder */}
+        {/* CENTER — reserved (empty for now). */}
+        <div className="shell-topbar-cluster" />
+
+        {/* RIGHT — issues pill (only when issues exist), Save (mocked),
+            undo/redo, overflow, presence. The collab LockIndicator is
+            intentionally hidden for now — re-enable once real-time
+            collaboration lands. */}
         <div className="shell-topbar-cluster">
+          <StatusPill />
+          <SaveButton />
           <div className="shell-undo-group" role="group" aria-label="History">
             <button
               type="button"
+              className="shell-icon-btn"
               onClick={undo}
               disabled={pastStatesLen === 0}
               title="Undo (Ctrl+Z)"
+              aria-label="Undo"
             >
-              Undo
+              <Undo2 size={16} aria-hidden />
             </button>
             <button
               type="button"
+              className="shell-icon-btn"
               onClick={redo}
               disabled={futureStatesLen === 0}
               title="Redo (Ctrl+Shift+Z)"
+              aria-label="Redo"
             >
-              Redo
+              <Redo2 size={16} aria-hidden />
             </button>
           </div>
           <OverflowMenu
@@ -183,16 +205,29 @@ export function Shell() {
               },
               { divider: true, label: "" },
               {
+                label: "Versions",
+                icon: <Layers size={14} />,
+                children: [
+                  {
+                    label: "v1 — edit in sidebar",
+                    checked: nodeVersion === "v1",
+                    onClick: () => setNodeVersion("v1"),
+                  },
+                  {
+                    label: "v2 — edit inside nodes",
+                    checked: nodeVersion === "v2",
+                    onClick: () => setNodeVersion("v2"),
+                  },
+                ],
+              },
+              { divider: true, label: "" },
+              {
                 label: "Help / shortcuts",
                 icon: <HelpCircle size={14} />,
                 onClick: () => setHelpOpen(true),
               },
             ]}
           />
-          {/* Other users currently viewing this flow (cross-tab via BroadcastChannel). */}
-          <PresenceStack />
-          {/* The local user identity — click to rename. */}
-          <PresenceIndicator />
         </div>
       </header>
 

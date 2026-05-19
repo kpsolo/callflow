@@ -175,14 +175,13 @@ describe("Auto Attendant simulator (§13.2)", () => {
     expect(t.terminal_detail).toContain("2145");
   });
 
-  it("goto_menu jumps into custom menu", () => {
+  it("menu action targeting another menu jumps into it", () => {
     const flow = mkAaFlow([
       mkNode(
         "menu_root",
-        { actions: { "1": { target_node_id: "goto" } } },
+        { actions: { "1": { target_node_id: "sales" } } },
         "root",
       ),
-      mkNode("action_goto_menu", { target_menu_node_id: "sales" }, "goto"),
       mkNode(
         "menu_custom",
         {

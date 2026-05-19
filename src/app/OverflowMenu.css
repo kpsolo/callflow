@@ -68,3 +68,36 @@
   font-size: 13px;
   color: var(--text-dim);
 }
+
+.ovm-list button {
+  position: relative;
+}
+
+.ovm-submenu-host {
+  position: relative;
+}
+
+.ovm-list .ovm-submenu-host > button {
+  grid-template-columns: 22px 1fr auto;
+}
+
+.ovm-submenu-arrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-dim);
+}
+
+.ovm-submenu {
+  position: absolute;
+  top: -4px;
+  right: 100%;
+  margin-right: 2px;
+  z-index: 31;
+}
+
+.ovm-submenu .ovm-list {
+  position: static;
+  margin: 0;
+  min-width: 160px;
+}
+

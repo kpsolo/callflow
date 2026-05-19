@@ -218,8 +218,13 @@ configured no_input action. Matched actions never count toward retry.
 | `action_disconnect` | Play optional `play_before_action`. Terminate `disconnected`. |
 | `action_disa` | Play optional password prompt. MVP stub — terminates `answered` with `"DISA accepted (MVP stub)"`. Real PortaSwitch flow would gate on a password and then allow an outbound dial. |
 | `action_queue` | MVP stub — terminate `answered` with `"Queue (MVP stub)"`. |
-| `action_goto_menu` | Run the menu at `target_menu_node_id` via `runMenu`. The stack-push happens automatically; ROOT's intro stays latched. |
 | `action_nop` | Play optional prompt. Pop nothing — replay the parent menu's `menu_prompt` and re-enter `consumeInput`. Does **not** count toward the retry budget. Used to lock down a key without leaving it undefined. |
+
+A menu action whose `target_node_id` points directly at another
+`menu_root` / `menu_custom` node is routed through `runMenu` by
+`runNode`. The retired `action_goto_menu` indirection node is no
+longer needed — its only behaviour was a one-hop trampoline that the
+direct-target dispatch now handles in place.
 
 ### 5.4 Direct extension dial (`allow_direct_dial`)
 
@@ -492,7 +497,6 @@ Run on every flow change. Code in `src/validation/validate.ts`.
 | `menu_action_ref` | error | A menu action's `target_node_id` doesn't resolve |
 | `menu_inactive_ref` | error | `inactive_action_node_id` doesn't resolve |
 | `menu_noinput_ref` | error | `no_input.action_node_id` doesn't resolve |
-| `goto_menu_ref` | error | `action_goto_menu.target_menu_node_id` doesn't resolve |
 | `forward_rule_ref` | error | A forwarding rule's `target_node_id` doesn't resolve |
 | `no_entry` | warning | No `incoming_call` / `menu_root` / `answering_mode_ext` present |
 | `no_terminal` | warning | No terminal-like node anywhere (call may drop silently) |

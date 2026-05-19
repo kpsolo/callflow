@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { NodeKind } from "@/schema";
 
 /**
  * Ephemeral UI state shared across panes — used for cross-pane affordances
@@ -58,16 +59,55 @@ interface UiState {
       screenY: number;
     } | null,
   ) => void;
+
+  /** Most-recently-used node kinds (MRU at the front), capped at 5. Surfaced
+   *  as a pinned section at the top of the palette so common kinds are one
+   *  click away regardless of which category they live in. Persisted in
+   *  localStorage. */
+  recentNodeKinds: NodeKind[];
+  recordRecentNodeKind: (kind: NodeKind) => void;
+
+  /** Node rendering mode. v1 = compact summary rows, edit in the sidebar.
+   *  v2 = main fields are editable inline inside each node card. */
+  nodeVersion: "v1" | "v2";
+  setNodeVersion: (v: "v1" | "v2") => void;
 }
+
+const RECENT_LIMIT = 5;
 
 const SHOW_NODE_IDS_KEY = "callflow.ui.showNodeIds";
 const MINIMAP_COLLAPSED_KEY = "callflow.ui.miniMapCollapsed";
+const RECENT_NODE_KINDS_KEY = "callflow.ui.recentNodeKinds";
+const NODE_VERSION_KEY = "callflow.ui.nodeVersion";
+
+const readNodeVersion = (): "v1" | "v2" => {
+  try {
+    const raw = localStorage.getItem(NODE_VERSION_KEY);
+    // Default to v2 (inline editing) — v1 is opt-in for users who prefer the
+    // compact summary-card look with sidebar editing.
+    return raw === "v1" ? "v1" : "v2";
+  } catch {
+    return "v2";
+  }
+};
 
 const readShowNodeIds = (): boolean => {
   try {
     return localStorage.getItem(SHOW_NODE_IDS_KEY) === "1";
   } catch {
     return false;
+  }
+};
+
+const readRecentNodeKinds = (): NodeKind[] => {
+  try {
+    const raw = localStorage.getItem(RECENT_NODE_KINDS_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((x): x is NodeKind => typeof x === "string").slice(0, RECENT_LIMIT);
+  } catch {
+    return [];
   }
 };
 
@@ -122,4 +162,26 @@ export const useUiStore = create<UiState>((set) => ({
 
   pendingMenuPick: null,
   setPendingMenuPick: (v) => set({ pendingMenuPick: v }),
+
+  recentNodeKinds: readRecentNodeKinds(),
+  recordRecentNodeKind: (kind) =>
+    set((s) => {
+      const next = [kind, ...s.recentNodeKinds.filter((k) => k !== kind)].slice(0, RECENT_LIMIT);
+      try {
+        localStorage.setItem(RECENT_NODE_KINDS_KEY, JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return { recentNodeKinds: next };
+    }),
+
+  nodeVersion: readNodeVersion(),
+  setNodeVersion: (v) => {
+    try {
+      localStorage.setItem(NODE_VERSION_KEY, v);
+    } catch {
+      // ignore
+    }
+    set({ nodeVersion: v });
+  },
 }));

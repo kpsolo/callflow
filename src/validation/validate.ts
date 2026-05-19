@@ -101,16 +101,6 @@ function referenceIntegrity(ctx: Ctx) {
         });
       }
     }
-    if (n.type === "action_goto_menu" && n.data.target_menu_node_id) {
-      if (!ctx.byId.has(n.data.target_menu_node_id)) {
-        add(ctx, {
-          code: "goto_menu_ref",
-          severity: "error",
-          message: `Go to Menu target ${n.data.target_menu_node_id} not found.`,
-          node_id: n.id,
-        });
-      }
-    }
     if (n.type === "forward_follow_me" || n.type === "forward_advanced") {
       for (const rule of n.data.rules) {
         if (rule.target_node_id && !ctx.byId.has(rule.target_node_id)) {

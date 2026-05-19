@@ -1,0 +1,55 @@
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.save-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.save-btn--dirty {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.save-btn--dirty:hover {
+  background: #6ba0ff;
+  border-color: #6ba0ff;
+}
+
+.save-btn--clean {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+}
+
+.save-btn--clean:hover {
+  border-color: var(--ok);
+}
+
+.save-btn--saving {
+  color: var(--text-dim);
+}
+
+.save-btn-spinner {
+  animation: save-btn-spin 0.9s linear infinite;
+}
+
+@keyframes save-btn-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

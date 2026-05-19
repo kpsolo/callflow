@@ -80,7 +80,34 @@ export interface FlowStore {
   clearFlow: () => void;
 
   replaceLayout: (positions: Record<string, { x: number; y: number }>) => void;
+
+  /**
+   * Collapse duplicate "terminal-like" nodes that share kind + identical data
+   * into a single canonical node, rewiring all inbound edges. Useful after a
+   * flow grows organically and accumulates many identical Voicemail/Disconnect
+   * terminals — one click and the canvas reads as the many-to-one fan-in it
+   * really is. Goes through normal store mutation, so it lands in undo history.
+   * Returns the number of duplicates removed.
+   */
+  mergeIdenticalTerminals: () => number;
 }
+
+/** Kinds that are cheap to collapse — terminal outcomes and "leaf" actions that
+ *  don't carry downstream behaviour. Process nodes (menus, transfers, conditions)
+ *  are NOT mergeable: two transfers with identical data still represent two
+ *  distinct authoring intents in most flows. */
+const MERGEABLE_KINDS = new Set<NodeKind>([
+  "voicemail",
+  "fax_mailbox",
+  "action_disconnect",
+  "action_nop",
+  "term_answered",
+  "term_voicemail_left",
+  "term_forwarded_answered",
+  "term_forwarded_unanswered",
+  "term_rejected",
+  "term_dropped",
+]);
 
 function flowNodeToRf(n: FlowNode): Node<FlowNode["data"]> {
   return {
@@ -396,6 +423,54 @@ export const useFlowStore = create<FlowStore>()(
           ),
           dirty: true,
         }),
+
+      mergeIdenticalTerminals: () => {
+        const allNodes = get().nodes;
+        const allEdges = get().edges;
+        // Group mergeable nodes by (kind, data-shape). JSON.stringify is good
+        // enough here — terminal data is small and order-insensitive on the
+        // shapes we care about; if that ever stops being true, switch to a
+        // stable serializer.
+        const groups = new Map<string, Node<FlowNode["data"]>[]>();
+        for (const n of allNodes) {
+          if (!MERGEABLE_KINDS.has(n.type as NodeKind)) continue;
+          const key = `${n.type}::${JSON.stringify(n.data)}`;
+          const arr = groups.get(key) ?? [];
+          arr.push(n);
+          groups.set(key, arr);
+        }
+        // For each group of >1, keep the first (by id-sort for determinism)
+        // and remap the rest to it.
+        const remap = new Map<string, string>(); // dup-id -> canonical-id
+        const removedIds = new Set<string>();
+        for (const arr of groups.values()) {
+          if (arr.length < 2) continue;
+          const sorted = [...arr].sort((a, b) => (a.id < b.id ? -1 : 1));
+          const canonical = sorted[0];
+          for (let i = 1; i < sorted.length; i++) {
+            remap.set(sorted[i].id, canonical.id);
+            removedIds.add(sorted[i].id);
+          }
+        }
+        if (removedIds.size === 0) return 0;
+
+        const nextNodes = allNodes.filter((n) => !removedIds.has(n.id));
+        // Rewire edges: any edge targeting a removed node now targets the
+        // canonical replacement. De-dupe identical (source, sourceHandle,
+        // target) tuples that emerge from the rewire so we don't leave
+        // stacked-on-top-of-each-other edges behind.
+        const seen = new Set<string>();
+        const nextEdges: Edge[] = [];
+        for (const e of allEdges) {
+          const target = remap.get(e.target) ?? e.target;
+          const dedupeKey = `${e.source}::${e.sourceHandle ?? ""}::${target}`;
+          if (seen.has(dedupeKey)) continue;
+          seen.add(dedupeKey);
+          nextEdges.push(target === e.target ? e : { ...e, target });
+        }
+        set({ nodes: nextNodes, edges: nextEdges, dirty: true });
+        return removedIds.size;
+      },
     }),
     {
       limit: 100,

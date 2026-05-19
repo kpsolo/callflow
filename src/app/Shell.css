@@ -52,23 +52,53 @@
   border-left: 0;
 }
 
+/* Outline / ghost variant — used for the "Open simulator" affordance now
+   that the simulator is a secondary action sitting next to the fixture
+   select, not a primary call-to-action in the centre of the top bar. */
 .shell-sim-btn {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  padding: 4px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 4px;
 }
 
 .shell-sim-btn:hover:not(:disabled) {
-  background: #6ba0ff;
-  border-color: #6ba0ff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .shell-sim-btn.is-on {
-  background: var(--accent-dim);
   border-color: var(--accent);
+  background: var(--accent-dim);
   color: var(--text);
+}
+
+/* Square icon-only button — used for undo/redo. Same hit area as a text
+   button but the glyph carries the meaning and the title attribute keeps
+   the hover hint. */
+.shell-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.shell-icon-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.shell-icon-btn:disabled {
+  color: var(--text-dim);
+  opacity: 0.55;
+  cursor: default;
 }
 
 .shell-presence-slot {

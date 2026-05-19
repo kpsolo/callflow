@@ -2,6 +2,13 @@ import type { Flow } from "@/schema";
 import { inferEdges } from "./inferEdges";
 import { splitFanIn } from "./splitFanIn";
 
+// Layout: three columns. Screening rules and the answering mode card are tall
+// in v2 (inline editor + answering_mode_ext has 6 output handles), so vertical
+// gaps are generous enough that they never bump into each other.
+const COL_IN = 0;
+const COL_RULES = 480;
+const COL_SINK = 960;
+
 export const ext401Screening: Flow = (() => {
   const f: Flow = {
   schema_version: "1.0",
@@ -15,13 +22,13 @@ export const ext401Screening: Flow = (() => {
     {
       id: "incoming",
       type: "incoming_call",
-      position: { x: 0, y: 200 },
+      position: { x: COL_IN, y: 600 },
       data: { label: "Incoming Call" },
     },
     {
       id: "rule_vip",
       type: "screening_rule",
-      position: { x: 260, y: 80 },
+      position: { x: COL_RULES, y: 0 },
       data: {
         name: "VIP — always ring",
         order: 0,
@@ -37,7 +44,7 @@ export const ext401Screening: Flow = (() => {
     {
       id: "rule_afterhours",
       type: "screening_rule",
-      position: { x: 260, y: 200 },
+      position: { x: COL_RULES, y: 360 },
       data: {
         name: "After-hours → voicemail",
         order: 1,
@@ -53,7 +60,7 @@ export const ext401Screening: Flow = (() => {
     {
       id: "am",
       type: "answering_mode_ext",
-      position: { x: 260, y: 320 },
+      position: { x: COL_RULES, y: 720 },
       data: {
         mode: "ring_then_voicemail",
         ring_timeout_s: 20,
@@ -62,9 +69,19 @@ export const ext401Screening: Flow = (() => {
       },
     },
     {
+      id: "rec",
+      type: "call_recording",
+      position: { x: COL_SINK, y: 0 },
+      data: {
+        announce: true,
+        announce_prompt: "p_recording_notice",
+        send_to_email: "compliance@acme.example",
+      },
+    },
+    {
       id: "vm",
       type: "voicemail",
-      position: { x: 560, y: 320 },
+      position: { x: COL_SINK, y: 780 },
       data: {
         greeting: "personal",
         require_pin: true,
@@ -72,16 +89,6 @@ export const ext401Screening: Flow = (() => {
         announce_datetime: true,
         email_option: "forward_as_attachment",
         email_address: "dave@acme.example",
-      },
-    },
-    {
-      id: "rec",
-      type: "call_recording",
-      position: { x: 560, y: 80 },
-      data: {
-        announce: true,
-        announce_prompt: "p_recording_notice",
-        send_to_email: "compliance@acme.example",
       },
     },
   ],

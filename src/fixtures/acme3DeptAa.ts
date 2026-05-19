@@ -2,6 +2,14 @@ import type { Flow } from "@/schema";
 import { inferEdges } from "./inferEdges";
 import { splitFanIn } from "./splitFanIn";
 
+// Layout columns — sized for v2 inline-editor nodes (max-width 320 px) with
+// breathing room. Wider gutters mean both v1 and v2 modes render cleanly
+// without manually nudging cards.
+const COL_ROOT = 0;
+const COL_MENU = 480;
+const COL_TRANSFER = 960;
+const COL_TARGET = 1440;
+
 export const acme3DeptAa: Flow = (() => {
   const f: Flow = {
   schema_version: "1.0",
@@ -21,7 +29,7 @@ export const acme3DeptAa: Flow = (() => {
     {
       id: "root",
       type: "menu_root",
-      position: { x: 0, y: 200 },
+      position: { x: COL_ROOT, y: 220 },
       data: {
         name: "ROOT",
         active_period: "always",
@@ -31,9 +39,9 @@ export const acme3DeptAa: Flow = (() => {
         allow_direct_dial: true,
         interdigit_timeout_s: 5,
         actions: {
-          "1": { target_node_id: "goto_sales" },
-          "2": { target_node_id: "goto_eng" },
-          "3": { target_node_id: "goto_support" },
+          "1": { target_node_id: "sales" },
+          "2": { target_node_id: "eng" },
+          "3": { target_node_id: "support" },
           "9": { target_node_id: "disc_root", play_before_action: "p_goodbye" },
           fax: { target_node_id: "vm" },
           no_input: { target_node_id: "disc_root" },
@@ -41,27 +49,9 @@ export const acme3DeptAa: Flow = (() => {
       },
     },
     {
-      id: "goto_sales",
-      type: "action_goto_menu",
-      position: { x: 280, y: 80 },
-      data: { target_menu_node_id: "sales" },
-    },
-    {
-      id: "goto_eng",
-      type: "action_goto_menu",
-      position: { x: 280, y: 200 },
-      data: { target_menu_node_id: "eng" },
-    },
-    {
-      id: "goto_support",
-      type: "action_goto_menu",
-      position: { x: 280, y: 320 },
-      data: { target_menu_node_id: "support" },
-    },
-    {
       id: "sales",
       type: "menu_custom",
-      position: { x: 560, y: 80 },
+      position: { x: COL_MENU, y: 0 },
       data: {
         name: "Sales",
         active_period: "always",
@@ -78,7 +68,7 @@ export const acme3DeptAa: Flow = (() => {
     {
       id: "eng",
       type: "menu_custom",
-      position: { x: 560, y: 200 },
+      position: { x: COL_MENU, y: 320 },
       data: {
         name: "Engineering",
         active_period: "always",
@@ -95,7 +85,7 @@ export const acme3DeptAa: Flow = (() => {
     {
       id: "support",
       type: "menu_custom",
-      position: { x: 560, y: 320 },
+      position: { x: COL_MENU, y: 640 },
       data: {
         name: "Support",
         active_period: "business_hours",
@@ -111,45 +101,33 @@ export const acme3DeptAa: Flow = (() => {
       },
     },
     {
+      id: "disc_root",
+      type: "action_disconnect",
+      position: { x: COL_MENU, y: 1000 },
+      data: { play_before_action: "p_goodbye" },
+    },
+    {
       id: "tgt_alice",
       type: "action_transfer",
-      position: { x: 840, y: 60 },
+      position: { x: COL_TRANSFER, y: 40 },
       data: { mode: "extension", target_node_id: "ext_201" },
     },
     {
       id: "tgt_bob",
       type: "action_transfer",
-      position: { x: 840, y: 200 },
+      position: { x: COL_TRANSFER, y: 360 },
       data: { mode: "extension", target_node_id: "ext_202" },
     },
     {
       id: "tgt_carol",
       type: "action_transfer",
-      position: { x: 840, y: 340 },
+      position: { x: COL_TRANSFER, y: 680 },
       data: { mode: "extension", target_node_id: "ext_301" },
-    },
-    {
-      id: "ext_201",
-      type: "target_extension",
-      position: { x: 1100, y: 60 },
-      data: { extension: "201" },
-    },
-    {
-      id: "ext_202",
-      type: "target_extension",
-      position: { x: 1100, y: 200 },
-      data: { extension: "202" },
-    },
-    {
-      id: "ext_301",
-      type: "target_extension",
-      position: { x: 1100, y: 340 },
-      data: { extension: "301" },
     },
     {
       id: "vm",
       type: "voicemail",
-      position: { x: 1100, y: 480 },
+      position: { x: COL_TRANSFER, y: 1000 },
       data: {
         greeting: "standard",
         require_pin: true,
@@ -160,10 +138,22 @@ export const acme3DeptAa: Flow = (() => {
       },
     },
     {
-      id: "disc_root",
-      type: "action_disconnect",
-      position: { x: 280, y: 480 },
-      data: { play_before_action: "p_goodbye" },
+      id: "ext_201",
+      type: "target_extension",
+      position: { x: COL_TARGET, y: 40 },
+      data: { extension: "201" },
+    },
+    {
+      id: "ext_202",
+      type: "target_extension",
+      position: { x: COL_TARGET, y: 360 },
+      data: { extension: "202" },
+    },
+    {
+      id: "ext_301",
+      type: "target_extension",
+      position: { x: COL_TARGET, y: 680 },
+      data: { extension: "301" },
     },
   ],
   edges: [],

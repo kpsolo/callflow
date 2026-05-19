@@ -147,3 +147,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* "Recently used" — pinned section at the top of the palette. Static header
+   (no toggle), dashed underline so it visually separates from the regular
+   category sections without competing with them. */
+.palette-section--recent {
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.palette-section-header--static {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: default;
+}

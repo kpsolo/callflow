@@ -119,10 +119,6 @@ export const ActionQueueDataSchema = z.object({
   queue_name: z.string().min(1).optional(),
 });
 
-export const ActionGotoMenuDataSchema = z.object({
-  target_menu_node_id: z.string().min(1).optional(),
-});
-
 export const ActionNopDataSchema = z.object({
   /**
    * Optional prompt to play after the no-op (e.g., "this option is intentionally

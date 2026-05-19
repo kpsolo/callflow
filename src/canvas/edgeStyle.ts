@@ -1,4 +1,5 @@
-import type { Edge } from "reactflow";
+import type { Edge, Node } from "reactflow";
+import type { FlowNode } from "@/schema";
 
 /**
  * Visual edge-style vocabulary.
@@ -35,9 +36,11 @@ const DEFAULT_STROKE = "#6b7280"; // matches --text-dim-ish
 const STROKE_WIDTH_DEFAULT = 2;
 const STROKE_WIDTH_EMPHASIS = 2.5;
 
-/** Canvas background colour — labelBgStyle.fill should match. Kept in sync
- *  with `--bg` in src/index.css so label pills "punch out" the dot grid. */
-const LABEL_BG_FILL = "#0f1115";
+/** Canvas background colour — labelBgStyle.fill should match so the label
+ *  pill "punches out" of the dot grid. Read from `--bg` (set on :root and
+ *  swapped under `prefers-color-scheme: light`) so it tracks the theme;
+ *  SVG `fill` resolves CSS custom properties at paint time. */
+const LABEL_BG_FILL = "var(--bg)";
 
 export interface EdgeStyleProps {
   style: React.CSSProperties;
@@ -125,17 +128,77 @@ function faxStyle(): EdgeStyleInternal {
 }
 
 /**
+ * Decides whether an edge is gated by a time-period — its activation depends
+ * on when the call arrives. Two sources today:
+ *   - `cond_time` nodes: every outgoing edge is by definition time-conditional.
+ *   - Menus with `active_period !== "always"`: every outgoing edge fires only
+ *     during the configured period, except the `inactive` edge which fires
+ *     during the complement. Both are time-gated.
+ *
+ * The dashed treatment makes "this path is taken when X is true" visible at a
+ * glance, distinct from the always-on solid edges.
+ */
+function isTimeConditional(
+  edge: Edge,
+  byId: Map<string, Node<FlowNode["data"]>> | undefined,
+): boolean {
+  if (!byId) return false;
+  const src = byId.get(edge.source);
+  if (!src) return false;
+  if (src.type === "cond_time") return true;
+  if (src.type === "menu_root" || src.type === "menu_custom") {
+    const period = (src.data as { active_period?: string } | undefined)?.active_period;
+    if (period && period !== "always") return true;
+  }
+  return false;
+}
+
+/**
  * Apply styles to every edge in an array. Cheap to call from React.useMemo;
  * preserves existing `id`, `source`, `target`, etc. Also stamps every edge with
  * a label-pill (`labelBgStyle` + padding + radius + `labelShowBg`) so labels
  * are readable where edges overlap.
+ *
+ * When `nodes` is provided, edges originating from time-gated sources (a
+ * `cond_time` node or a menu with a non-`always` active_period) are dashed
+ * unless they already carry an explicit dash pattern from the handle vocabulary.
  */
-export function styleEdges(edges: Edge[]): Edge[] {
+export function styleEdges(
+  edges: Edge[],
+  nodes?: Node<FlowNode["data"]>[],
+): Edge[] {
+  const byId = nodes ? new Map(nodes.map((n) => [n.id, n])) : undefined;
+  // Walk edges once to figure out per-source ordering, so the custom edge
+  // component can stagger labels for siblings.
+  const sourceGroups = new Map<string, string[]>();
+  for (const e of edges) {
+    const arr = sourceGroups.get(e.source) ?? [];
+    arr.push(e.id);
+    sourceGroups.set(e.source, arr);
+  }
   return edges.map((e) => {
     const s = getEdgeStyleInternal(e);
+    const timeGated = isTimeConditional(e, byId);
+    const existingDash = s.style.strokeDasharray;
+    const finalDash = existingDash ?? (timeGated ? "6 4" : undefined);
+    const siblings = sourceGroups.get(e.source);
+    const siblingIndex = siblings ? siblings.indexOf(e.id) : -1;
+    const siblingCount = siblings?.length ?? 1;
     return {
       ...e,
-      style: { ...(e.style ?? {}), ...s.style },
+      // Route every edge through the custom <FlowEdge/> so the label
+      // fan-out works uniformly. Preserves any caller-set `type` if present.
+      type: e.type ?? "flow",
+      data: {
+        ...(e.data ?? {}),
+        siblingIndex: siblingIndex >= 0 ? siblingIndex : 0,
+        siblingCount,
+      },
+      style: {
+        ...(e.style ?? {}),
+        ...s.style,
+        ...(finalDash ? { strokeDasharray: finalDash } : {}),
+      },
       labelStyle: { ...(e.labelStyle ?? {}), ...(s.labelStyle ?? {}) },
       // Solid pill: canvas-bg fill + 1px stroke in the edge colour. Renders
       // as an SVG <rect> by React Flow's <EdgeText>.

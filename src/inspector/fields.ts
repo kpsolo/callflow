@@ -37,6 +37,13 @@ export interface FieldDef {
    * `undefined` = no tab grouping; the Inspector falls back to a flat layout.
    */
   tab?: "general" | "prompts" | "actions" | "errors";
+  /**
+   * Hide this field from the v2 in-node inline editor. Use for fields that are
+   * primarily set by drawing edges (e.g. action_transfer.target_node_id) — they
+   * would just clutter the card without being directly editable.
+   * The sidebar Inspector still shows the field.
+   */
+  inlineHidden?: boolean;
 }
 
 const ANSWERING_EXT_MODES = [
@@ -142,6 +149,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       type: "text",
       placeholder: "(set by drawing an edge from this node)",
       visibleWhen: (d) => d.mode !== "e164",
+      inlineHidden: true,
     },
     {
       key: "number",

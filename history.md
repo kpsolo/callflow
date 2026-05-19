@@ -320,6 +320,163 @@ ready and tighten the inspector header.
    drive this from outside, `useUiStore.getState().setShowNodeIds(...)`
    is the single entry point.
 
+## 11b. Reviewer-driven UX pass (2026-05-18 → 2026-05-19)
+
+A long external review of the canvas landed with 22 individual issues
+and 5 proposed architecture changes. A triage pass separated:
+
+- Items already shipped (3-store split, generic `FlowNodeView` from
+  registry, terminal-node category, edge styling vocabulary — half the
+  reviewer's "architecture proposals" already existed).
+- Real wins worth picking up (Tier 1).
+- Bigger changes worth a design pairing first (Tier 2).
+- Items deferred or rejected on inspection (Tier 3).
+
+After the triage, the user opted to ship Tier 1, Tier 2, and four
+specific Tier 3 items. Final state below — test count went 109 → **124**.
+
+### Tier 1 (clean wins)
+
+1. **Inspector empty state with entity properties.** A new
+   `EntityInspector` replaces the "Select a node to edit" placeholder.
+   When nothing is selected, the right pane shows entity name (with
+   type chip), DID/extension, node + edge count, scenario count,
+   validation summary, save status, and an **Edit…** button that opens
+   `EntitySettingsModal`. The Inspector now accepts an `onEditEntity`
+   callback wired through from `Shell`.
+2. **Palette search box + sharper off-pattern tooltips.** `Ctrl/Cmd+K`
+   focuses the search; matches across `label + description + kind`;
+   results render flat with a category sub-label. Off-pattern items
+   show a more concrete tooltip ("Designed for an Extension — drop it
+   here only if you know what you're doing.") instead of the vaguer
+   "Mainly used for X".
+3. **Edge label pills.** Every labelled edge now gets a solid pill
+   background through `styleEdges()` — `labelBgStyle.fill = var(--bg)`
+   so the pill reads as a punched-out hole in either theme, plus a 1px
+   border in the edge's accent colour. `labelBgPadding [6,3]`,
+   `labelBgBorderRadius 8`, `labelShowBg true`. Fixes "labels turn
+   into solid black blobs in light mode."
+4. **MiniMap collapse toggle.** Collapsed by default (`miniMapCollapsed`
+   in `uiStore`, persisted under `callflow.ui.miniMapCollapsed`); the
+   collapsed state renders a `▦` icon button bottom-right. Expanding
+   shows the full MiniMap with an `×` close-button overlay.
+
+### Tier 2 (needed design decisions first)
+
+5. **Node card hierarchy.** New `src/nodes/headline.ts` maps each kind
+   to a human-meaningful identifier (menu name, target extension,
+   screening rule name, forwarding target, queue name, etc.) or
+   `null`. When a node has a headline, `FlowNodeView` switches to a
+   stacked header: small uppercase type label on top, large bold
+   headline below. When no headline applies (most action / condition
+   / terminal nodes), the header is unchanged. So "Sales" / "Support"
+   / "Engineering" custom menus stop looking like three identical
+   orange "Custom Menu" cards.
+6. **Handle shapes per type.** New `src/nodes/handleVisuals.ts` is the
+   single source of truth for handle color **and** shape. Vocabulary:
+   - digits (0-9, `*`, `#`): filled **circle** (per-digit color)
+   - fax: filled **square** (blue)
+   - no_input: filled **diamond** (rotated square, amber)
+   - inactive: hollow **ring** (orange outline)
+   - everything else: circle, default grey
+   Handles still read at a glance for colour-blind users, since the
+   silhouette alone disambiguates the four event types. Replaces the
+   duplicated `DIGIT_PALETTE`/`getHandleColor` that was previously
+   inline in `FlowNodeView`.
+
+### Tier 3 (the ones we accepted on second pass)
+
+7. **Removed `action_goto_menu`.** The "Go to Menu" intermediate node
+   added nothing the edge couldn't carry: a menu action's
+   `target_node_id` can point directly at another menu, and
+   `runNode` already routes menu kinds through `runMenu`. Schema,
+   registry, simulator, validator, edge-inference, icons, and all
+   three fixtures rewired in one pass. Node kind count dropped from
+   39 → 38. Fixtures: `acme3DeptAa` ROOT's keys 1/2/3 now target
+   `sales`/`eng`/`support` directly; `acmeHqMultiDept`'s shared
+   `a_goto_root` is gone and every sub-menu's `0` points at `root`.
+8. **Shared terminal merge affordance.** New
+   `mergeIdenticalTerminals()` action on the flow store. Groups
+   terminal/leaf nodes (`voicemail`, `fax_mailbox`, `action_disconnect`,
+   `action_nop`, all six `term_*`) by `(kind, JSON.stringify(data))`,
+   keeps one canonical per group (id-sorted for determinism), rewires
+   inbound edges, de-dupes resulting `(source, sourceHandle, target)`
+   tuples. Exposed as a new entry in the pane right-click menu:
+   "Merge identical terminals" with a `<Merge/>` icon. Undoable (goes
+   through the temporal middleware).
+9. **Custom edge component with label fan-out.** New `FlowEdge` —
+   minimal wrapper around `BaseEdge` + `EdgeText` using
+   `getBezierPath`. When `data.siblingCount > 1`, the label position
+   is staggered at `t = (i+1)/(n+1)` along the (source, target)
+   segment so labels for edges sharing a source stop stacking on top
+   of each other. `styleEdges` precomputes per-source ordering and
+   stamps `siblingIndex` / `siblingCount` into `edge.data`. Registered
+   as `edgeTypes={{ flow: FlowEdge }}` on the React Flow root.
+10. **Single StatusPill, then split.** First pass collapsed
+    `SaveStatus` + `ValidationPill` into one `StatusPill` (red issues
+    → amber issues → green saved → hidden). On user feedback the save
+    state was extracted into its own affordance (see §11c below); the
+    `StatusPill` now renders only when there are validation issues.
+
+### Tier 3-adjacent
+
+- **Time-conditional edges dashed** (§8). `styleEdges` accepts a `nodes`
+  array; `isTimeConditional(edge, byId)` flags any edge originating
+  from `cond_time` or from a menu with `active_period !== "always"`.
+  Such edges get `strokeDasharray: "6 4"` unless a per-handle dash
+  (`inactive`, `no_input`, `fax`) already applies. Three new tests
+  cover the positive (cond_time, non-always menu) and negative
+  (always menu) cases.
+- **Palette recently-used** (§9). `uiStore` gains
+  `recentNodeKinds: NodeKind[]` (MRU, capped at 5, persisted under
+  `callflow.ui.recentNodeKinds`). `Canvas` calls `recordRecentNodeKind`
+  on a successful drop. Palette renders the recent kinds in a pinned
+  "Recently used" section above the regular categories, with a dashed
+  underline separator and static (non-collapsible) header.
+
+## 11c. Save button, autosave, and per-entity persistence (2026-05-19)
+
+The reviewer's "save semantics" item kept evolving as we made it work:
+
+1. **Topbar reshuffle.** Left cluster: brand · fixture select · **Open
+   simulator** (outline, no `▶` glyph). Right cluster: validation pill
+   · **Save** · undo/redo (icon-only via `Undo2` / `Redo2` lucide
+   icons) · overflow `⋯` · presence. The collab `LockIndicator` is
+   hidden from the topbar until real-time collab ships.
+2. **Mocked Save button.** `SaveButton` (new) replaces `SaveStatus`
+   and the old combined `StatusPill` save-state. Three states:
+   - dirty + idle → accent-filled "Save"
+   - clean + idle → green outline "Saved" with check
+   - saving → "Saving…" with spinner, disabled
+   Click triggers a 400 ms fake-latency window, then
+   `persistFlow()` + `markSaved()`. Swap `persistFlow()` for the real
+   API call when the backend lands.
+3. **localStorage autosave with explicit restore.** New
+   `src/app/useAutosave.ts` exposes `persistFlow()`,
+   `restoreAutosave()`, `restoreSavedForEntity(id)`,
+   `hasSaveForEntity(id)`, `clearAutosave()`. **No continuous
+   subscription** — every write happens because the user clicked Save.
+   Shell restores on first mount: `useEffect(restoreAutosave, [])`.
+4. **Per-entity storage shape** (v2). Storage layout:
+   ```jsonc
+   {
+     "entities": {
+       "aa_acme_hq":  { ...Flow },
+       "ext_401":     { ...Flow }
+     },
+     "lastEntityId": "aa_acme_hq"
+   }
+   ```
+   The dropdown's onChange tries `restoreSavedForEntity(f.flow.entity.id)`
+   first; only falls back to `loadFlow(f.flow)` (pristine fixture)
+   when there's no save. Each fixture now remembers its own edits.
+   Transparent migration from the v1 single-flow key
+   (`callflow.autosave.flow.v1`).
+5. **Temporal-history reset on fixture switch.** The dropdown
+   `onChange` calls `useFlowStore.temporal.getState().clear()` after a
+   fixture pick so Ctrl+Z can't accidentally time-travel into a
+   different entity's state.
+
 ## 12. Decision log
 
 Decisions worth carrying forward:
@@ -351,6 +508,29 @@ Decisions worth carrying forward:
 - **Hunt Groups deferred but referenced.** `target_hunt_group_ref` is a
   real node kind; full hunt-group flows (members, ring policy, wrap-up
   time, diversion inhibitor) are a separate entity model to add later.
+- **Persistence is per-entity, not per-document.** Each fixture/entity
+  remembers its own edits in localStorage. Picking the same fixture
+  twice in a row does not wipe drag-positions. Side effect: there is
+  no single "saved flow" — the storage holds a dictionary keyed by
+  `entity.id` plus a `lastEntityId` pointer.
+- **No continuous autosave.** Persistence is explicit via the Save
+  button. Keeps the `dirty` flag meaningful and avoids surprising the
+  user with rolled-back state when they discard edits and reload.
+- **Headline-first node header is opt-in per kind.** Kinds that carry
+  a meaningful user-facing identifier (`menu_root`, `menu_custom`,
+  `screening_rule`, all four `target_*`, `forward_simple`,
+  `forward_sip_uri`, `action_transfer` in `e164` mode, `action_queue`)
+  switch to a two-line stacked header. Everything else keeps the
+  single-line header. The mapping lives in `src/nodes/headline.ts`.
+- **Single source of truth for handle visuals.** `src/nodes/handleVisuals.ts`
+  owns both colour and shape. `FlowNodeView` consumes from there; the
+  edge styling vocabulary in `src/canvas/edgeStyle.ts` shares the same
+  semantic groups so dot, edge, and label colour stay coherent.
+- **action_goto_menu removed.** A menu action's `target_node_id` may
+  point directly at another menu node; the simulator handles the
+  `menu_root`/`menu_custom` case via `runMenu` from `runNode`. Saves
+  one node-kind from the registry and removes a class of "indirection
+  cards" the reviewer flagged as visual noise.
 
 ## 13. Still deferred (genuinely, this time)
 

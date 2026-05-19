@@ -48,7 +48,14 @@ export function splitFanIn(
   // Build a quick lookup of which source-to-target edges need rewiring.
   // Key = original edge id, value = the new target id.
   const rewires = new Map<string, string>();
-  let seq = 0;
+
+  // Stagger clones with a per-original sequence so a single tall terminal
+  // (e.g. voicemail in v2 mode is ~270 px tall: header + 6 inline fields +
+  // "done" port pill) doesn't get clones stacking on top of it. 300 px
+  // leaves a comfortable gap for both v1 summary cards and v2 inline-editor
+  // cards, and matches the spacing used by COL_SINK in the fixtures.
+  const CLONE_Y_STEP = 300;
+  const CLONE_X_OFFSET = 60;
 
   for (const node of nodes) {
     if (!DUPLICATABLE_KINDS.has(node.type)) continue;
@@ -58,6 +65,7 @@ export function splitFanIn(
     // Keep the original node attached to the first inbound source.
     // Clone for every additional inbound source so each menu/action transfer
     // has its own visible terminal.
+    let localSeq = 0;
     for (let i = 1; i < inEdges.length; i++) {
       const e = inEdges[i];
       // Disambiguate when several edges from the SAME source point at this terminal
@@ -65,14 +73,14 @@ export function splitFanIn(
       // include the source handle; if even that collides, fall back to the edge id.
       const handlePart = e.sourceHandle ? `_${e.sourceHandle.replace(/[^a-zA-Z0-9]/g, "_")}` : "";
       const cloneId = `${node.id}__forMenu_${e.source}${handlePart}`;
-      // Offset the clone slightly to avoid stacking exactly on top of the original;
-      // auto-layout will re-pack them anyway.
-      seq += 1;
-      const offset = seq * 40;
+      localSeq += 1;
       const clone: FlowNode = {
         ...node,
         id: cloneId,
-        position: { x: node.position.x + 60, y: node.position.y + offset },
+        position: {
+          x: node.position.x + CLONE_X_OFFSET,
+          y: node.position.y + localSeq * CLONE_Y_STEP,
+        },
         // Deep clone data so later edits to one don't affect the other.
         data: JSON.parse(JSON.stringify(node.data)),
       } as FlowNode;

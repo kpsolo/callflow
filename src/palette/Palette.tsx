@@ -5,6 +5,7 @@ import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
   NODE_TYPE_LIST,
+  getNodeType,
   type EntityKind,
   type NodeCategory,
   type NodeTypeDef,
@@ -32,6 +33,7 @@ function paletteTooltip(def: NodeTypeDef, entity: EntityKind): string {
 export function Palette() {
   const entityType = useFlowStore((s) => s.entity.type);
   const connecting = useUiStore((s) => s.connectingFromNodeId !== null);
+  const recentKinds = useUiStore((s) => s.recentNodeKinds);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -72,9 +74,21 @@ export function Palette() {
     );
   }, [q, searchActive]);
 
+  // Resolve the recent-kinds id list against the registry. Filter out any
+  // kinds that no longer exist (e.g. after a schema migration) or are flagged
+  // paletteHidden so the section stays valid even if the persisted list is stale.
+  const recentDefs = useMemo<NodeTypeDef[]>(() => {
+    const out: NodeTypeDef[] = [];
+    for (const kind of recentKinds) {
+      const def = getNodeType(kind);
+      if (!def || def.paletteHidden) continue;
+      out.push(def);
+    }
+    return out;
+  }, [recentKinds]);
+
   return (
     <div className={"palette" + (connecting ? " palette--connect-armed" : "")}>
-      <h2 className="shell-section-title">Palette</h2>
       <div className="palette-search">
         <input
           ref={inputRef}
@@ -111,9 +125,24 @@ export function Palette() {
           )}
         </div>
       ) : (
-        CATEGORY_ORDER.map((cat) => (
-          <Section key={cat} category={cat} defs={grouped[cat]} entityType={entityType} />
-        ))
+        <>
+          {recentDefs.length > 0 && (
+            <section className="palette-section palette-section--recent">
+              <div className="palette-section-header palette-section-header--static">
+                <span>Recently used</span>
+                <span className="palette-section-count">{recentDefs.length}</span>
+              </div>
+              <ul className="palette-list">
+                {recentDefs.map((def) => (
+                  <PaletteItem key={`recent-${def.kind}`} def={def} entityType={entityType} />
+                ))}
+              </ul>
+            </section>
+          )}
+          {CATEGORY_ORDER.map((cat) => (
+            <Section key={cat} category={cat} defs={grouped[cat]} entityType={entityType} />
+          ))}
+        </>
       )}
     </div>
   );

@@ -15,10 +15,10 @@ import {
   LayoutGrid,
   Map as MapIcon,
   Maximize2,
+  Merge,
   Minimize2,
   Plus,
   Trash2,
-  X,
 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import { reactFlowNodeTypes } from "@/nodes/nodeTypes";
@@ -27,11 +27,14 @@ import { getNodeType, type NodeTypeDef } from "@/nodes/registry";
 import type { FlowNode, NodeKind } from "@/schema";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 import { styleEdges } from "./edgeStyle";
+import { FlowEdge } from "./FlowEdge";
 import { useUiStore } from "@/state/uiStore";
 import { MenuKeyPicker } from "./MenuKeyPicker";
 import "./Canvas.css";
 
 const ICON_SIZE = 14;
+
+const edgeTypes = { flow: FlowEdge } as const;
 
 export const PALETTE_DRAG_MIME = "application/x-callflow-node-kind";
 
@@ -70,6 +73,7 @@ export function Canvas() {
   const duplicateNode = useFlowStore((s) => s.duplicateNode);
   const removeEdge = useFlowStore((s) => s.removeEdge);
   const clearFlow = useFlowStore((s) => s.clearFlow);
+  const mergeIdenticalTerminals = useFlowStore((s) => s.mergeIdenticalTerminals);
   const loadCounter = useFlowStore((s) => s.loadCounter);
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
   const hoveredMenuKey = useUiStore((s) => s.hoveredMenuKey);
@@ -79,6 +83,7 @@ export function Canvas() {
   const setDropTargetNodeId = useUiStore((s) => s.setDropTargetNodeId);
   const setPendingMenuPick = useUiStore((s) => s.setPendingMenuPick);
   const setConnectingFromNodeId = useUiStore((s) => s.setConnectingFromNodeId);
+  const recordRecentNodeKind = useUiStore((s) => s.recordRecentNodeKind);
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -105,7 +110,7 @@ export function Canvas() {
   // in the inspector, the matching outgoing edge gets bumped to a thicker stroke
   // and brought above siblings.
   const styledEdges = useMemo(() => {
-    const styled = styleEdges(edges);
+    const styled = styleEdges(edges, nodes);
     if (!hoveredMenuKey || !selectedNodeId) return styled;
     const wantedHandle = `menu:${hoveredMenuKey}`;
     return styled.map((e) => {
@@ -121,7 +126,7 @@ export function Canvas() {
         },
       };
     });
-  }, [edges, hoveredMenuKey, selectedNodeId]);
+  }, [edges, nodes, hoveredMenuKey, selectedNodeId]);
 
   const onInit = useCallback((rf: ReactFlowInstance) => {
     instanceRef.current = rf;
@@ -160,7 +165,7 @@ export function Canvas() {
     (e: React.DragEvent) => {
       // Fires for child re-entries too; clear only when leaving the wrapper.
       const wrapper = wrapperRef.current;
-      if (wrapper && !wrapper.contains(e.relatedTarget as Node | null)) {
+      if (wrapper && !wrapper.contains(e.relatedTarget as globalThis.Node | null)) {
         setDropTargetNodeId(null);
       }
     },
@@ -184,6 +189,7 @@ export function Canvas() {
       const targetId = useUiStore.getState().dropTargetNodeId;
       setDropTargetNodeId(null);
       markHint("dragDrop");
+      recordRecentNodeKind(kind);
 
       if (!targetId) {
         const position = rf.screenToFlowPosition({ x: e.clientX, y: e.clientY });
@@ -220,7 +226,7 @@ export function Canvas() {
         });
       }
     },
-    [addNode, addNodeConnectedTo, markHint, setDropTargetNodeId, setPendingMenuPick],
+    [addNode, addNodeConnectedTo, markHint, setDropTargetNodeId, setPendingMenuPick, recordRecentNodeKind],
   );
 
   // --- Flavour B: drag a node connector and release over a palette item.
@@ -357,6 +363,18 @@ export function Canvas() {
           },
           { divider: true, label: "" },
           {
+            label: "Merge identical terminals",
+            icon: <Merge size={ICON_SIZE} />,
+            onClick: () => {
+              const n = mergeIdenticalTerminals();
+              if (n === 0) {
+                window.alert("No duplicate terminals to merge.");
+              }
+            },
+            disabled: nodes.length === 0,
+          },
+          { divider: true, label: "" },
+          {
             label: "Clear flow",
             icon: <Trash2 size={ICON_SIZE} />,
             danger: true,
@@ -367,7 +385,15 @@ export function Canvas() {
         ],
       });
     },
-    [nodes.length, addNode, clearFlow, handleAutoLayout, handleFitView, markHint],
+    [
+      nodes.length,
+      addNode,
+      clearFlow,
+      handleAutoLayout,
+      handleFitView,
+      markHint,
+      mergeIdenticalTerminals,
+    ],
   );
 
   return (
@@ -412,6 +438,7 @@ export function Canvas() {
           if (sh.startsWith("menu:")) flashMenuKey(sh.slice("menu:".length));
         }}
         nodeTypes={reactFlowNodeTypes}
+        edgeTypes={edgeTypes}
         snapToGrid
         snapGrid={[10, 10]}
         fitView

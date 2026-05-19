@@ -50,9 +50,6 @@ export function inferEdges(nodes: FlowNode[]): FlowEdge[] {
       case "action_voicemail":
         add(n.id, "next", n.data.mailbox_node_id);
         break;
-      case "action_goto_menu":
-        add(n.id, "next", n.data.target_menu_node_id);
-        break;
       case "forward_follow_me":
       case "forward_advanced": {
         for (const rule of n.data.rules) {

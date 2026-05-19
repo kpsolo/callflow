@@ -5,12 +5,13 @@ routing**. It replaces the per-screen configuration of Auto Attendant
 menus, Follow-me lists, Hunt Groups, Call Screening, and Voicemail with
 one canvas, one inspector, and one deterministic simulator.
 
-> **Status:** MVP, frontend-only SPA. JSON save/load, no PortaSwitch API
-> integration yet. Working demos: drag-and-drop canvas, full simulator,
-> validation, comments / activity / multi-tab presence, MR129-shape
-> call recording with on-demand and transcription side-effects.
+> **Status:** MVP, frontend-only SPA. Per-entity save to browser
+> localStorage (mocked server save), no PortaSwitch API integration yet.
+> Working demos: drag-and-drop canvas, full simulator, validation,
+> comments / activity / multi-tab presence, MR129-shape call recording
+> with on-demand and transcription side-effects.
 >
-> **109 tests** across 15 files. Build is clean (149 kB main bundle,
+> **124 tests** across 17 files. Build is clean (~196 kB main bundle,
 > no warnings).
 
 ## Who this README is for
@@ -53,13 +54,20 @@ In the running app:
 
 1. Top bar → fixture dropdown → **"Acme HQ — multi-dept + holidays"**.
 2. Click any node — the Inspector on the right shows its properties.
+   Nothing selected? The Inspector falls back to entity-level summary
+   (DID, node/edge counts, scenario count, validation summary).
    Right-click for a context menu (Duplicate, Delete, Go to target).
-3. Bottom drawer → **▶ Run simulator**. Pick a saved scenario or set
-   inputs (caller, callee, time, key presses) and click **Run**.
+3. Top bar → **Open simulator** (left-cluster, next to the fixture
+   select). Pick a saved scenario or set inputs (caller, callee, time,
+   key presses) and click **Run**.
 4. The traced path lights up on the canvas; the trace viewer shows
    every prompt played and every side-effect emitted.
 5. Top bar → **Time periods…** to edit the `business_hours`,
    `after_hours`, `weekend`, and `holidays` schedules the demo uses.
+6. Move some nodes around, click **Save** on the right (mocked — writes
+   to browser localStorage). Pick a different fixture, then pick this
+   one again: your moved-node version comes back. Saves are keyed by
+   `entity.id` so each fixture remembers its own customizations.
 
 ### The four documents in this repo
 
@@ -76,7 +84,7 @@ In the running app:
 |---|---|
 | **Flow** | The exported JSON blob: one entity (AA or Extension), its node graph, its scenarios, and (when collab is on) its comments and activity. |
 | **Entity** | The thing the flow describes. Either `auto_attendant` or `extension`. |
-| **Node** | One configurable unit on the canvas. 39 kinds, grouped into 11 categories (entry, menu, action, answering, forwarding, screening, messaging, recording, condition, target, terminal). |
+| **Node** | One configurable unit on the canvas. 38 kinds, grouped into 11 categories (entry, menu, action, answering, forwarding, screening, messaging, recording, condition, target, terminal). |
 | **Edge** | A visual connection between two node handles. For menu actions, edges and `data.actions[key]` stay in sync — editing either updates the other. |
 | **Active period** | A named, reusable schedule (e.g. `business_hours`, `holidays`). Defined per-entity, referenced from menus / screening rules / forwarding rules / `cond_time`. |
 | **Answering mode** | One of 8 PortaOne-defined behaviours for an extension or AA (`ring_only`, `ring_then_forward`, `forward_only`, `reject`, etc.). The forwarding nodes only fire when the mode includes Forward. |
@@ -165,7 +173,7 @@ Specifically:
 ```bash
 npm install
 npm run dev          # Vite dev server, hot reload at :5173
-npm test             # vitest run — 99 passing
+npm test             # vitest run — 124 passing
 npm run build        # tsc -b + vite build — clean
 npm run lint
 npm run format
@@ -182,8 +190,10 @@ Node 20+. No other tooling required.
 - **Zustand** + **zundo** — store with undo/redo
 - **dagre** — auto-layout
 - **react-hook-form** — inspector forms
+- **lucide-react** — icon set for node header glyphs, top-bar buttons, etc.
 - **Vitest** + **@testing-library** — tests
 - **BroadcastChannel** + **localStorage** — local collaboration backend
+  and per-entity flow autosave (key: `callflow.autosave.v2`)
 
 ### Project layout (high-level)
 
@@ -256,16 +266,17 @@ Open PRs at https://github.com/kpsolo/callflow/pulls.
 
 ### Tests at a glance
 
-109 tests across 15 files. Run all: `npm test`. Run one: `npx vitest run <path>`.
+124 tests across 17 files. Run all: `npm test`. Run one: `npx vitest run <path>`.
 
 | Area | Tests | File |
 |---|---|---|
 | Schema round-trip + period evaluator | 11 | `src/schema/__tests__/` |
 | Node registry + contrast picker | 8 | `src/nodes/__tests__/` |
-| Canvas edge styling | 6 | `src/canvas/__tests__/` |
-| Menu ↔ edge sync helpers | 7 | `src/state/__tests__/` |
+| Canvas edge styling (incl. time-conditional dashing) | 9 | `src/canvas/__tests__/` |
+| Menu ↔ edge sync + merge identical terminals | 11 | `src/state/__tests__/` |
 | Validation rules | 10 | `src/validation/__tests__/` |
 | Export/import | 4 | `src/io/__tests__/` |
+| Per-entity localStorage save / restore | 8 | `src/app/__tests__/persistFlow.test.ts` |
 | Simulator: extensions | 8 | `src/simulator/__tests__/extension.test.ts` |
 | Simulator: auto attendants | 19 | `src/simulator/__tests__/autoAttendant.test.ts` |
 | Simulator: forwarding | 9 | `src/simulator/__tests__/forwarding.test.ts` |
@@ -287,18 +298,23 @@ Open PRs at https://github.com/kpsolo/callflow/pulls.
 
 ### Honest gaps to know about
 
-- **No PortaSwitch API integration.** Save/load is local JSON. A future
-  HTTP client implementing `CollabClient` is the obvious next step.
+- **No PortaSwitch API integration.** Save/load is mocked: the **Save**
+  button writes the current flow to browser localStorage under
+  `callflow.autosave.v2`, keyed by `entity.id` so each fixture
+  remembers its own edits. A future HTTP client implementing
+  `CollabClient` is the obvious next step — drop `persistFlow()` in
+  [src/app/useAutosave.ts](src/app/useAutosave.ts) for a real API call.
 - **No Hunt Group entity.** `target_hunt_group_ref` exists as a
   reference; the entity with members / ring policy / wrap-up is not
   modelled.
 - **No Call Queue as a flow.** `action_queue` is a stub.
 - **No real-time backend yet.** Multi-tab sync works (BroadcastChannel);
-  cross-machine sync needs the HTTP `CollabClient`.
+  cross-machine sync needs the HTTP `CollabClient`. The LockIndicator
+  in the top bar is intentionally hidden until that ships.
 - **`keep_original_cld` and `replace_caller_id_name`** on forwarding
   are editable and exported but not yet annotated in the simulator
   trace. Easy follow-up.
-- **Bundle size warning:** none. Main app 149 kB / 41 kB gzip after
+- **Bundle size warning:** none. Main app ~196 kB / ~52 kB gzip after
   vendor splits.
 
 ---
@@ -308,7 +324,7 @@ Open PRs at https://github.com/kpsolo/callflow/pulls.
 1. Fork or branch from `main` (or whichever branch is most recent).
 2. Make changes. Run `npm test` and `npm run build` before pushing.
 3. For UI changes, run `npm run dev` and verify with one of the demo
-   fixtures (Acme HQ exercises 45 of the 39 node kinds in real shape).
+   fixtures (Acme HQ exercises 45+ nodes spanning most of the 38 kinds).
 4. For spec changes, edit the relevant `.md` document. The docs are
    the spec — keep them in sync with the code.
 5. Open a PR. Add yourself to the activity log description if you

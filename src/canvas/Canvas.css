@@ -108,14 +108,14 @@
   border-radius: 3px;
   color: var(--text-dim);
   cursor: pointer;
-  
+
   opacity: 0;
   pointer-events: none;
   transition: opacity 150ms ease, border-color 100ms ease, color 100ms ease;
 }
 
 /* Show the collapse button when hovering over the mini-map or the button itself */
-.react-flow__minimap:hover + .canvas-minimap-collapse,
+.react-flow__minimap:hover+.canvas-minimap-collapse,
 .canvas-minimap-collapse:hover {
   opacity: 1;
   pointer-events: auto;
@@ -147,4 +147,19 @@
 
 .react-flow__edge.selected .react-flow__edge-textbg {
   fill: rgba(79, 140, 255, 0.18) !important;
+}
+
+/* Render connection stroke edges on top of the cards/nodes */
+.react-flow__edges {
+  z-index: 10 !important;
+  pointer-events: none !important;
+}
+
+.react-flow__nodes {
+  z-index: 5;
+}
+
+/* Ensure individual edges remain clickable to select them, without blocking the node elements */
+.react-flow__edge {
+  pointer-events: visibleStroke !important;
 }
