@@ -51,3 +51,7 @@ Provide hardcoded `CallFlow` objects used for initial state and unit testing. Wh
 - **Node Immutability:** Never mutate nodes directly. Always use the Zustand actions provided in `store.ts` (e.g., `updateNodeData`, `addNode`, `addEdge`).
 - **Styling:** The project uses pure Vanilla CSS. Avoid adding CSS frameworks unless explicitly instructed. Use CSS variables defined in the standard palette (`src/palette/Palette.css`).
 - **Testing:** The project uses Vitest. Run `npm test` after making changes to verify you haven't broken the logic. Test files are co-located in `__tests__` directories next to the files they test.
+
+
+## Before commit
+- Update the documentation before each commit whenever it makes sense to mention any changes or updates made.
