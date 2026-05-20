@@ -51,10 +51,15 @@ export function inferEdges(nodes: FlowNode[]): FlowEdge[] {
         add(n.id, "next", n.data.mailbox_node_id);
         break;
       case "forward_follow_me":
-      case "forward_advanced": {
+      case "forward_advanced":
+      case "call_forwarding": {
         for (const rule of n.data.rules) {
           add(n.id, "answered", rule.target_node_id, "rule");
         }
+        break;
+      }
+      case "menu_action_transfer": {
+        add(n.id, "next", n.data.target_node_id);
         break;
       }
       case "answering_mode_ext": {

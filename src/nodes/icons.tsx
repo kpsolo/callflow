@@ -33,6 +33,8 @@ import {
   PhoneCall,
   MailCheck,
   HelpCircle,
+  Megaphone,
+  Calendar,
   type LucideIcon,
 } from "lucide-react";
 import type { NodeKind } from "@/schema";
@@ -75,6 +77,13 @@ const ICON_MAP: Record<NodeKind, LucideIcon> = {
   term_forwarded_unanswered: PhoneOff,
   term_rejected: Ban,
   term_dropped: XCircle,
+  call_forwarding: GitFork,
+  condition_advanced: CheckSquare,
+  call_screening: Filter,
+  call_terminal: PhoneCall,
+  announcement: Megaphone,
+  holiday_calendar: Calendar,
+  menu_action_transfer: PhoneForwarded,
 };
 
 export function getNodeIcon(kind: NodeKind): LucideIcon {

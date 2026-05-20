@@ -44,16 +44,16 @@ export const acme3DeptAa: Flow = (() => {
         active_period: "always",
         intro_prompt: "p_welcome_to_acme",
         menu_prompt: "p_root_options",
-        no_input: { timeout_s: 9, action_node_id: "disc_root" },
+        no_input: { timeout_s: 9, action_node_id: "ann_goodbye" },
         allow_direct_dial: true,
         interdigit_timeout_s: 5,
         actions: {
           "1": { target_node_id: "sales" },
           "2": { target_node_id: "eng" },
           "3": { target_node_id: "support" },
-          "9": { target_node_id: "disc_root", play_before_action: "p_goodbye" },
+          "9": { target_node_id: "ann_goodbye" },
           fax: { target_node_id: "vm" },
-          no_input: { target_node_id: "disc_root" },
+          no_input: { target_node_id: "ann_goodbye" },
         },
       },
     },
@@ -69,7 +69,7 @@ export const acme3DeptAa: Flow = (() => {
         allow_direct_dial: false,
         interdigit_timeout_s: 5,
         actions: {
-          "1": { target_node_id: "tgt_alice" },
+          "1": { target_node_id: "mat_alice" },
           no_input: { target_node_id: "vm" },
         },
       },
@@ -86,7 +86,7 @@ export const acme3DeptAa: Flow = (() => {
         allow_direct_dial: false,
         interdigit_timeout_s: 5,
         actions: {
-          "1": { target_node_id: "tgt_bob" },
+          "1": { target_node_id: "mat_bob" },
           no_input: { target_node_id: "vm" },
         },
       },
@@ -104,32 +104,38 @@ export const acme3DeptAa: Flow = (() => {
         interdigit_timeout_s: 5,
         inactive_action_node_id: "vm",
         actions: {
-          "1": { target_node_id: "tgt_carol" },
+          "1": { target_node_id: "mat_carol" },
           no_input: { target_node_id: "vm" },
         },
       },
     },
     {
-      id: "disc_root",
-      type: "action_disconnect",
+      id: "ann_goodbye",
+      type: "announcement",
       position: { x: COL_MENU, y: 1000 },
-      data: { play_before_action: "p_goodbye" },
+      data: { prompt: "p_goodbye" },
     },
     {
-      id: "tgt_alice",
-      type: "action_transfer",
+      id: "disc_root",
+      type: "call_terminal",
+      position: { x: COL_MENU + 60, y: 1200 },
+      data: { outcome: "disconnected" },
+    },
+    {
+      id: "mat_alice",
+      type: "menu_action_transfer",
       position: { x: COL_TRANSFER, y: 40 },
       data: { mode: "extension", extension: "201" },
     },
     {
-      id: "tgt_bob",
-      type: "action_transfer",
+      id: "mat_bob",
+      type: "menu_action_transfer",
       position: { x: COL_TRANSFER, y: 360 },
       data: { mode: "extension", extension: "202" },
     },
     {
-      id: "tgt_carol",
-      type: "action_transfer",
+      id: "mat_carol",
+      type: "menu_action_transfer",
       position: { x: COL_TRANSFER, y: 680 },
       data: { mode: "extension", extension: "301" },
     },
@@ -214,7 +220,10 @@ export const acme3DeptAa: Flow = (() => {
     },
   ],
   };
-  const split = splitFanIn(f.nodes, inferEdges(f.nodes));
+  const explicitEdges = [
+    { id: "e_goodbye", source: "ann_goodbye", sourceHandle: "next", target: "disc_root", targetHandle: "in" }
+  ];
+  const split = splitFanIn(f.nodes, [...inferEdges(f.nodes), ...explicitEdges]);
   f.nodes = split.nodes;
   f.edges = split.edges;
   return f;

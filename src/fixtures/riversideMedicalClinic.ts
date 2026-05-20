@@ -64,11 +64,11 @@ const nodes: FlowNode[] = [
       interdigit_timeout_s: 5,
       actions: {
         "1": { target_node_id: "m_appointments" },
-        "2": { target_node_id: "tr_pharmacy", play_before_action: "p_connecting_pharmacy" },
+        "2": { target_node_id: "tr_pharmacy" },
         "3": { target_node_id: "m_billing" },
-        "4": { target_node_id: "tr_nurse_triage", play_before_action: "p_connecting_nurse" },
+        "4": { target_node_id: "tr_nurse_triage" },
         "0": { target_node_id: "tr_receptionist" },
-        "9": { target_node_id: "a_disc_emergency_reminder", play_before_action: "p_call_911_reminder" },
+        "9": { target_node_id: "ann_emergency" },
         fax: { target_node_id: "fax_records" },
         no_input: { target_node_id: "tr_receptionist" },
       },
@@ -122,27 +122,33 @@ const nodes: FlowNode[] = [
   // between them. tr_pharmacy starts well below m_billing's bottom (~782 px).
   {
     id: "tr_pharmacy",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_MENU, y: 880 },
-    data: { mode: "extension", extension: "400" },
+    data: { mode: "extension", extension: "400", play_before_action: "p_connecting_pharmacy" },
   },
   {
     id: "tr_nurse_triage",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_MENU, y: 1100 },
-    data: { mode: "hunt_group", hunt_group_id: "hg_nurse_triage", label: "Nurse triage" },
+    data: { mode: "hunt_group", hunt_group_id: "hg_nurse_triage", label: "Nurse triage", play_before_action: "p_connecting_nurse" },
   },
   {
     id: "tr_receptionist",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_MENU, y: 1320 },
     data: { mode: "extension", extension: "500" },
   },
   {
-    id: "a_disc_emergency_reminder",
-    type: "action_disconnect",
+    id: "ann_emergency",
+    type: "announcement",
     position: { x: COL_MENU, y: 1540 },
-    data: { play_before_action: "p_call_911_reminder" },
+    data: { prompt: "p_call_911_reminder" },
+  },
+  {
+    id: "a_disc_emergency_reminder",
+    type: "call_terminal",
+    position: { x: COL_MENU + 60, y: 1740 },
+    data: { outcome: "disconnected" },
   },
 
   // ===== Appointment / billing leaf transfers =====
@@ -150,37 +156,37 @@ const nodes: FlowNode[] = [
   // visually across COL_MENU and COL_TRANSFER.
   {
     id: "tr_new_appt",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 0 },
     data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk", play_before_action: "p_new_patient_intro" },
   },
   {
     id: "tr_reschedule",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 220 },
     data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_cancel",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 440 },
     data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_appt_desk",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 660 },
     data: { mode: "hunt_group", hunt_group_id: "hg_appointments_desk", label: "Appointment desk" },
   },
   {
     id: "tr_bill_questions",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 880 },
     data: { mode: "extension", extension: "300" },
   },
   {
     id: "tr_bill_payment",
-    type: "action_transfer",
+    type: "menu_action_transfer",
     position: { x: COL_TRANSFER, y: 1100 },
     data: { mode: "extension", extension: "300" },
   },
@@ -269,7 +275,12 @@ export const riversideMedicalClinic: Flow = {
       { extension: "500", name: "Reception", published: true },
     ],
   },
-  ...splitFanIn(nodes, inferEdges(nodes)),
+  ...(() => {
+    const explicitEdges = [
+      { id: "e_emergency", source: "ann_emergency", sourceHandle: "next", target: "a_disc_emergency_reminder", targetHandle: "in" }
+    ];
+    return splitFanIn(nodes, [...inferEdges(nodes), ...explicitEdges]);
+  })(),
   scenarios: [
     {
       name: "Business hours · press 1 1 → New patient appointment desk",

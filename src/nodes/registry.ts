@@ -141,6 +141,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
       "Transfer the call. Choose between routing to an internal target (extension, hunt group, SIP URI) or placing an outbound call to an E.164 number.",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: () => ({ mode: "extension", extension: "100" }),
   },
   action_prompt_extension: {
@@ -289,6 +290,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Ordered list of forwarding targets with per-rule time check and timeout.",
     inputs: IN,
     outputs: OUT_ANSWERED_UNANSWERED,
+    paletteHidden: true,
     defaultData: () => ({ ring_mode: "sequential", rules: [], replace_caller_id_name: false }),
   },
   forward_advanced: {
@@ -300,6 +302,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Follow-me + per-rule SIP proxy + sequential/simultaneous/random/percentage.",
     inputs: IN,
     outputs: OUT_ANSWERED_UNANSWERED,
+    paletteHidden: true,
     defaultData: () => ({
       ring_mode: "sequential",
       rules: [],
@@ -341,6 +344,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
       { id: "matched", label: "matched" },
       { id: "next_rule", label: "next rule" },
     ],
+    paletteHidden: true,
     defaultData: () => ({
       name: "Rule",
       order: 0,
@@ -421,6 +425,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Branch on which DID or alias was dialed.",
     inputs: IN,
     outputs: OUT_TF,
+    paletteHidden: true,
     defaultData: () => ({ kind: "did" }),
   },
   cond_mode: {
@@ -431,6 +436,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Branch on currently active incoming-call mode.",
     inputs: IN,
     outputs: OUT_TF,
+    paletteHidden: true,
     defaultData: () => ({ mode: "business_hours" }),
   },
   target_extension: {
@@ -441,7 +447,6 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Internal extension target.",
     inputs: IN,
     outputs: NO_PORTS,
-    paletteHidden: true,
     defaultData: () => ({ extension: "100" }),
   },
   target_hunt_group_ref: {
@@ -452,7 +457,6 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Reference to a Hunt Group entity (full editor deferred).",
     inputs: IN,
     outputs: NO_PORTS,
-    paletteHidden: true,
     defaultData: () => ({ hunt_group_id: "hg_1" }),
   },
   target_external: {
@@ -463,7 +467,6 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "External E.164 number target.",
     inputs: IN,
     outputs: NO_PORTS,
-    paletteHidden: true,
     defaultData: () => ({ number: "+10000000000" }),
   },
   target_sip_uri: {
@@ -474,7 +477,6 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Direct SIP endpoint target.",
     inputs: IN,
     outputs: NO_PORTS,
-    paletteHidden: true,
     defaultData: () => ({ uri: "sip:user@example.com" }),
   },
   term_answered: termDef("term_answered", "Answered"),
@@ -483,6 +485,80 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
   term_forwarded_unanswered: termDef("term_forwarded_unanswered", "Forwarded — Unanswered"),
   term_rejected: termDef("term_rejected", "Rejected"),
   term_dropped: termDef("term_dropped", "Dropped"),
+
+  call_forwarding: {
+    kind: "call_forwarding",
+    category: "forwarding",
+    primaryFor: ["extension"],
+    label: "Call Forwarding",
+    color: C.forwarding,
+    description: "Advanced Follow-Me forwarding with multiple targets and rules.",
+    inputs: IN,
+    outputs: OUT_ANSWERED_UNANSWERED,
+    defaultData: () => ({ ring_mode: "sequential", rules: [], keep_original_cld: false, replace_caller_id_name: false }),
+  },
+  condition_advanced: {
+    kind: "condition_advanced",
+    category: "condition",
+    label: "Advanced Condition",
+    color: C.condition,
+    description: "Branch on callee DID/alias or current incoming-call mode.",
+    inputs: IN,
+    outputs: OUT_TF,
+    defaultData: () => ({ callee: { kind: "any" } }),
+  },
+  call_screening: {
+    kind: "call_screening",
+    category: "screening",
+    primaryFor: ["extension"],
+    label: "Call Screening",
+    color: C.screening,
+    description: "Table-based call screening rules.",
+    inputs: IN,
+    outputs: OUT_NEXT,
+    defaultData: () => ({ rules: [] }),
+  },
+  call_terminal: {
+    kind: "call_terminal",
+    category: "terminal",
+    label: "Call Terminal",
+    color: C.terminal,
+    description: "Dynamic terminal outcome of a call flow.",
+    inputs: IN,
+    outputs: NO_PORTS,
+    defaultData: () => ({ outcome: "answered" }),
+  },
+  announcement: {
+    kind: "announcement",
+    category: "action",
+    label: "Announcement",
+    color: C.action,
+    description: "Play an audio message and continue.",
+    inputs: IN,
+    outputs: OUT_NEXT,
+    defaultData: () => ({}),
+  },
+  holiday_calendar: {
+    kind: "holiday_calendar",
+    category: "condition",
+    label: "Holiday Calendar",
+    color: C.condition,
+    description: "Visual calendar for scheduling PBX closures.",
+    inputs: IN,
+    outputs: OUT_TF,
+    defaultData: () => ({ dates: [], action_mode: "voicemail_only" }),
+  },
+  menu_action_transfer: {
+    kind: "menu_action_transfer",
+    category: "action",
+    primaryFor: ["auto_attendant"],
+    label: "Transfer",
+    color: C.action,
+    description: "Intermediate logic connecting menu keypresses to explicit targets.",
+    inputs: IN,
+    outputs: OUT_NEXT,
+    defaultData: () => ({}),
+  },
 };
 
 type TerminalKind =
@@ -502,6 +578,7 @@ function termDef<K extends TerminalKind>(kind: K, label: string): NodeTypeDef<K>
     description: "Terminal outcome of a call flow.",
     inputs: IN,
     outputs: NO_PORTS,
+    paletteHidden: true,
     defaultData: (() => ({})) as NodeTypeDef<K>["defaultData"],
   };
 }

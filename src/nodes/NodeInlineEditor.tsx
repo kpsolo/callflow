@@ -121,11 +121,15 @@ function InlineField({
             onChange={(e) => onChange(path, e.target.value || undefined)}
           >
             <option value="">—</option>
-            {def.options?.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
+            {def.options?.map((o) => {
+              const val = typeof o === "string" ? o : o.value;
+              const lbl = typeof o === "string" ? o : o.label;
+              return (
+                <option key={val} value={val}>
+                  {lbl}
+                </option>
+              );
+            })}
           </select>
         ) : def.type === "readonly" ? (
           <span className="fn-inline-readonly">{String(value ?? "—")}</span>

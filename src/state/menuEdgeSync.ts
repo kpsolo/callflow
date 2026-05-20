@@ -77,6 +77,25 @@ export function applyMenuConnectToActions(
   conn: { source: string; sourceHandle?: string | null; target: string },
 ): Node<FlowNode["data"]>[] {
   const sh = conn.sourceHandle ?? "";
+  if (sh === "inactive") {
+    return nodes.map((n) => {
+      if (n.id !== conn.source || !isMenuNode(n)) return n;
+      return {
+        ...n,
+        data: { ...n.data, inactive_action_node_id: conn.target } as typeof n.data,
+      };
+    });
+  }
+  if (sh === "no_input") {
+    return nodes.map((n) => {
+      if (n.id !== conn.source || !isMenuNode(n)) return n;
+      const no_input = (n.data as any).no_input ?? {};
+      return {
+        ...n,
+        data: { ...n.data, no_input: { ...no_input, action_node_id: conn.target } } as typeof n.data,
+      };
+    });
+  }
   if (!sh.startsWith(MENU_HANDLE_PREFIX)) return nodes;
   const key = sh.slice(MENU_HANDLE_PREFIX.length);
   return nodes.map((n) => {
@@ -104,6 +123,32 @@ export function applyMenuEdgeRemovalToActions(
   removed: Edge,
 ): Node<FlowNode["data"]>[] {
   const sh = removed.sourceHandle ?? "";
+  if (sh === "inactive") {
+    return nodes.map((n) => {
+      if (n.id !== removed.source || !isMenuNode(n)) return n;
+      const nextData = { ...n.data };
+      delete (nextData as any).inactive_action_node_id;
+      return {
+        ...n,
+        data: nextData as typeof n.data,
+      };
+    });
+  }
+  if (sh === "no_input") {
+    return nodes.map((n) => {
+      if (n.id !== removed.source || !isMenuNode(n)) return n;
+      const nextData = { ...n.data } as any;
+      if (nextData.no_input) {
+        const nextNoInput = { ...nextData.no_input };
+        delete nextNoInput.action_node_id;
+        nextData.no_input = nextNoInput;
+      }
+      return {
+        ...n,
+        data: nextData as typeof n.data,
+      };
+    });
+  }
   if (!sh.startsWith(MENU_HANDLE_PREFIX)) return nodes;
   const key = sh.slice(MENU_HANDLE_PREFIX.length);
   return nodes.map((n) => {

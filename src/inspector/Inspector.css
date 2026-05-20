@@ -270,6 +270,51 @@
   text-overflow: ellipsis;
 }
 
+.active-period-helper-card {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.active-period-helper-behavior {
+  color: var(--text);
+}
+
+.active-period-helper-behavior strong {
+  color: var(--accent);
+}
+
+.active-period-helper-schedule {
+  color: var(--text-dim);
+}
+
+.active-period-helper-schedule code {
+  font-family: ui-monospace, monospace;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: var(--text);
+}
+
+.active-period-helper-tip {
+  font-size: 11px;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+  margin-top: 2px;
+}
+
 .actions-map,
 .rules-list {
   border: 1px solid var(--border);

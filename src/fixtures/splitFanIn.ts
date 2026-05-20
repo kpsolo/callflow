@@ -15,6 +15,7 @@ const DUPLICATABLE_KINDS = new Set([
   "term_forwarded_unanswered",
   "term_rejected",
   "term_dropped",
+  "call_terminal",
 ]);
 
 /** Inbound edge-count threshold above which we start cloning. */

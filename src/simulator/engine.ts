@@ -182,17 +182,21 @@ function groupEdgesBySource(edges: FlowEdge[]): Map<string, FlowEdge[]> {
 
 function runExtension(ctx: Ctx): Trace {
   // 1. Evaluate screening rules in order.
-  const rules = ctx.flow.nodes
-    .filter((n): n is NodeOf<"screening_rule"> => n.type === "screening_rule")
-    .filter((n) => n.data.enabled)
-    .sort((a, b) => a.data.order - b.data.order);
+  const screenNode = ctx.flow.nodes.find((n): n is NodeOf<"call_screening"> => n.type === "call_screening");
+  let rules = screenNode ? screenNode.data.rules : [];
+  if (rules.length === 0) {
+    rules = ctx.flow.nodes
+      .filter((n): n is NodeOf<"screening_rule"> => n.type === "screening_rule")
+      .map((n) => n.data)
+      .sort((a, b) => a.order - b.order);
+  }
 
   for (const r of rules) {
-    if (matchesScreening(ctx, r)) {
-      step(ctx, r.id, r.type, `Screening rule "${r.data.name}" matched`);
-      playPrompt(ctx, r.data.play_before_action);
+    if (r.enabled && matchesScreeningData(ctx, r)) {
+      step(ctx, screenNode ? screenNode.id : null, screenNode ? "call_screening" : "screening_rule", `Screening rule "${r.name}" matched`);
+      playPrompt(ctx, r.play_before_action);
       return runExtAnsweringMode(ctx, {
-        mode: r.data.action_mode,
+        mode: r.action_mode,
         ring_timeout_s: 20,
         reject_sip_code: 486,
       });
@@ -209,11 +213,11 @@ function runExtension(ctx: Ctx): Trace {
   return runExtAnsweringMode(ctx, am.data);
 }
 
-function matchesScreening(
+function matchesScreeningData(
   ctx: Ctx,
-  r: NodeOf<"screening_rule">,
+  r: NodeOf<"screening_rule">["data"] | NodeOf<"call_screening">["data"]["rules"][0],
 ): boolean {
-  const c = r.data.conditions;
+  const c = r.conditions;
   if (!isPeriodActive(ctx, c.time_period)) return false;
   // caller
   const callerKind = c.caller.kind;
@@ -319,6 +323,7 @@ function goVoicemailExt(ctx: Ctx): Trace {
 function goForwardExt(ctx: Ctx): Trace {
   const fwd = ctx.flow.nodes.find(
     (n) =>
+      n.type === "call_forwarding" ||
       n.type === "forward_follow_me" ||
       n.type === "forward_advanced" ||
       n.type === "forward_sip_uri" ||
@@ -335,8 +340,8 @@ function goForwardExt(ctx: Ctx): Trace {
     const data = (fwd as NodeOf<"forward_sip_uri">).data;
     return tryForwardOne(ctx, data.target_uri ?? "<unset>", data.timeout_s);
   }
-  if (fwd.type === "forward_follow_me" || fwd.type === "forward_advanced") {
-    const data = (fwd as NodeOf<"forward_follow_me" | "forward_advanced">).data;
+  if (fwd.type === "call_forwarding" || fwd.type === "forward_follow_me" || fwd.type === "forward_advanced") {
+    const data = (fwd as NodeOf<"call_forwarding" | "forward_follow_me" | "forward_advanced">).data;
     const rules = data.rules.filter((r) => r.enabled && isPeriodActive(ctx, r.time_check));
     if (rules.length === 0)
       return terminate(ctx, "forwarded_unanswered", "No enabled forwarding rules");
@@ -870,8 +875,8 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       const num = node.data.number;
       step(ctx, node.id, node.type, `Ringing external ${num}`);
       const r = answeringFor(ctx, num);
-      if (r === "answer") return terminate(ctx, "answered", `external ${num}`);
-      return terminate(ctx, "dropped", `external ${num} unreachable`);
+      if (r === "answer") return terminate(ctx, "forwarded_answered", `Answered by ${num}`);
+      return terminate(ctx, "forwarded_unanswered", `${num} unreachable`);
     }
     case "target_hunt_group_ref": {
       const hg = node.data.label ?? node.data.hunt_group_id;
@@ -898,6 +903,100 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
       return terminate(ctx, "rejected");
     case "term_dropped":
       return terminate(ctx, "dropped");
+    case "menu_action_transfer": {
+      playPrompt(ctx, node.data.play_before_action);
+      const mode = node.data.mode;
+      if (mode) {
+        if (mode === "extension") {
+          const ext = node.data.extension;
+          if (ext) {
+            step(ctx, node.id, node.type, `Ringing extension ${ext}`);
+            const r = answeringFor(ctx, ext);
+            if (r === "answer") {
+              applyRecordingIfConfigured(ctx);
+              return terminate(ctx, "answered", `ext ${ext}`);
+            }
+            if (r === "busy") return terminate(ctx, "rejected", `ext ${ext} busy`);
+            if (r === "fail") return terminate(ctx, "dropped", `ext ${ext} network fail`);
+            return terminate(ctx, "dropped", `ext ${ext} no answer`);
+          }
+        } else if (mode === "hunt_group") {
+          const hg = node.data.label ?? node.data.hunt_group_id ?? "<unset>";
+          step(ctx, node.id, node.type, `Hunt group ${hg}`);
+          const r = answeringFor(ctx, node.data.hunt_group_id ?? "");
+          if (r === "answer") return terminate(ctx, "answered", `hunt group ${hg}`);
+          return terminate(ctx, "dropped", `hunt group ${hg} no answer`);
+        } else if (mode === "sip_uri") {
+          const uri = node.data.uri ?? "<unset>";
+          step(ctx, node.id, node.type, `Dialing SIP URI ${uri}`);
+          const r = answeringFor(ctx, uri);
+          if (r === "answer") return terminate(ctx, "answered", uri);
+          return terminate(ctx, "dropped", `${uri} unreachable`);
+        } else if (mode === "e164") {
+          const num = node.data.number ?? "<unset>";
+          step(ctx, node.id, node.type, `Transfer to E.164 ${num}`);
+          const r = answeringFor(ctx, num);
+          if (r === "answer") return terminate(ctx, "forwarded_answered", `Answered by ${num}`);
+          return terminate(ctx, "forwarded_unanswered", `${num} unreachable`);
+        }
+        return terminate(ctx, "dropped", `Invalid transfer mode`);
+      }
+
+      const tgt = node.data.target_node_id;
+      if (!tgt) return terminate(ctx, "dropped", "Transfer target missing");
+      const tgtNode = ctx.nodesById.get(tgt);
+      if (!tgtNode) return terminate(ctx, "dropped", `Transfer target node ${tgt} not found`);
+      return runNode(ctx, tgtNode);
+    }
+    case "announcement": {
+      playPrompt(ctx, node.data.prompt);
+      const edge = findEdge(ctx, node.id, "next");
+      if (edge) {
+        recordEdge(ctx, edge);
+        const next = ctx.nodesById.get(edge.target);
+        if (next) return runNode(ctx, next);
+      }
+      return terminate(ctx, "dropped", "Announcement has no next node");
+    }
+    case "call_terminal": {
+      const outcome = node.data.outcome ?? "answered";
+      return terminate(ctx, outcome as TerminalCode);
+    }
+    case "holiday_calendar": {
+      const dateStr = ctx.input.time.split("T")[0]; // YYYY-MM-DD
+      if (node.data.dates.includes(dateStr)) {
+        return runExtAnsweringMode(ctx, {
+          mode: node.data.action_mode ?? "voicemail_only",
+          ring_timeout_s: 20,
+          reject_sip_code: 486,
+        });
+      }
+      const edge = findEdge(ctx, node.id, "false");
+      if (edge) {
+        recordEdge(ctx, edge);
+        const next = ctx.nodesById.get(edge.target);
+        if (next) return runNode(ctx, next);
+      }
+      return terminate(ctx, "dropped", "Holiday calendar no next node");
+    }
+    case "condition_advanced": {
+      const edgeTrue = findEdge(ctx, node.id, "true");
+      const edgeFalse = findEdge(ctx, node.id, "false");
+      let matched = false;
+      if (node.data.callee && node.data.callee.kind !== "any" && node.data.callee.value === ctx.input.callee) {
+        matched = true;
+      }
+      if (node.data.mode && node.data.mode === ctx.input.active_mode) {
+        matched = true;
+      }
+      const edge = matched ? edgeTrue : edgeFalse;
+      if (edge) {
+        recordEdge(ctx, edge);
+        const next = ctx.nodesById.get(edge.target);
+        if (next) return runNode(ctx, next);
+      }
+      return terminate(ctx, "dropped", "Condition has no next node");
+    }
     default:
       // Walk forward via the first outgoing edge.
       {

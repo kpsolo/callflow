@@ -31,6 +31,13 @@ const headlines: { [K in NodeKind]?: HeadlineFn<K> } = {
     if (d.mode === "sip_uri") return d.uri || null;
     return d.number || null;
   },
+  menu_action_transfer: (d) => {
+    if (d.mode === "extension") return d.extension || null;
+    if (d.mode === "hunt_group") return d.label || d.hunt_group_id || null;
+    if (d.mode === "sip_uri") return d.uri || null;
+    if (d.mode === "e164") return d.number || null;
+    return d.target_node_id || null;
+  },
   action_queue: (d) => d.queue_name || null,
 };
 

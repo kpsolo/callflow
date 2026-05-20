@@ -355,3 +355,59 @@ export const TargetSipUriDataSchema = z.object({
 export const TerminalDataSchema = z.object({
   label: z.string().optional(),
 });
+
+// --- New Consolidated Nodes ---
+
+export const CallForwardingDataSchema = z.object({
+  ring_mode: RingModeSchema.default("sequential"),
+  rules: z.array(ForwardRuleSchema).default([]),
+  keep_original_cld: z.boolean().default(false),
+  replace_caller_id_name: z.boolean().default(false),
+});
+
+export const ConditionAdvancedDataSchema = z.object({
+  callee: z
+    .object({
+      kind: z.enum(["any", "did", "alias"]),
+      value: z.string().optional(),
+    })
+    .default({ kind: "any" }),
+  mode: IncomingCallModeSchema.optional(),
+});
+
+export const CallScreeningDataSchema = z.object({
+  rules: z.array(ScreeningRuleDataSchema).default([]),
+});
+
+export const CallTerminalDataSchema = z.object({
+  outcome: z.enum([
+    "answered",
+    "voicemail_left",
+    "forwarded_answered",
+    "forwarded_unanswered",
+    "rejected",
+    "disconnected",
+    "dropped",
+  ]).default("answered"),
+  label: z.string().optional(),
+});
+
+export const AnnouncementDataSchema = z.object({
+  prompt: PromptIdSchema.optional(),
+});
+
+export const HolidayCalendarDataSchema = z.object({
+  dates: z.array(z.string()).default([]),
+  action_mode: AnsweringModeExtSchema.default("voicemail_only"),
+});
+
+export const MenuActionTransferDataSchema = z.object({
+  target_node_id: z.string().optional(),
+  play_before_action: PromptIdSchema.optional(),
+  mode: z.enum(["extension", "hunt_group", "sip_uri", "e164"]).optional(),
+  extension: ExtensionNumberSchema.optional(),
+  hunt_group_id: z.string().optional(),
+  label: z.string().optional(),
+  uri: SipUriSchema.optional(),
+  number: E164Schema.optional(),
+});

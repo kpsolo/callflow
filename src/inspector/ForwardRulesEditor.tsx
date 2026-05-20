@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
+import type { NodeKind } from "@/schema";
 
 export interface ForwardRule {
   id: string;
@@ -20,11 +21,13 @@ export function ForwardRulesEditor({
   rules,
   onChange,
   ringMode,
+  nodeKind,
 }: {
   rules: Array<Record<string, unknown>>;
   onChange: (next: ForwardRule[]) => void;
   /** Drives whether per-rule weight inputs are shown. */
   ringMode?: string;
+  nodeKind?: NodeKind;
 }) {
   const allNodes = useFlowStore((s) => s.nodes);
   const targets = allNodes
@@ -136,6 +139,7 @@ export function ForwardRulesEditor({
                 <ActivePeriodPicker
                   value={r.time_check ?? "always"}
                   onChange={(v) => setRule(i, { time_check: v })}
+                  nodeKind={nodeKind}
                 />
               </label>
               <label className="inspector-field">

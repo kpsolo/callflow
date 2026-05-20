@@ -40,7 +40,7 @@ describe("Save → localStorage → restore round-trip (per-entity)", () => {
     useFlowStore.getState().loadFlow(ext401Screening);
     // Simulate the user dragging a node.
     useFlowStore.getState().onNodesChange([
-      { id: "rule_vip", type: "position", position: { x: 999, y: 999 }, dragging: false },
+      { id: "screening", type: "position", position: { x: 999, y: 999 }, dragging: false },
     ]);
     persistFlow();
 
@@ -51,7 +51,7 @@ describe("Save → localStorage → restore round-trip (per-entity)", () => {
     // Switch back: restoreSavedForEntity should bring the moved-position
     // version back, NOT the pristine fixture.
     expect(restoreSavedForEntity("ext_401")).toBe(true);
-    const node = useFlowStore.getState().nodes.find((n) => n.id === "rule_vip")!;
+    const node = useFlowStore.getState().nodes.find((n) => n.id === "screening")!;
     expect(node.position).toEqual({ x: 999, y: 999 });
   });
 

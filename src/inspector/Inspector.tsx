@@ -90,7 +90,7 @@ export function Inspector({ onEditEntity }: InspectorProps = {}) {
         <p className="shell-placeholder">No editable fields for this node type.</p>
       )}
 
-      <InspectorFields fields={fields} data={data} onChange={onChange} />
+      <InspectorFields fields={fields} data={data} onChange={onChange} nodeKind={kind} />
 
       <NodeCommentsSection nodeId={node.id} />
     </div>
@@ -126,10 +126,12 @@ function InspectorFields({
   fields,
   data,
   onChange,
+  nodeKind,
 }: {
   fields: FieldDef[];
   data: Record<string, unknown>;
   onChange: (path: string, value: unknown) => void;
+  nodeKind?: NodeKind;
 }) {
   // If no field declares a tab, render the flat layout (most node types).
   const tabbed = fields.some((f) => !!f.tab);
@@ -147,6 +149,7 @@ function InspectorFields({
             value={getAtPath(data, f.path ?? f.key)}
             data={data}
             onChange={onChange}
+            nodeKind={nodeKind}
           />
         ))}
       </div>
@@ -180,6 +183,7 @@ function InspectorFields({
             value={getAtPath(data, f.path ?? f.key)}
             data={data}
             onChange={onChange}
+            nodeKind={nodeKind}
           />
         ))}
       </div>
@@ -192,11 +196,13 @@ function FieldRow({
   value,
   data,
   onChange,
+  nodeKind,
 }: {
   def: FieldDef;
   value: unknown;
   data: Record<string, unknown>;
   onChange: (path: string, value: unknown) => void;
+  nodeKind?: NodeKind;
 }) {
   const path = def.path ?? def.key;
 
@@ -215,6 +221,7 @@ function FieldRow({
         rules={(data.rules as Array<Record<string, unknown>> | undefined) ?? []}
         onChange={(next) => onChange("rules", next)}
         ringMode={data.ring_mode as string | undefined}
+        nodeKind={nodeKind}
       />
     );
   }
@@ -226,6 +233,7 @@ function FieldRow({
         <ActivePeriodPicker
           value={(value as string | undefined) ?? "always"}
           onChange={(v) => onChange(path, v)}
+          nodeKind={nodeKind}
         />
       </label>
     );
@@ -264,11 +272,15 @@ function FieldRow({
             onChange={(e) => onChange(path, e.target.value || undefined)}
           >
             <option value="">—</option>
-            {def.options?.map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
+            {def.options?.map((o) => {
+              const val = typeof o === "string" ? o : o.value;
+              const lbl = typeof o === "string" ? o : o.label;
+              return (
+                <option key={val} value={val}>
+                  {lbl}
+                </option>
+              );
+            })}
           </select>
           {def.optionDescriptions && typeof value === "string" && def.optionDescriptions[value] && (
             <span className="inspector-option-description">{def.optionDescriptions[value]}</span>

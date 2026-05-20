@@ -36,35 +36,34 @@ export const ext401Screening: Flow = (() => {
       data: { label: "Incoming Call" },
     },
     {
-      id: "rule_vip",
-      type: "screening_rule",
-      position: { x: COL_RULES, y: 0 },
-      data: {
-        name: "VIP — always ring",
-        order: 0,
-        enabled: true,
-        conditions: {
-          time_period: "always",
-          caller: { kind: "prefix", value: "+1415" },
-          callee: { kind: "any" },
-        },
-        action_mode: "ring_only",
-      },
-    },
-    {
-      id: "rule_afterhours",
-      type: "screening_rule",
+      id: "screening",
+      type: "call_screening",
       position: { x: COL_RULES, y: 360 },
       data: {
-        name: "After-hours → voicemail",
-        order: 1,
-        enabled: true,
-        conditions: {
-          time_period: "after_hours",
-          caller: { kind: "any" },
-          callee: { kind: "any" },
-        },
-        action_mode: "voicemail_only",
+        rules: [
+          {
+            name: "VIP — always ring",
+            order: 0,
+            enabled: true,
+            conditions: {
+              time_period: "always",
+              caller: { kind: "prefix", value: "+1415" },
+              callee: { kind: "any" },
+            },
+            action_mode: "ring_only",
+          },
+          {
+            name: "After-hours → voicemail",
+            order: 1,
+            enabled: true,
+            conditions: {
+              time_period: "after_hours",
+              caller: { kind: "any" },
+              callee: { kind: "any" },
+            },
+            action_mode: "voicemail_only",
+          },
+        ],
       },
     },
     {
@@ -153,13 +152,8 @@ export const ext401Screening: Flow = (() => {
   };
   f.edges = [
     ...inferEdges(f.nodes),
-    // Visual chain showing screening-rule evaluation order; the simulator orders
-    // rules by `data.order`, so these edges are decorative but help readability.
-    { id: "v_e1", source: "incoming", sourceHandle: "next", target: "rule_vip", targetHandle: "in" },
-    { id: "v_e2", source: "rule_vip", sourceHandle: "next_rule", target: "rule_afterhours", targetHandle: "in" },
-    { id: "v_e3", source: "rule_afterhours", sourceHandle: "next_rule", target: "am", targetHandle: "in" },
-    { id: "v_e4", source: "rule_vip", sourceHandle: "matched", target: "am", targetHandle: "in", label: "VIP → ring" },
-    { id: "v_e5", source: "rule_afterhours", sourceHandle: "matched", target: "vm", targetHandle: "in", label: "after-hours → vm" },
+    { id: "v_e1", source: "incoming", sourceHandle: "next", target: "screening", targetHandle: "in" },
+    { id: "v_e2", source: "screening", sourceHandle: "next", target: "am", targetHandle: "in" },
     // Recording is attached implicitly by the simulator on any answered leg; show it as a dotted hook off the answering mode.
     { id: "v_e6", source: "am", sourceHandle: "answered", target: "rec", targetHandle: "in", label: "recorded" },
   ];

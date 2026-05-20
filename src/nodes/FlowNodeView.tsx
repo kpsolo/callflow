@@ -26,8 +26,31 @@ const BODY_PAD_Y = 16;     // 8px top + 8px bottom (--fn-node-pad-y * 2)
 
 function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const kind = type as NodeKind;
-  const def = getNodeType(kind);
-  const Icon = getNodeIcon(kind);
+  let def = getNodeType(kind);
+  let Icon = getNodeIcon(kind);
+
+  if (kind === "call_terminal") {
+    const outcome = (data as any).outcome ?? "answered";
+    if (outcome === "rejected") {
+      def = { ...def, color: "#ef476f", label: "Rejected", shortLabel: "Rejected" };
+      Icon = getNodeIcon("term_rejected");
+    } else if (outcome === "dropped") {
+      def = { ...def, color: "#ef476f", label: "Dropped", shortLabel: "Dropped" };
+      Icon = getNodeIcon("term_dropped");
+    } else if (outcome === "voicemail_left") {
+      def = { ...def, label: "Voicemail Left", shortLabel: "Voicemail Left" };
+      Icon = getNodeIcon("term_voicemail_left");
+    } else if (outcome === "forwarded_unanswered") {
+      def = { ...def, label: "Forwarded — Unanswered", shortLabel: "Forwarded — Unanswered" };
+      Icon = getNodeIcon("term_forwarded_unanswered");
+    } else if (outcome === "forwarded_answered") {
+      def = { ...def, label: "Forwarded — Answered", shortLabel: "Forwarded — Answered" };
+      Icon = getNodeIcon("term_forwarded_answered");
+    } else {
+      def = { ...def, label: "Answered", shortLabel: "Answered" };
+      Icon = getNodeIcon("term_answered");
+    }
+  }
   const traceActive = useTraceStore((s) => s.trace != null);
   const visited = useTraceStore((s) => s.visited_node_ids.has(id));
   const issues = useValidation();
@@ -222,13 +245,16 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
 function menuHandles(data: {
   actions?: Record<string, unknown>;
   inactive_action_node_id?: string;
+  active_period?: string;
   no_input?: { action_node_id?: string };
 }): { id: string; label: string }[] {
   const out: { id: string; label: string }[] = [];
   const actions = data.actions ?? {};
   const actionKeys = Object.keys(actions);
   for (const key of actionKeys) out.push({ id: `menu:${key}`, label: key });
-  if (data.inactive_action_node_id) out.push({ id: "inactive", label: "inactive" });
+  if (data.inactive_action_node_id || (data.active_period && data.active_period !== "always")) {
+    out.push({ id: "inactive", label: "inactive" });
+  }
   if (data.no_input?.action_node_id && !actionKeys.includes("no_input")) {
     out.push({ id: "no_input", label: "no_input" });
   }

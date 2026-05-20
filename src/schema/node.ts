@@ -33,6 +33,13 @@ import {
   TargetSipUriDataSchema,
   TerminalDataSchema,
   VoicemailDataSchema,
+  CallForwardingDataSchema,
+  ConditionAdvancedDataSchema,
+  CallScreeningDataSchema,
+  CallTerminalDataSchema,
+  AnnouncementDataSchema,
+  HolidayCalendarDataSchema,
+  MenuActionTransferDataSchema,
 } from "./nodeData";
 
 export const NODE_KINDS = [
@@ -73,6 +80,13 @@ export const NODE_KINDS = [
   "term_forwarded_unanswered",
   "term_rejected",
   "term_dropped",
+  "call_forwarding",
+  "condition_advanced",
+  "call_screening",
+  "call_terminal",
+  "announcement",
+  "holiday_calendar",
+  "menu_action_transfer",
 ] as const;
 export type NodeKind = (typeof NODE_KINDS)[number];
 
@@ -122,6 +136,13 @@ export const FlowNodeSchema = z.discriminatedUnion("type", [
   base("term_forwarded_unanswered", TerminalDataSchema),
   base("term_rejected", TerminalDataSchema),
   base("term_dropped", TerminalDataSchema),
+  base("call_forwarding", CallForwardingDataSchema),
+  base("condition_advanced", ConditionAdvancedDataSchema),
+  base("call_screening", CallScreeningDataSchema),
+  base("call_terminal", CallTerminalDataSchema),
+  base("announcement", AnnouncementDataSchema),
+  base("holiday_calendar", HolidayCalendarDataSchema),
+  base("menu_action_transfer", MenuActionTransferDataSchema),
 ]);
 export type FlowNode = z.infer<typeof FlowNodeSchema>;
 

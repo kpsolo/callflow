@@ -76,7 +76,7 @@ const nodes: FlowNode[] = [
         "6": { target_node_id: "tr_operator", play_before_action: "p_connecting_operator" },
         "7": { target_node_id: "a_dbn" },
         "0": { target_node_id: "m_holiday" },
-        "9": { target_node_id: "a_disc_goodbye", play_before_action: "p_goodbye" },
+        "9": { target_node_id: "ann_goodbye" },
         fax: { target_node_id: "fax_main" },
         no_input: { target_node_id: "tr_operator" },
       },
@@ -199,14 +199,14 @@ const nodes: FlowNode[] = [
       active_period: "holidays",
       intro_prompt: "p_holiday_announcement",
       menu_prompt: "p_holiday_options",
-      no_input: { timeout_s: 5, action_node_id: "a_disc_holiday" },
+      no_input: { timeout_s: 5, action_node_id: "ann_holiday_closing" },
       allow_direct_dial: false,
       interdigit_timeout_s: 5,
       // When holidays are NOT active, fall through to normal after-hours voicemail.
       inactive_action_node_id: "vm_after_hours",
       actions: {
         "1": { target_node_id: "vm_holiday" },
-        no_input: { target_node_id: "a_disc_holiday" },
+        no_input: { target_node_id: "ann_holiday_closing" },
       },
     }),
   },
@@ -221,50 +221,49 @@ const nodes: FlowNode[] = [
 
   // Top-level disconnect (key 9 → goodbye).
   {
-    id: "a_disc_goodbye",
-    type: "action_disconnect",
+    id: "ann_goodbye",
+    type: "announcement",
     position: { x: COL_MENU, y: 2760 },
-    data: { play_before_action: "p_goodbye" },
+    data: { prompt: "p_goodbye" },
+  },
+  {
+    id: "a_disc_goodbye",
+    type: "call_terminal",
+    position: { x: COL_MENU + 60, y: 2960 },
+    data: { outcome: "disconnected" },
   },
 
-  // ===== Transfer wrappers (some carry play-before prompts) =====
-  // Step 220 px in COL_TRANSFER — each action_transfer in v2 renders at ~180 px
-  // (header + 3-field inline editor + 1 output port pill), so 220 px leaves a
-  // ~40 px gap between cards.
-  // Sales — note these transfers are intended to be recorded for compliance.
-  { id: "tr_sales_new", type: "action_transfer", position: { x: COL_TRANSFER, y: 0 }, data: { mode: "extension", extension: "201" } },
-  { id: "tr_sales_existing", type: "action_transfer", position: { x: COL_TRANSFER, y: 220 }, data: { mode: "extension", extension: "202" } },
-  { id: "tr_sales_enterprise", type: "action_transfer", position: { x: COL_TRANSFER, y: 440 }, data: { mode: "extension", extension: "203" } },
-  { id: "tr_sales_default", type: "action_transfer", position: { x: COL_TRANSFER, y: 660 }, data: { mode: "extension", extension: "201" } },
+  // ===== Transfer wrappers =====
+  { id: "tr_sales_new", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 0 }, data: { mode: "extension", extension: "201" } },
+  { id: "tr_sales_existing", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 220 }, data: { mode: "extension", extension: "202" } },
+  { id: "tr_sales_enterprise", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 440 }, data: { mode: "extension", extension: "203" } },
+  { id: "tr_sales_default", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 660 }, data: { mode: "extension", extension: "201" } },
+  { id: "tr_sup_tier1", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 880 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier1", label: "Support Tier 1" } },
+  { id: "tr_sup_tier2", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 1100 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier2", label: "Support Tier 2" } },
+  { id: "tr_sup_accounts", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 1320 }, data: { mode: "extension", extension: "301" } },
+  { id: "tr_emergency", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 1540 }, data: { mode: "e164", number: "+18005551111" } },
+  { id: "tr_eng_platform", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 1760 }, data: { mode: "extension", extension: "401" } },
+  { id: "tr_eng_mobile", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 1980 }, data: { mode: "extension", extension: "402" } },
+  { id: "tr_eng_sre", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 2200 }, data: { mode: "extension", extension: "403" } },
+  { id: "tr_bill_invoices", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 2420 }, data: { mode: "extension", extension: "501" } },
+  { id: "tr_bill_payments", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 2640 }, data: { mode: "extension", extension: "502" } },
+  { id: "tr_bill_disputes", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 2860 }, data: { mode: "extension", extension: "503" } },
+  { id: "tr_hr_benefits", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 3080 }, data: { mode: "extension", extension: "601" } },
+  { id: "tr_hr_recruiting", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 3300 }, data: { mode: "extension", extension: "602" } },
+  { id: "tr_hr_payroll", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 3520 }, data: { mode: "extension", extension: "603" } },
+  { id: "tr_operator", type: "menu_action_transfer", position: { x: COL_TRANSFER, y: 3740 }, data: { mode: "extension", extension: "100" } },
 
-  // Support — hunt groups for tiers, single ext for accounts, external for emergency.
-  { id: "tr_sup_tier1", type: "action_transfer", position: { x: COL_TRANSFER, y: 880 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier1", label: "Support Tier 1" } },
-  { id: "tr_sup_tier2", type: "action_transfer", position: { x: COL_TRANSFER, y: 1100 }, data: { mode: "hunt_group", hunt_group_id: "hg_support_tier2", label: "Support Tier 2" } },
-  { id: "tr_sup_accounts", type: "action_transfer", position: { x: COL_TRANSFER, y: 1320 }, data: { mode: "extension", extension: "301" } },
-  { id: "tr_emergency", type: "action_transfer", position: { x: COL_TRANSFER, y: 1540 }, data: { mode: "e164", number: "+18005551111" } },
-
-  // Engineering
-  { id: "tr_eng_platform", type: "action_transfer", position: { x: COL_TRANSFER, y: 1760 }, data: { mode: "extension", extension: "401" } },
-  { id: "tr_eng_mobile", type: "action_transfer", position: { x: COL_TRANSFER, y: 1980 }, data: { mode: "extension", extension: "402" } },
-  { id: "tr_eng_sre", type: "action_transfer", position: { x: COL_TRANSFER, y: 2200 }, data: { mode: "extension", extension: "403" } },
-
-  // Billing
-  { id: "tr_bill_invoices", type: "action_transfer", position: { x: COL_TRANSFER, y: 2420 }, data: { mode: "extension", extension: "501" } },
-  { id: "tr_bill_payments", type: "action_transfer", position: { x: COL_TRANSFER, y: 2640 }, data: { mode: "extension", extension: "502" } },
-  { id: "tr_bill_disputes", type: "action_transfer", position: { x: COL_TRANSFER, y: 2860 }, data: { mode: "extension", extension: "503" } },
-
-  // HR
-  { id: "tr_hr_benefits", type: "action_transfer", position: { x: COL_TRANSFER, y: 3080 }, data: { mode: "extension", extension: "601" } },
-  { id: "tr_hr_recruiting", type: "action_transfer", position: { x: COL_TRANSFER, y: 3300 }, data: { mode: "extension", extension: "602" } },
-  { id: "tr_hr_payroll", type: "action_transfer", position: { x: COL_TRANSFER, y: 3520 }, data: { mode: "extension", extension: "603" } },
-
-  // Operator + holiday disconnect
-  { id: "tr_operator", type: "action_transfer", position: { x: COL_TRANSFER, y: 3740 }, data: { mode: "extension", extension: "100" } },
+  {
+    id: "ann_holiday_closing",
+    type: "announcement",
+    position: { x: COL_TRANSFER, y: 3960 },
+    data: { prompt: "p_holiday_closing" },
+  },
   {
     id: "a_disc_holiday",
-    type: "action_disconnect",
-    position: { x: COL_TRANSFER, y: 3960 },
-    data: { play_before_action: "p_holiday_closing" },
+    type: "call_terminal",
+    position: { x: COL_TRANSFER + 60, y: 4160 },
+    data: { outcome: "disconnected" },
   },
 
   // ===== Voicemail / fax / compliance =====
@@ -321,141 +320,151 @@ void VM_GREETING_HOLIDAY;
 
 // ---- flow + scenarios -----------------------------------------------------
 
-export const acmeHqMultiDept: Flow = {
-  schema_version: "1.0",
-  entity: {
-    type: "auto_attendant",
-    id: "aa_acme_hq",
-    did: "+18005557890",
-    name: "Acme Corp HQ",
-    time_periods: {
-      business_hours: [
-        { time_from: "08:00", time_to: "18:00", days_of_week: [1, 2, 3, 4, 5] },
-      ],
-      after_hours: [
-        // Evenings on weekdays
-        { time_from: "18:00", time_to: "23:59", days_of_week: [1, 2, 3, 4, 5] },
-        { time_from: "00:00", time_to: "08:00", days_of_week: [1, 2, 3, 4, 5] },
-        // Whole weekend
-        { days_of_week: [6, 7] },
-      ],
-      weekend: [{ days_of_week: [6, 7] }],
-      // US-style holidays: New Year's Day, Independence Day, Christmas Day.
-      holidays: [
-        { months: [1], days_of_month: [1] },
-        { months: [7], days_of_month: [4] },
-        { months: [12], days_of_month: [25] },
+export const acmeHqMultiDept: Flow = (() => {
+  const f: Flow = {
+    schema_version: "1.0",
+    entity: {
+      type: "auto_attendant",
+      id: "aa_acme_hq",
+      did: "+18005557890",
+      name: "Acme Corp HQ",
+      time_periods: {
+        business_hours: [
+          { time_from: "08:00", time_to: "18:00", days_of_week: [1, 2, 3, 4, 5] },
+        ],
+        after_hours: [
+          // Evenings on weekdays
+          { time_from: "18:00", time_to: "23:59", days_of_week: [1, 2, 3, 4, 5] },
+          { time_from: "00:00", time_to: "08:00", days_of_week: [1, 2, 3, 4, 5] },
+          // Whole weekend
+          { days_of_week: [6, 7] },
+        ],
+        weekend: [{ days_of_week: [6, 7] }],
+        // US-style holidays: New Year's Day, Independence Day, Christmas Day.
+        holidays: [
+          { months: [1], days_of_month: [1] },
+          { months: [7], days_of_month: [4] },
+          { months: [12], days_of_month: [25] },
+        ],
+      },
+      directory: [
+        { extension: "100", name: "Operator", published: true },
+        { extension: "201", name: "Alice Sales", published: true },
+        { extension: "202", name: "Bob Sales", published: true },
+        { extension: "203", name: "Carol Sales", published: true },
+        { extension: "301", name: "David Support", published: true },
+        { extension: "401", name: "Erin Engineering", published: true },
+        { extension: "402", name: "Frank Engineering", published: true },
+        { extension: "403", name: "Grace SRE", published: false },
+        { extension: "501", name: "Hank Billing", published: true },
+        { extension: "502", name: "Ivy Billing", published: true },
+        { extension: "503", name: "Jane Disputes", published: true },
+        { extension: "601", name: "Karen HR Benefits", published: true },
+        { extension: "602", name: "Liam HR Recruiting", published: true },
+        { extension: "603", name: "Mona HR Payroll", published: false },
       ],
     },
-    directory: [
-      { extension: "100", name: "Operator", published: true },
-      { extension: "201", name: "Alice Sales", published: true },
-      { extension: "202", name: "Bob Sales", published: true },
-      { extension: "203", name: "Carol Sales", published: true },
-      { extension: "301", name: "David Support", published: true },
-      { extension: "401", name: "Erin Engineering", published: true },
-      { extension: "402", name: "Frank Engineering", published: true },
-      { extension: "403", name: "Grace SRE", published: false },
-      { extension: "501", name: "Hank Billing", published: true },
-      { extension: "502", name: "Ivy Billing", published: true },
-      { extension: "503", name: "Jane Disputes", published: true },
-      { extension: "601", name: "Karen HR Benefits", published: true },
-      { extension: "602", name: "Liam HR Recruiting", published: true },
-      { extension: "603", name: "Mona HR Payroll", published: false },
+    nodes: [],
+    edges: [],
+    scenarios: [
+      {
+        name: "Business hours · press 1 1 → Alice (Sales new customer)",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: ["1", "1"],
+        answering_behavior: [],
+        expected_terminal: "answered",
+      },
+      {
+        name: "Business hours · press 2 1 → Tier 1 hunt group",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: ["2", "1"],
+        answering_behavior: [],
+        expected_terminal: "answered",
+      },
+      {
+        name: "After hours · press 1 → Sales inactive → voicemail",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T22:00:00-07:00",
+        press_sequence: ["1"],
+        answering_behavior: [],
+        expected_terminal: "voicemail_left",
+      },
+      {
+        name: "After hours · press 2 9 → Support emergency external line",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T22:00:00-07:00",
+        press_sequence: ["2"],
+        answering_behavior: [],
+        expected_terminal: "forwarded_answered",
+      },
+      {
+        name: "Holiday · press 0 → holiday announcement + disconnect",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-12-25T11:00:00-08:00",
+        active_mode: "holidays",
+        press_sequence: ["0"],
+        answering_behavior: [],
+        expected_terminal: "disconnected",
+      },
+      {
+        name: "Business hours · no input → operator",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: [],
+        answering_behavior: [],
+        expected_terminal: "answered",
+      },
+      {
+        name: "Dial-by-name 'BOB' (2-6-2) → Bob Sales (202)",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: ["7", "2", "6", "2"],
+        answering_behavior: [],
+        expected_terminal: "answered",
+      },
+      {
+        name: "Fax tone at ROOT → fax mailbox",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: ["fax"],
+        answering_behavior: [],
+        expected_terminal: "voicemail_left",
+      },
+      {
+        name: "Direct-dial 401 from ROOT (allow_direct_dial)",
+        caller: "+14155550101",
+        callee: "18005557890",
+        time: "2026-05-18T10:00:00-07:00",
+        active_mode: "business_hours",
+        press_sequence: ["4", "0", "1"],
+        answering_behavior: [],
+        expected_terminal: "answered",
+      },
     ],
-  },
-  // splitFanIn duplicates voicemail/disconnect terminals when too many menus
-  // point at them, so the rendered graph reads cleanly instead of every
-  // department dumping into one node.
-  ...splitFanIn(nodes, inferEdges(nodes)),
-  scenarios: [
-    {
-      name: "Business hours · press 1 1 → Alice (Sales new customer)",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: ["1", "1"],
-      answering_behavior: [],
-      expected_terminal: "answered",
-    },
-    {
-      name: "Business hours · press 2 1 → Tier 1 hunt group",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: ["2", "1"],
-      answering_behavior: [],
-      expected_terminal: "answered",
-    },
-    {
-      name: "After hours · press 1 → Sales inactive → voicemail",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T22:00:00-07:00",
-      press_sequence: ["1"],
-      answering_behavior: [],
-      expected_terminal: "voicemail_left",
-    },
-    {
-      name: "After hours · press 2 9 → Support emergency external line",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T22:00:00-07:00",
-      press_sequence: ["2"],
-      answering_behavior: [],
-      expected_terminal: "forwarded_answered",
-    },
-    {
-      name: "Holiday · press 0 → holiday announcement + disconnect",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-12-25T11:00:00-08:00",
-      active_mode: "holidays",
-      press_sequence: ["0"],
-      answering_behavior: [],
-      expected_terminal: "disconnected",
-    },
-    {
-      name: "Business hours · no input → operator",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: [],
-      answering_behavior: [],
-      expected_terminal: "answered",
-    },
-    {
-      name: "Dial-by-name 'BOB' (2-6-2) → Bob Sales (202)",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: ["7", "2", "6", "2"],
-      answering_behavior: [],
-      expected_terminal: "answered",
-    },
-    {
-      name: "Fax tone at ROOT → fax mailbox",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: ["fax"],
-      answering_behavior: [],
-      expected_terminal: "voicemail_left",
-    },
-    {
-      name: "Direct-dial 401 from ROOT (allow_direct_dial)",
-      caller: "+14155550101",
-      callee: "18005557890",
-      time: "2026-05-18T10:00:00-07:00",
-      active_mode: "business_hours",
-      press_sequence: ["4", "0", "1"],
-      answering_behavior: [],
-      expected_terminal: "answered",
-    },
-  ],
-};
+  };
+
+  const explicitEdges = [
+    { id: "e_goodbye", source: "ann_goodbye", sourceHandle: "next", target: "a_disc_goodbye", targetHandle: "in" },
+    { id: "e_holiday", source: "ann_holiday_closing", sourceHandle: "next", target: "a_disc_holiday", targetHandle: "in" },
+  ];
+
+  const split = splitFanIn(nodes, [...inferEdges(nodes), ...explicitEdges]);
+  f.nodes = split.nodes;
+  f.edges = split.edges;
+  return f;
+})();
