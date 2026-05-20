@@ -1,62 +1,105 @@
+/* ==========================================================================
+   FLOW NODE VIEW STYLES
+   --------------------------------------------------------------------------
+   Premium dark-mode aesthetics, kinetic micro-interactions, and high-fidelity
+   typography aligned with Switzer/Outfit display guidelines.
+   ========================================================================== */
+
 .fn-node {
   min-width: 195px;
   max-width: 260px;
-  background: var(--bg-elev);
-  border: 1.5px solid var(--border);
-  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  
+  /* Soft Translucent Border — "The No-Line Rule" */
+  border: 1px solid color-mix(in srgb, var(--node-color, var(--border)) 12%, transparent);
+  border-radius: 12px;
   color: var(--text);
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  
+  /* Elegant Depth & Ambient Glow Shadows */
+  box-shadow: 
+    0 4px 20px -2px rgba(0, 0, 0, 0.3), 
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  
+  /* Smooth Cubic-Bezier Transitions for Kinetic Feedback */
+  transition: 
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Kinetic Elevation Hover State */
+.fn-node:hover {
+  transform: translateY(-4px) scale(1.005);
+  background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+  box-shadow: 
+    0 20px 40px -8px rgba(0, 0, 0, 0.5), 
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 16px -2px color-mix(in srgb, var(--node-color, var(--accent)) 18%, transparent);
+  border-color: color-mix(in srgb, var(--node-color, var(--accent)) 35%, transparent);
+}
+
+/* High-Fidelity Active Selection Outlines */
 .fn-node.is-selected {
   box-shadow:
     0 0 0 2px var(--accent),
-    0 2px 8px rgba(0, 0, 0, 0.45);
+    0 24px 48px -8px rgba(0, 0, 0, 0.55),
+    0 0 20px 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: var(--accent) !important;
+  transform: translateY(-2px);
 }
 
 .fn-node.is-visited {
   box-shadow:
     0 0 0 2px var(--ok),
-    0 2px 8px rgba(0, 0, 0, 0.45);
+    0 24px 48px -8px rgba(0, 0, 0, 0.55),
+    0 0 20px 2px color-mix(in srgb, var(--ok) 30%, transparent);
+  border-color: var(--ok) !important;
+  transform: translateY(-2px);
 }
 
 .fn-node.is-dimmed {
   opacity: 0.35;
 }
 
-/* "Release here to auto-connect" affordance during palette drag-over. Uses a
-   warm accent (gold) distinct from the selection blue so it doesn't read as
-   "selected" on top of an actual selection. */
+/* Warm Accent Drop Target Indicator during Palette drag-over */
 .fn-node.is-drop-target {
   box-shadow:
     0 0 0 3px #ffd166,
-    0 0 12px 2px rgba(255, 209, 102, 0.55),
-    0 2px 8px rgba(0, 0, 0, 0.45);
+    0 0 16px 4px rgba(255, 209, 102, 0.45),
+    0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
-/* Quick-delete trash button — hidden by default, fades in on node hover.
-   Lives outside the header so it overlays the corner regardless of header colour. */
+/* Corner Overlay Trash Button - Glides Up on Hover */
 .fn-node-trash {
   position: absolute;
   top: -8px;
   right: -8px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: var(--bg-elev, #1a1d24);
-  border: 1px solid var(--border, #2a2f3a);
+  background: color-mix(in srgb, var(--bg-elev) 80%, #000);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-  color: var(--err, #ef476f);
+  color: var(--danger, #ef476f);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 100ms, transform 100ms, background 100ms;
+  transition: 
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 5;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .fn-node:hover .fn-node-trash,
@@ -66,24 +109,36 @@
 }
 
 .fn-node-trash:hover {
-  background: var(--err, #ef476f);
+  background: var(--danger, #ef476f);
   color: #fff;
-  transform: scale(1.1);
+  transform: scale(1.15);
+  border-color: transparent;
 }
 
+/* Elegant Node Header with Outfit Display Typography */
 .fn-node-header {
   height: var(--fn-node-header-h);
-  padding: 0 var(--fn-node-pad-x);
-  border-radius: 4px 4px 0 0;
-  /* `color` is set inline by FlowNodeView.tsx via pickHeaderText() so the
-     header text passes WCAG AA on light category colours (action orange,
-     answering amber, condition yellow, etc.). */
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  padding: 0 12px;
+  border-radius: 11px 11px 0 0;
+  
+  /* Switzer/Outfit Display Styling */
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fn-node-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.08) 100%);
+  pointer-events: none;
 }
 
 .fn-node-header-label {
@@ -94,17 +149,13 @@
   white-space: nowrap;
 }
 
-/* Headlined header — the node carries a user-meaningful identifier
-   (menu name, target extension, screening rule name…). The identifier
-   reads as the dominant text; the type label demotes to a small tag
-   above it so cards stop looking identical at a glance. */
+/* Headlined Header Layout — for node instances with user-meaningful titles */
 .fn-node-header.fn-node-header--headlined {
-  /* Taller — two lines of text. */
   height: auto;
   min-height: var(--fn-node-header-h);
-  padding-top: 3px;
-  padding-bottom: 3px;
-  align-items: flex-start;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  align-items: center;
 }
 
 .fn-node-header-stack {
@@ -112,25 +163,29 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  line-height: 1.1;
+  gap: 1px;
+  line-height: 1.15;
 }
 
+/* Wide Tracked-Out Uppercase Category Label */
 .fn-node-header-type {
+  font-family: var(--font-family-display);
   font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.82;
+  opacity: 0.76;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Punchy, Modern Headline */
 .fn-node-header-headline {
-  font-size: 13px;
+  font-family: var(--font-family-display);
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -138,6 +193,7 @@
 
 .fn-node-header-icon {
   flex: 0 0 auto;
+  opacity: 0.95;
 }
 
 .fn-node-header-badges {
@@ -147,19 +203,17 @@
   flex: 0 0 auto;
 }
 
+/* Micro-Start Badge */
 .fn-node-start-chip {
-  /* `background` and `color` are set inline from FlowNodeView.tsx:
-       background = pickHeaderText(def.color)   // inverse of header bg
-       color      = def.color                   // header bg
-     This pairs the chip with the same contrast guarantee the header already has,
-     so "START" is legible across all category colours. */
-  font-size: 11px;
-  font-weight: 700;
+  font-family: var(--font-family-display);
+  font-size: 9px;
+  font-weight: 800;
   letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 999px;
+  padding: 2px 6px;
+  border-radius: 4px;
   white-space: nowrap;
   flex: 0 0 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .fn-node-badge {
@@ -168,9 +222,11 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  font-size: 12px;
-  font-weight: 700;
+  font-family: var(--font-family-display);
+  font-size: 11px;
+  font-weight: 800;
   color: var(--text-on-status);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .fn-node-badge-error {
@@ -181,43 +237,61 @@
   background: var(--warn);
 }
 
+/* Glassmorphic Unresolved Comment Badge */
 .fn-node-badge-comment {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
   color: inherit;
   border-radius: 999px;
-  padding: 1px 6px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 2px 6px;
+  font-family: var(--font-family-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   width: auto;
   height: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .fn-node-body {
-  padding: var(--fn-node-pad-y) var(--fn-node-pad-x);
-  line-height: 1.35;
+  padding: 10px 12px 12px;
+  line-height: 1.4;
 }
 
+/* High-Contrast Dictionary Layout */
 .fn-node-fields {
   display: grid;
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  column-gap: 8px;
-  row-gap: 2px;
+  column-gap: 10px;
+  row-gap: 3px;
   align-items: baseline;
 }
 
+/* Microtracked Uppercase Keys */
 .fn-node-field__key {
   color: var(--text-dim);
   text-align: right;
-  font-weight: 500;
-  font-size: 13px;
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   white-space: nowrap;
   line-height: var(--fn-node-row-h);
+  opacity: 0.78;
 }
 
+/* Crispy, Semi-Bold Values */
 .fn-node-field__value {
   color: var(--text);
-  font-weight: 500;
-  font-size: 14px;
+  font-family: var(--font-family-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -225,42 +299,56 @@
   line-height: var(--fn-node-row-h);
 }
 
+/* Elegant Tint-Backdrop Status Chips */
 .fn-node-chip {
   display: inline-block;
-  padding: 0 6px;
+  padding: 1px 7px;
   border-radius: 999px;
   background: var(--bg-elev-2);
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 12px;
-  line-height: 14px;
-  font-weight: 500;
+  font-family: var(--font-family-display);
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: 600;
   letter-spacing: 0.02em;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: baseline;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .fn-node-chip--on {
   color: var(--ok);
-  border-color: color-mix(in srgb, var(--ok) 40%, transparent);
+  background: color-mix(in srgb, var(--ok) 6%, var(--bg-elev-2));
+  border-color: color-mix(in srgb, var(--ok) 25%, transparent);
 }
 
 .fn-node-chip--off {
   color: var(--text-dim);
+  background: color-mix(in srgb, var(--text-dim) 5%, var(--bg-elev-2));
+  border-color: color-mix(in srgb, var(--text-dim) 18%, transparent);
 }
 
 .fn-node-chip--warn {
   color: var(--warn);
-  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
+  background: color-mix(in srgb, var(--warn) 6%, var(--bg-elev-2));
+  border-color: color-mix(in srgb, var(--warn) 25%, transparent);
 }
 
+/* Linear Gradient Fading Separator — "The No-Line Rule" */
 .fn-node-divider {
   height: 1px;
-  background: var(--border);
-  margin: 2px 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--border) 40%, transparent) 15%,
+    color-mix(in srgb, var(--border) 40%, transparent) 85%,
+    transparent 100%
+  );
+  margin: 6px 0;
 }
 
 .fn-node-ports {
@@ -282,7 +370,9 @@
 }
 
 .fn-node-port-row__label {
-  font-size: 12px;
+  font-family: var(--font-family-display);
+  font-size: 11.5px;
+  font-weight: 500;
   color: var(--text-dim);
   white-space: nowrap;
   overflow: hidden;
@@ -292,24 +382,56 @@
 
 .fn-node-port-row__label--menu {
   color: var(--text);
+  font-weight: 600;
 }
 
-/* React Flow handle override — bigger and clearer than the default. */
+/* Kinetic Handle Pulse Keyframes */
+@keyframes handle-pulse {
+  0% {
+    box-shadow: 
+      0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent),
+      0 0 0 0 var(--accent);
+  }
+  70% {
+    box-shadow: 
+      0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent),
+      0 0 8px var(--accent);
+  }
+  100% {
+    box-shadow: 
+      0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent),
+      0 0 0 0 var(--accent);
+  }
+}
+
+/* Overriding React Flow Handles — Sleek Glowing Orbs */
 .react-flow__handle {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   background: var(--bg-elev);
   border: 2px solid var(--text-dim);
-  transition: border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
 }
 
 .react-flow__handle:hover,
 .react-flow__handle.connecting,
 .react-flow__handle.connectingfrom,
 .react-flow__handle.connectingto {
-  border-color: var(--accent);
-  background: var(--accent);
-  transform: scale(1.25);
+  border-color: var(--accent) !important;
+  background: var(--bg-elev) !important;
+  transform: scale(1.4);
+  box-shadow: 
+    0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent),
+    0 0 12px var(--accent);
+  animation: handle-pulse 1.5s infinite;
+}
+
+.react-flow__edge-path {
+  stroke: var(--text-dim);
+  stroke-width: 2.5;
+  transition: stroke-width 0.25s ease, stroke 0.25s ease;
 }
 
 .react-flow__handle.source {
@@ -324,69 +446,83 @@
   border-color: var(--accent);
 }
 
-
-
-/* Premium pill containers for menu options */
+/* Premium Dynamic-Colored Option Pills for Menus */
 .fn-menu-option-pill {
   position: relative;
   display: flex;
   align-items: center;
-  margin: 5px 10px;
-  padding: 5px 28px 5px 12px;
-  /* Extra right padding for the nested handle */
-  border: 1.2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  margin: 6px 12px;
+  padding: 5px 30px 5px 14px;
+  
+  /* Harmonize with parent node's dynamic semantic color */
+  border: 1px solid color-mix(in srgb, var(--node-color, var(--accent)) 25%, transparent);
   border-radius: 9999px;
-  background: color-mix(in srgb, var(--accent) 4%, var(--bg-elev));
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  background: color-mix(in srgb, var(--node-color, var(--accent)) 3%, var(--bg-elev-2));
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: 
+    border-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .fn-menu-option-pill:hover {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-elev-2));
-  box-shadow: 0 2px 6px rgba(79, 140, 255, 0.15);
+  border-color: color-mix(in srgb, var(--node-color, var(--accent)) 60%, transparent);
+  background: color-mix(in srgb, var(--node-color, var(--accent)) 8%, var(--bg-elev));
+  box-shadow: 
+    0 4px 12px color-mix(in srgb, var(--node-color, var(--accent)) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transform: translateX(1px);
 }
 
-/* Label of the option inside the pill */
 .fn-menu-option-label {
+  font-family: var(--font-family-display);
   font-size: 12px;
-  font-weight: 500;
-  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--node-color, var(--accent)) 90%, var(--text));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90px;
+  max-width: 110px;
 }
 
-/* Integrated inner React Flow handle (dot) */
+/* Integrated Dynamic-Glow Inner Source Handles */
 .react-flow__handle.fn-menu-inner-handle {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  border: none;
+  border: 1.5px solid var(--bg-elev-2);
   cursor: crosshair;
   pointer-events: auto;
   z-index: 2;
-  transition: transform 0.12s ease, background-color 0.12s ease;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--node-color, var(--accent)) 40%, transparent);
+  transition: 
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    background-color 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .react-flow__handle.fn-menu-inner-handle:hover,
 .react-flow__handle.fn-menu-inner-handle.connecting,
 .react-flow__handle.fn-menu-inner-handle.connectingfrom,
 .react-flow__handle.fn-menu-inner-handle.connectingto {
-  background: var(--accent) !important;
-  transform: translateY(-50%) scale(1.35) !important;
+  background: var(--node-color, var(--accent)) !important;
+  border-color: var(--bg-elev) !important;
+  transform: translateY(-50%) scale(1.4) !important;
+  box-shadow: 
+    0 0 0 4px color-mix(in srgb, var(--node-color, var(--accent)) 25%, transparent),
+    0 0 8px var(--node-color, var(--accent));
 }
 
-/* Handle shape variants — let users distinguish digit / fax / no_input /
-   inactive at a glance, including when colour-blind. The colour still
-   reinforces the meaning via inline backgroundColor. */
+/* Shape-Coded Handle Variants for Enhanced Accessibility & Glancability */
 
-/* Default circle — no class needed, but defined so explicit `fn-handle-shape--circle`
-   stays a no-op rather than removing the existing border-radius. */
 .react-flow__handle.fn-handle-shape--circle {
   border-radius: 50%;
 }
@@ -397,8 +533,6 @@
 
 .react-flow__handle.fn-handle-shape--diamond {
   border-radius: 2px;
-  /* Diamond = a square rotated 45°. The pill anchors the handle via
-     `transform: translateY(-50%)` at top:50%; we compose rotation on top. */
   transform: translateY(-50%) rotate(45deg);
 }
 
@@ -406,15 +540,12 @@
 .react-flow__handle.fn-handle-shape--diamond.connecting,
 .react-flow__handle.fn-handle-shape--diamond.connectingfrom,
 .react-flow__handle.fn-handle-shape--diamond.connectingto {
-  transform: translateY(-50%) rotate(45deg) scale(1.35) !important;
+  transform: translateY(-50%) rotate(45deg) scale(1.4) !important;
 }
 
 .react-flow__handle.fn-handle-shape--ring {
   border-radius: 50%;
-  /* "Open" ring: 2px solid border in the accent colour, hollow interior.
-     The inline backgroundColor that paints the other shapes is overridden
-     here so the ring reads as outline-only. */
   background: transparent !important;
-  box-shadow: inset 0 0 0 2px currentColor;
-  color: #ffb454; /* matches inactive edge */
+  box-shadow: inset 0 0 0 2.5px currentColor;
+  color: #ffb454;
 }

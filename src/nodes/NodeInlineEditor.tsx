@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useFlowStore } from "@/state/store";
 import { FIELDS, type FieldDef } from "@/inspector/fields";
 import { getAtPath, setAtPath } from "@/inspector/paths";

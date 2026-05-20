@@ -64,6 +64,18 @@ export function Shell() {
   const entityId = useFlowStore((s) => s.entity.id);
   const matchedFixture = FIXTURES.find((f) => f.flow.entity.id === entityId);
 
+  // Clear trace if the simulator panel is collapsed or closed.
+  useEffect(() => {
+    if (!simOpen) {
+      setTrace(null);
+    }
+  }, [simOpen, setTrace]);
+
+  // Clear trace if the active flow entity changes (e.g. preset/fixture switch).
+  useEffect(() => {
+    setTrace(null);
+  }, [entityId, setTrace]);
+
   const pastStatesLen = useStore(useFlowStore.temporal, (s) => s.pastStates.length);
   const futureStatesLen = useStore(useFlowStore.temporal, (s) => s.futureStates.length);
   const undo = () => useFlowStore.temporal.getState().undo();
@@ -308,7 +320,7 @@ export function Shell() {
         </button>
         {simOpen && (
           <div className="shell-simdrawer-body">
-            <SimulatorPanel onTrace={setTrace} />
+            <SimulatorPanel onTrace={setTrace} onClose={() => setSimOpen(false)} />
           </div>
         )}
       </section>

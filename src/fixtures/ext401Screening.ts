@@ -17,6 +17,16 @@ export const ext401Screening: Flow = (() => {
     id: "ext_401",
     extension: "401",
     name: "Sales lead — Dave",
+    time_periods: {
+      business_hours: [
+        { time_from: "08:00", time_to: "17:00", days_of_week: [1, 2, 3, 4, 5] },
+      ],
+      after_hours: [
+        { time_from: "17:00", time_to: "23:59", days_of_week: [1, 2, 3, 4, 5] },
+        { time_from: "00:00", time_to: "08:00", days_of_week: [1, 2, 3, 4, 5] },
+        { days_of_week: [6, 7] },
+      ],
+    },
   },
   nodes: [
     {
@@ -111,6 +121,33 @@ export const ext401Screening: Flow = (() => {
       press_sequence: [],
       answering_behavior: [],
       expected_terminal: "voicemail_left",
+    },
+    {
+      name: "Business hours non-VIP caller → Dave answers",
+      caller: "+12025550199",
+      callee: "401",
+      time: "2026-05-18T10:00:00Z",
+      press_sequence: [],
+      answering_behavior: [],
+      expected_terminal: "answered",
+    },
+    {
+      name: "Business hours non-VIP caller → Dave doesn't answer → Voicemail",
+      caller: "+12025550199",
+      callee: "401",
+      time: "2026-05-18T10:00:00Z",
+      press_sequence: [],
+      answering_behavior: [{ target: "ext_401", outcome: "never_answer" }],
+      expected_terminal: "voicemail_left",
+    },
+    {
+      name: "VIP bypasses After-hours → Dave answers",
+      caller: "+14155550101",
+      callee: "401",
+      time: "2026-05-17T22:00:00Z",
+      press_sequence: [],
+      answering_behavior: [],
+      expected_terminal: "answered",
     },
   ],
   };

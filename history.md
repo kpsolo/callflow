@@ -550,7 +550,26 @@ Decisions worth carrying forward:
   Stored and editable but not currently shown in the trace step output.
 - **Mobile editing.** Read-only on tablets; no mobile editor.
 
-## 14. Reference
+## 14. Typographic Refinement & Visual Polish (2026-05-20)
+
+We completed a comprehensive typographic and visual hierarchy pass on the canvas node cards, aligning strictly with premium dark-mode aesthetics and the Switzer/Outfit display guidelines.
+
+1. **Outfit Display Typography Integration:** Explicitly integrated the global `--font-family-display` (`'Outfit'`) across critical visual touchpoints including node headers, stacked category badges, uppercase keys, inline labels, badges, and action option pills.
+2. **Visual Hierarchy & Rhythm Tuning:**
+   - Primary headlines were styled to look modern and punchy using bold Outfit font weights and a snug `-0.01em` letter spacing with tight line height (`1.15`).
+   - Microtracked labels (like type badges, start chips, and dictionary keys) were styled with letter spacing of `0.05em` to `0.08em` and bold weights to improve structural readability.
+   - Snugged down values to `12.5px` and semi-bold weights for high text density and premium clarity.
+3. **"The No-Line Rule" Transition:** Replaced solid border dividers with a soft linear-gradient fading separator (`transparent` -> translucent border color -> `transparent`) to visually divide sections without harsh solid lines. Card boundaries are delimited by translucent border-color blending (`12%` opacity using `color-mix` with `var(--node-color)`).
+4. **Kinetic Micro-interactions:** Integrated highly responsive micro-animations for hover feedback using a premium cubic-bezier ease (`cubic-bezier(0.2, 0.8, 0.2, 1)`):
+   - Hovering physical nodes shifts them up by `translateY(-4px) scale(1.005)` and generates a custom dynamic glow drop-shadow corresponding to the node's custom semantic color.
+   - Connection handles dynamically scale up by `1.4x` and animate with a soft glowing halo on hover, focus, or active dragging.
+5. **Shape-Coded & Dynamic Color Coordinated Elements:**
+   - Outer option pills and inner connection handles are dynamically styled on a per-node basis using `color-mix` with `var(--node-color)`, achieving perfect visual harmonization instead of relying on a static blue accent.
+   - Connection handles are shape-coded to represent connection semantics: filled circle for digits, square for fax, diamond for no_input, and hollow ring for inactive.
+
+All changes compile perfectly with zero lint warnings or errors, and all 133 integration and unit tests pass cleanly.
+
+## 15. Reference
 
 - Plan: `C:\Users\kpsol\.claude\plans\analyze-docs-and-create-immutable-narwhal.md`
 - Branch: `ui-improvements-2026-05-18`

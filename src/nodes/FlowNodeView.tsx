@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type CSSProperties } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 import { MessageCircle, Trash2 } from "lucide-react";
 import type { FlowNode, NodeKind } from "@/schema";
@@ -20,9 +20,9 @@ type FlowNodeViewProps = NodeProps<FlowNode["data"]>;
 
 // Layout constants — must match the matching CSS custom properties in index.css.
 // Handle positions are computed from these so dot-center === label-center.
-const HEADER_H = 24;       // --fn-node-header-h
-const ROW_H = 16;          // --fn-node-row-h (body summary rows)
-const BODY_PAD_Y = 12;     // 6px top + 6px bottom (--fn-node-pad-y * 2)
+const HEADER_H = 26;       // --fn-node-header-h
+const ROW_H = 20;          // --fn-node-row-h (body summary rows)
+const BODY_PAD_Y = 16;     // 8px top + 8px bottom (--fn-node-pad-y * 2)
 
 function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
   const kind = type as NodeKind;
@@ -80,7 +80,7 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
         (isDropTarget ? " is-drop-target" : "") +
         (traceActive ? (visited ? " is-visited" : " is-dimmed") : "")
       }
-      style={{ borderColor: def.color }}
+      style={{ "--node-color": def.color } as CSSProperties}
       role="group"
       aria-label={`${def.label} node`}
     >

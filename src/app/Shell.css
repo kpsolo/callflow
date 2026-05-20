@@ -10,10 +10,20 @@
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 16px;
   gap: 12px;
-  background: var(--bg-elev);
+  background: rgba(17, 20, 27, 0.8) !important;
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+  z-index: 10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: light) {
+  .shell-topbar {
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
 }
 
 .shell-topbar-cluster {
@@ -28,7 +38,13 @@
 }
 
 .shell-brand {
-  font-size: 15px;
+  font-family: var(--font-family-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #4f8cff 0%, #a180ff 50%, #59d093 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   white-space: nowrap;
 }
 
@@ -42,13 +58,13 @@
 }
 
 .shell-undo-group button:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 .shell-undo-group button:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
   border-left: 0;
 }
 
@@ -56,23 +72,29 @@
    that the simulator is a secondary action sitting next to the fixture
    select, not a primary call-to-action in the centre of the top bar. */
 .shell-sim-btn {
-  background: transparent;
+  background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  color: var(--text);
-  font-weight: 500;
-  padding: 3px 12px;
-  border-radius: 4px;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .shell-sim-btn:hover:not(:disabled) {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-elev-2));
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.1);
 }
 
 .shell-sim-btn.is-on {
   border-color: var(--accent);
-  background: var(--accent-dim);
-  color: var(--text);
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.15);
 }
 
 /* Square icon-only button — used for undo/redo. Same hit area as a text

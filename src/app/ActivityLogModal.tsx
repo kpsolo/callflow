@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, RotateCcw, Bookmark } from "lucide-react";
 import { useCollab, type ActivityEvent, type ActivityKind } from "@/api";
 import { useFlowStore } from "@/state/store";
+import type { Flow } from "@/schema";
 import "./ActivityLogModal.css";
 
 const KIND_LABEL: Record<ActivityKind, string> = {
@@ -111,7 +112,7 @@ export function ActivityLogModal({ onClose }: { onClose: () => void }) {
     if (!confirmRestore) return;
 
     // Restore flow state
-    useFlowStore.getState().loadFlow(snapshot as any);
+    useFlowStore.getState().loadFlow(snapshot as unknown as Flow);
 
     // Record the restore activity event so it's logged in history
     collab.recordActivity({

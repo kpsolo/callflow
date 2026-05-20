@@ -1,66 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #0f1115;
-  --bg-elev: #161a22;
-  --bg-elev-2: #1d222c;
-  --border: #2a2f3a;
-  --text: #e7eaf0;
-  --text-dim: #9aa3b2;
+  --bg: #0b0d11;
+  --bg-elev: #11141b;
+  --bg-elev-2: #181d26;
+  --border: #222834;
+  --text: #f0f2f5;
+  --text-dim: #8b95a5;
   --accent: #4f8cff;
-  --accent-dim: #2a4a8a;
+  --accent-dim: rgba(79, 140, 255, 0.15);
   --danger: #ff5577;
   --warn: #ffb454;
   --info: #4fbcff;
   --ok: #59d093;
-  --dot-grid: #1a1f2a;
-  /* Text colour for pills/badges whose background is a status token
-     (var(--ok|warn|info|danger)) or a saturated category fill. Flips with
-     the theme so it always contrasts: dark on the light-hued dark-theme
-     tokens, light on the deeper light-theme tokens. */
-  --text-on-status: #11161f;
+  --dot-grid: #171c26;
+  /* Text colour for pills/badges whose background is a status token */
+  --text-on-status: #0b0d11;
 
-  /* Flow node internal metrics — shared between FlowNodeView.css and the JS
-     in FlowNodeView.tsx that positions React Flow handles. Keep CSS and JS
-     in sync (constants HEADER_H, ROW_H, PORT_ROW_H in FlowNodeView.tsx). */
-  --fn-node-header-h: 24px;
-  --fn-node-row-h: 16px;
+  /* Flow node internal metrics */
+  --fn-node-header-h: 26px;
+  --fn-node-row-h: 20px;
   --fn-node-port-row-h: 18px;
-  --fn-node-pad-x: 8px;
-  --fn-node-pad-y: 6px;
+  --fn-node-pad-x: 10px;
+  --fn-node-pad-y: 8px;
 
-  --font-family: 'Roboto', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-family-display: 'Outfit', var(--font-family);
 
   font-family: var(--font-family);
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.5;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
 }
 
-/* Light palette — applied when the browser/OS prefers light. The portal
-   will eventually drive theme selection explicitly; until then we follow
-   `prefers-color-scheme` so the embed matches its host chrome. */
+/* Light palette */
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #f7f8fa;
+    --bg: #f5f6f8;
     --bg-elev: #ffffff;
-    --bg-elev-2: #eef0f4;
-    --border: #d4d8e0;
-    --text: #11161f;
-    --text-dim: #5a6371;
-    /* Status / accent tokens darkened from the dark-theme palette so they meet
-       WCAG AA (≥4.5:1) when used as foreground text on --bg-elev-2 chips and
-       on --bg surfaces. Dark-theme equivalents (saturated mid-tones) would
-       fall to ~3.8:1 here. */
-    --accent: #2964cf;
-    --accent-dim: #c7d8f7;
-    --danger: #b62244;
-    --warn: #8a5800;
-    --info: #1372a8;
-    --ok: #137a4d;
-    --dot-grid: #d4d8e0;
+    --bg-elev-2: #eaedf2;
+    --border: #cbd2db;
+    --text: #0f1219;
+    --text-dim: #5c6674;
+    --accent: #2662d9;
+    --accent-dim: rgba(38, 98, 217, 0.12);
+    --danger: #d9264c;
+    --warn: #8f5d00;
+    --info: #107bb5;
+    --ok: #108552;
+    --dot-grid: #cbd2db;
     --text-on-status: #ffffff;
   }
 }
@@ -79,23 +69,50 @@ body,
   overflow: hidden;
 }
 
-button {
-  font: inherit;
-  color: inherit;
-  background: var(--bg-elev-2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 10px;
-  cursor: pointer;
+/* Custom premium scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-button:hover {
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+button {
+  font: inherit;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+button:hover:not(:disabled) {
   background: var(--bg-elev);
   border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.12);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -103,20 +120,30 @@ input,
 select,
 textarea {
   font: inherit;
-  color: inherit;
-  background: var(--bg);
+  color: var(--text);
+  background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 8px;
+  border-radius: 6px;
+  padding: 6px 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 select {
   font-size: 13px;
+  cursor: pointer;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 1px solid var(--accent);
-  outline-offset: 0;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  background: var(--bg-elev);
 }

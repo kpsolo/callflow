@@ -1,7 +1,7 @@
 .palette {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .palette-search {
@@ -10,21 +10,29 @@
 
 .palette-search-input {
   width: 100%;
-  padding: 4px 8px;
+  padding: 8px 12px;
   font-size: 13px;
-  background: var(--bg);
+  background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
   color: var(--text);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .palette-search-input::placeholder {
   color: var(--text-dim);
 }
 
+.palette-search-input:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+}
+
 .palette-search-input:focus {
   outline: none;
   border-color: var(--accent);
+  background: var(--bg);
+  box-shadow: 0 0 0 3px var(--accent-dim), inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .palette-search-results {
@@ -34,15 +42,16 @@
 
 .palette-item-cat {
   display: block;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-top: 1px;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
 }
 
 .palette-section {
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 .palette-section-header {
@@ -55,65 +64,80 @@
   border: none;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
-  padding: 4px 0;
-  color: var(--text);
+  padding: 6px 0;
+  color: var(--text-dim);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  transition: all 0.15s ease;
 }
 
 .palette-section-header:hover {
-  color: var(--accent);
+  color: var(--text);
+  border-bottom-color: var(--accent);
 }
 
 .palette-section-count {
   color: var(--text-dim);
   font-weight: 400;
+  background: var(--bg-elev-2);
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-size: 10px;
+  border: 1px solid var(--border);
 }
 
 .palette-list {
   list-style: none;
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .palette-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
+  gap: 10px;
+  padding: 6px 10px;
   background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: grab;
   text-align: left;
-  font-size: 14px;
+  font-size: 13.5px;
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .palette-item:hover {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
   background: var(--bg-elev);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .palette-item:active {
   cursor: grabbing;
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .palette-item.is-demoted {
-  opacity: 0.45;
+  opacity: 0.5;
 }
 
 .palette-item.is-demoted:hover {
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .palette-section.is-offpattern .palette-section-header {
   color: var(--text-dim);
+  opacity: 0.7;
 }
 
 /* While the user is dragging a connection out of a node's handle, palette items
@@ -126,8 +150,8 @@
 .palette--connect-armed .palette-item:hover {
   border-color: #ffd166;
   background: var(--bg-elev);
-  box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.35);
-  transform: translateX(2px);
+  box-shadow: 0 4px 12px rgba(255, 209, 102, 0.15), 0 0 0 3px rgba(255, 209, 102, 0.25);
+  transform: translateY(-1px) translateX(2px);
 }
 
 .palette-item-color {
@@ -139,6 +163,11 @@
 
 .palette-item-icon {
   flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+
+.palette-item:hover .palette-item-icon {
+  transform: scale(1.05);
 }
 
 .palette-item-label {
@@ -152,8 +181,8 @@
    (no toggle), dashed underline so it visually separates from the regular
    category sections without competing with them. */
 .palette-section--recent {
-  padding-bottom: 6px;
-  margin-bottom: 4px;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
   border-bottom: 1px dashed var(--border);
 }
 
@@ -162,12 +191,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 0;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
   color: var(--accent);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: default;
 }

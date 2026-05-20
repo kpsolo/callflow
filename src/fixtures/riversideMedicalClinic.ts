@@ -349,5 +349,15 @@ export const riversideMedicalClinic: Flow = {
       answering_behavior: [],
       expected_terminal: "answered",
     },
+    {
+      name: "Fax tone at ROOT → Secure fax mailbox",
+      caller: "+14155550100",
+      callee: "18005552273",
+      time: "2026-05-18T10:00:00-07:00",
+      active_mode: "business_hours",
+      press_sequence: ["fax"],
+      answering_behavior: [],
+      expected_terminal: "voicemail_left",
+    },
   ],
 };

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import type { FlowNode, NodeKind, NodeOf } from "@/schema";
 
 type SummaryFn<K extends NodeKind> = (data: NodeOf<K>["data"]) => React.ReactNode;

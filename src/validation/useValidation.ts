@@ -7,9 +7,10 @@ export function useValidation(): Issue[] {
   const nodes = useFlowStore((s) => s.nodes);
   const edges = useFlowStore((s) => s.edges);
   const entity = useFlowStore((s) => s.entity);
-  // Re-run when any of these change.
-  void nodes;
-  void edges;
-  void entity;
-  return useMemo(() => validate(exportFlow(), nodes), [exportFlow, nodes, edges, entity]);
+  return useMemo(() => {
+    // Re-run when any of these change.
+    void edges;
+    void entity;
+    return validate(exportFlow(), nodes);
+  }, [exportFlow, nodes, edges, entity]);
 }
