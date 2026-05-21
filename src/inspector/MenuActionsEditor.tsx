@@ -4,6 +4,8 @@ import { useFlowStore } from "@/state/store";
 import { getNodeType } from "@/nodes/registry";
 import type { NodeKind } from "@/schema";
 import { useUiStore } from "@/state/uiStore";
+import { PromptPicker } from "./PromptPicker";
+import { usePromptStore } from "@/state/promptStore";
 
 const INPUT_KEYS = [
   "0",
@@ -44,6 +46,9 @@ function ActionRow({ inputKey, action, targetOptions, onChange, onRemove }: Acti
   const selectedTarget = targetOptions.find((t) => t.id === action.target_node_id);
   const playOn = !!action.play_before_action;
 
+  const prompt = usePromptStore((s) => s.prompts.find((p) => p.id === action.play_before_action));
+  const promptName = prompt ? `${prompt.name} (${prompt.id})` : action.play_before_action;
+
   return (
     <li
       className={"actions-row" + (flashed ? " is-hovered-from-canvas" : "")}
@@ -74,7 +79,7 @@ function ActionRow({ inputKey, action, targetOptions, onChange, onRemove }: Acti
             className={"actions-row-speaker" + (playOn ? " is-on" : "")}
             onClick={() => setEditingPrompt((v) => !v)}
             aria-pressed={playOn}
-            title={playOn ? `Play before action: ${action.play_before_action}` : "No prompt"}
+            title={playOn ? `Play before action: ${promptName}` : "No prompt"}
           >
             {playOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
           </button>
@@ -100,27 +105,15 @@ function ActionRow({ inputKey, action, targetOptions, onChange, onRemove }: Acti
 
         {editingPrompt && (
           <div className="actions-row-prompt">
-            <input
-              type="text"
-              autoFocus
-              placeholder="prompt id (leave blank to clear)"
+            <PromptPicker
               value={action.play_before_action ?? ""}
-              onChange={(e) => {
-                const v = e.target.value || undefined;
-                onChange({ ...action, play_before_action: v });
-              }}
-              onBlur={() => setEditingPrompt(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === "Escape") {
-                  (e.target as HTMLInputElement).blur();
-                }
-              }}
+              onChange={(v) => onChange({ ...action, play_before_action: v || undefined })}
             />
           </div>
         )}
         {!editingPrompt && playOn && (
           <div className="actions-row-prompt-display">
-            ▸ plays <code>{action.play_before_action}</code>
+            ▸ plays <code>{promptName}</code>
           </div>
         )}
       </div>

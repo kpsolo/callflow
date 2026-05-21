@@ -9,6 +9,7 @@ export type FieldType =
   | "actions-map"
   | "rules-list"
   | "active-period"
+  | "prompt"
   | "readonly";
 
 export interface SelectOption {
@@ -115,7 +116,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     {
       key: "record_announce_prompt",
       label: "Announcement prompt",
-      type: "text",
+      type: "prompt",
       placeholder: "prompt_id",
     },
     { key: "record_send_to_email", label: "Send to email", type: "email" },
@@ -134,8 +135,8 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       tab: "general",
       inlineHidden: true,
     },
-    { key: "intro_prompt", label: "Intro prompt", type: "text", tab: "prompts" },
-    { key: "menu_prompt", label: "Menu prompt", type: "text", tab: "prompts" },
+    { key: "intro_prompt", label: "Intro prompt", type: "prompt", tab: "prompts" },
+    { key: "menu_prompt", label: "Menu prompt", type: "prompt", tab: "prompts" },
     { key: "actions", label: "Menu actions", type: "actions-map", tab: "actions" },
     {
       key: "no_input.timeout_s",
@@ -146,23 +147,23 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       tab: "errors",
     },
     { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10, tab: "errors" },
-    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text", tab: "errors" },
-    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text", tab: "errors" },
-    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text", tab: "errors" },
+    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "prompt", tab: "errors" },
+    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "prompt", tab: "errors" },
+    { key: "max_fails_prompt", label: "Max-fails prompt", type: "prompt", tab: "errors" },
   ],
   menu_custom: [
     { key: "name", label: "Name", type: "text", tab: "general" },
     { key: "active_period", label: "Active period", type: "active-period", tab: "general" },
     { key: "allow_direct_dial", label: "Allow direct extension dial", type: "toggle", tab: "general" },
     { key: "interdigit_timeout_s", label: "Interdigit timeout (s)", type: "number", tab: "general", inlineHidden: true },
-    { key: "intro_prompt", label: "Intro prompt", type: "text", tab: "prompts" },
-    { key: "menu_prompt", label: "Menu prompt", type: "text", tab: "prompts" },
+    { key: "intro_prompt", label: "Intro prompt", type: "prompt", tab: "prompts" },
+    { key: "menu_prompt", label: "Menu prompt", type: "prompt", tab: "prompts" },
     { key: "actions", label: "Menu actions", type: "actions-map", tab: "actions" },
     { key: "no_input.timeout_s", label: "No-input timeout (s)", type: "number", tab: "errors" },
     { key: "max_input_errors", label: "Max input errors", type: "number", min: 1, max: 10, tab: "errors" },
-    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "text", tab: "errors" },
-    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "text", tab: "errors" },
-    { key: "max_fails_prompt", label: "Max-fails prompt", type: "text", tab: "errors" },
+    { key: "on_timeout_prompt", label: "On-timeout prompt", type: "prompt", tab: "errors" },
+    { key: "on_unavailable_prompt", label: "On-unavailable prompt", type: "prompt", tab: "errors" },
+    { key: "max_fails_prompt", label: "Max-fails prompt", type: "prompt", tab: "errors" },
   ],
   action_transfer: [
     {
@@ -210,10 +211,10 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       placeholder: "+18005551234",
       visibleWhen: (d) => d.mode === "e164",
     },
-    { key: "play_before_action", label: "Play before action", type: "text" },
+    { key: "play_before_action", label: "Play before action", type: "prompt" },
   ],
   action_prompt_extension: [
-    { key: "prompt", label: "Prompt", type: "text" },
+    { key: "prompt", label: "Prompt", type: "prompt" },
     { key: "timeout_s", label: "Timeout (s)", type: "number", min: 1, max: 30 },
     { key: "max_digits", label: "Max digits", type: "number", min: 1, max: 10 },
   ],
@@ -226,14 +227,14 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     },
     { key: "max_digits", label: "Max digits", type: "number", min: 1, max: 10 },
   ],
-  action_disconnect: [{ key: "play_before_action", label: "Play before action", type: "text" }],
-  action_disa: [{ key: "password_prompt", label: "Password prompt", type: "text" }],
+  action_disconnect: [{ key: "play_before_action", label: "Play before action", type: "prompt" }],
+  action_disa: [{ key: "password_prompt", label: "Password prompt", type: "prompt" }],
   action_queue: [{ key: "queue_name", label: "Queue name", type: "text" }],
   action_dial_by_name: [
-    { key: "prompt", label: "Prompt", type: "text" },
+    { key: "prompt", label: "Prompt", type: "prompt" },
     { key: "announce_extensions", label: "Announce extension numbers", type: "toggle" },
   ],
-  action_nop: [{ key: "prompt", label: "Optional prompt", type: "text" }],
+  action_nop: [{ key: "prompt", label: "Optional prompt", type: "prompt" }],
   answering_mode_ext: [
     { key: "mode", label: "Mode", type: "select", options: ANSWERING_EXT_MODES },
     { key: "ring_timeout_s", label: "Ring timeout (s)", type: "number", min: 1, max: 120 },
@@ -284,7 +285,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     },
     { key: "conditions.callee.value", label: "Callee value", type: "text" },
     { key: "action_mode", label: "Action mode", type: "select", options: ANSWERING_EXT_MODES },
-    { key: "play_before_action", label: "Play before action", type: "text" },
+    { key: "play_before_action", label: "Play before action", type: "prompt" },
   ],
   voicemail: [
     { key: "greeting", label: "Greeting", type: "select", options: VM_GREETING },
@@ -313,8 +314,8 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "start_dtmf_code", label: "Start DTMF code", type: "text", placeholder: "*44" },
     { key: "stop_dtmf_code", label: "Stop DTMF code", type: "text", placeholder: "*45" },
     { key: "announce_to_all", label: "Announce to all parties", type: "toggle" },
-    { key: "announce_started_prompt", label: "Started prompt", type: "text" },
-    { key: "announce_stopped_prompt", label: "Stopped prompt", type: "text" },
+    { key: "announce_started_prompt", label: "Started prompt", type: "prompt" },
+    { key: "announce_stopped_prompt", label: "Stopped prompt", type: "prompt" },
     { key: "auto_record_incoming", label: "Auto-record incoming", type: "toggle" },
     { key: "auto_record_redirected", label: "Auto-record redirected", type: "toggle" },
     { key: "format", label: "Output format", type: "select", options: ["wav", "mp3"] },
@@ -365,7 +366,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "label", label: "Label", type: "text" },
   ],
   announcement: [
-    { key: "prompt", label: "Announcement Prompt", type: "text" },
+    { key: "prompt", label: "Announcement Prompt", type: "prompt" },
   ],
   holiday_calendar: [
     { key: "action_mode", label: "Action mode", type: "select", options: ANSWERING_EXT_MODES },
@@ -417,6 +418,6 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       placeholder: "+18005551234",
       visibleWhen: (d) => d.mode === "e164",
     },
-    { key: "play_before_action", label: "Play before action", type: "text" },
+    { key: "play_before_action", label: "Play before action", type: "prompt" },
   ],
 };

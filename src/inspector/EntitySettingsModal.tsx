@@ -26,7 +26,17 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
   const patch = (next: Partial<Entity>) => setEntity({ ...entity, ...next } as Entity);
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Entity settings">
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Entity settings"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+    >
       <div className="modal esm">
         <header>
           <strong>Entity settings — {entity.name}</strong>

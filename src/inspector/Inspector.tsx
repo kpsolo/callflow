@@ -8,6 +8,7 @@ import { getAtPath, setAtPath } from "./paths";
 import { MenuActionsEditor } from "./MenuActionsEditor";
 import { ForwardRulesEditor } from "./ForwardRulesEditor";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
+import { PromptPicker } from "./PromptPicker";
 import { CommentsPanel } from "./CommentsPanel";
 import { EntityInspector } from "./EntityInspector";
 import { useFlowComments } from "@/api";
@@ -228,14 +229,26 @@ function FieldRow({
 
   if (def.type === "active-period") {
     return (
-      <label className="inspector-field">
+      <div className="inspector-field">
         <span className="inspector-field-label">{def.label}</span>
         <ActivePeriodPicker
           value={(value as string | undefined) ?? "always"}
           onChange={(v) => onChange(path, v)}
           nodeKind={nodeKind}
         />
-      </label>
+      </div>
+    );
+  }
+
+  if (def.type === "prompt") {
+    return (
+      <div className="inspector-field">
+        <span className="inspector-field-label">{def.label}</span>
+        <PromptPicker
+          value={(value as string | undefined) ?? ""}
+          onChange={(v) => onChange(path, v)}
+        />
+      </div>
     );
   }
 

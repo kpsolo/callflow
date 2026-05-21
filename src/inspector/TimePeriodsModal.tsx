@@ -87,7 +87,17 @@ export function TimePeriodsModal({ onClose }: { onClose: () => void }) {
   const isAuto = selected ? autoNamed.current.has(selected) : false;
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Time periods">
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Time periods"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+    >
       <div className="modal tpm">
         <header>
           <strong>Time periods — {entity.name}</strong>

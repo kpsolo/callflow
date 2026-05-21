@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { simulate } from "../engine";
 import { mkNode, mkExtFlow, mkAaFlow, resetIds } from "./helpers";
-import type { FlowEdge, SimulatorInput } from "@/schema";
+import type { FlowEdge } from "@/schema";
+import type { SimulatorInput } from "@/simulator/types";
 
 function mkEdge(id: string, source: string, target: string, sourceHandle?: string): FlowEdge {
   return { id, source, target, ...(sourceHandle ? { sourceHandle } : {}) };
@@ -110,7 +111,7 @@ describe("call_forwarding consolidated node", () => {
     const fwd = mkNode("call_forwarding", {
       ring_mode: "sequential",
       rules: [
-        { enabled: true, target_node_id: TARGET, timeout_s: 20, time_check: "always" },
+        { id: "rule_1", enabled: true, target_node_id: TARGET, timeout_s: 20, time_check: "always" },
       ],
     });
     const am = mkNode("answering_mode_ext", { mode: "forward_only" });
@@ -130,7 +131,7 @@ describe("call_forwarding consolidated node", () => {
     const fwd = mkNode("call_forwarding", {
       ring_mode: "sequential",
       rules: [
-        { enabled: true, target_node_id: TARGET, timeout_s: 5, time_check: "always" },
+        { id: "rule_1", enabled: true, target_node_id: TARGET, timeout_s: 5, time_check: "always" },
       ],
     });
     const am = mkNode("answering_mode_ext", { mode: "forward_only" });
@@ -153,7 +154,7 @@ describe("call_forwarding consolidated node", () => {
 describe("holiday_calendar node", () => {
   it("routes to voicemail on a holiday date (via menu action)", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "holiday_1" } },
     });
@@ -196,7 +197,7 @@ describe("holiday_calendar node", () => {
 describe("announcement node", () => {
   it("plays a prompt and proceeds to next node via 'next' edge", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "ann_1" } },
     });
@@ -219,7 +220,7 @@ describe("announcement node", () => {
 
   it("drops the call if no 'next' edge is configured", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "ann_1" } },
     });
@@ -244,7 +245,7 @@ describe("announcement node", () => {
 describe("call_terminal node", () => {
   function makeTerminalFlow(outcome: SimulatorInput["active_mode"] | string) {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "ct_1" } },
     });
@@ -290,7 +291,7 @@ describe("call_terminal node", () => {
 describe("menu_action_transfer node", () => {
   it("plays prompt and routes to target node", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "mat_1" } },
     });
@@ -314,7 +315,7 @@ describe("menu_action_transfer node", () => {
 
   it("supports inline destination configuration (extension)", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "mat_1" } },
     });
@@ -338,7 +339,7 @@ describe("menu_action_transfer node", () => {
 
   it("supports inline destination configuration (e164)", () => {
     const root = mkNode("menu_root", {
-      name: "Main",
+      name: "ROOT",
       active_period: "always",
       actions: { "1": { target_node_id: "mat_1" } },
     });
