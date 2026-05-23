@@ -27,7 +27,7 @@ import {
 } from "./menuEdgeSync";
 
 let idSeq = 1;
-function genId(prefix = "n"): string {
+export function genId(prefix = "n"): string {
   idSeq += 1;
   return `${prefix}_${Date.now().toString(36)}${idSeq.toString(36)}`;
 }

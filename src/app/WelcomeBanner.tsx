@@ -1,47 +1,59 @@
-import { useState } from "react";
+import { Sparkles, MousePointerClick, Play } from "lucide-react";
+import { useFlowStore } from "@/state/store";
+import { FIXTURES } from "@/fixtures";
 import "./WelcomeBanner.css";
 
-const STORAGE_KEY = "cfs.welcome.dismissed.v1";
-
+/**
+ * Empty-state-first welcome: only renders when the canvas has zero nodes,
+ * so it never overlaps real work, and it disappears automatically the moment
+ * the user drops their first node. Two CTAs replace the prior step-list:
+ * load a template (high-ROI for first runs) or import existing JSON.
+ *
+ * The right-click / inspector / simulator discoverability hints have been
+ * promoted to the topbar (Help icon) and the canvas Run bar respectively,
+ * so the empty state stays focused on "start here".
+ */
 export function WelcomeBanner() {
-  const [dismissed, setDismissed] = useState(
-    () => typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEY) === "1",
-  );
-  if (dismissed) return null;
+  const nodeCount = useFlowStore((s) => s.nodes.length);
+  const loadFlow = useFlowStore((s) => s.loadFlow);
+  if (nodeCount > 0) return null;
+
+  const firstFixture = FIXTURES[0];
 
   return (
-    <aside className="welcome" role="note" aria-label="Welcome">
-      <div className="welcome-content">
-        <strong>Welcome to Call Flow Studio.</strong>
-        <ol>
-          <li>
-            <b>Load a fixture</b> from the top-bar dropdown — try{" "}
-            <em>Acme HQ — multi-dept + holidays</em>.
-          </li>
-          <li>
-            <b>Drag nodes</b> from the left palette onto the canvas.{" "}
-            <b>Right-click</b> a node, edge, or empty canvas for actions.
-          </li>
-          <li>
-            <b>Click a node</b> to edit it in the right-hand Inspector.
-          </li>
-          <li>
-            Open the <b>▲ Simulator</b> drawer at the bottom, set inputs, and Run to see the
-            traced path light up on the canvas.
-          </li>
-        </ol>
+    <aside className="welcome" role="note" aria-label="Get started">
+      <div className="welcome-icon" aria-hidden>
+        <Sparkles size={20} />
       </div>
-      <button
-        type="button"
-        className="welcome-dismiss"
-        onClick={() => {
-          window.localStorage.setItem(STORAGE_KEY, "1");
-          setDismissed(true);
-        }}
-        aria-label="Dismiss welcome"
-      >
-        Got it
-      </button>
+      <div className="welcome-content">
+        <strong>This canvas is empty.</strong>
+        <p>
+          Drag a node from the left palette to get started — or load a sample
+          to see how a complete flow looks.
+        </p>
+        <div className="welcome-cta-row">
+          {firstFixture && (
+            <button
+              type="button"
+              className="welcome-cta welcome-cta--primary"
+              onClick={() => {
+                loadFlow(firstFixture.flow);
+                useFlowStore.temporal.getState().clear();
+              }}
+            >
+              <Sparkles size={13} aria-hidden /> Load a sample flow
+            </button>
+          )}
+          <span className="welcome-cta-hint">
+            <MousePointerClick size={13} aria-hidden />
+            Or drag a node from the left
+          </span>
+          <span className="welcome-cta-hint">
+            <Play size={13} aria-hidden />
+            Press Run (top-right) to simulate
+          </span>
+        </div>
+      </div>
     </aside>
   );
 }

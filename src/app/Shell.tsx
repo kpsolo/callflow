@@ -15,6 +15,8 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { FlowSwitcher, type FlowSwitcherOption } from "./FlowSwitcher";
+import { emptyFlow, type Entity } from "@/schema";
 import { Palette } from "@/palette/Palette";
 import { Canvas } from "@/canvas/Canvas";
 import { Inspector } from "@/inspector/Inspector";
@@ -27,6 +29,7 @@ import { SimulatorPanel } from "@/simulator/SimulatorPanel";
 import { ImportDialog } from "@/io/ImportDialog";
 import { downloadJson } from "@/io/exportImport";
 import { useFlowStore } from "@/state/store";
+import { cloneFlowWithFreshIds } from "@/state/cloneFlow";
 import { useTraceStore } from "@/state/traceStore";
 import { useValidation } from "@/validation/useValidation";
 import { hasErrors } from "@/validation/validate";
@@ -61,8 +64,35 @@ export function Shell() {
   const loadFlow = useFlowStore((s) => s.loadFlow);
   const markSaved = useFlowStore((s) => s.markSaved);
   const nodeCount = useFlowStore((s) => s.nodes.length);
-  const entityId = useFlowStore((s) => s.entity.id);
+  const entity = useFlowStore((s) => s.entity);
+  const entityId = entity.id;
   const matchedFixture = FIXTURES.find((f) => f.flow.entity.id === entityId);
+  const entityTypeLabel =
+    entity.type === "auto_attendant" ? "Auto Attendant" : "Extension";
+  const entityNumber =
+    entity.type === "auto_attendant" ? entity.did : entity.extension;
+
+  // Build the switcher option list once. The "custom" sentinel only appears
+  // when the loaded entity isn't backed by a known fixture, so users don't
+  // see a confusing "Custom flow" line for fixture-backed flows.
+  const switcherOptions: FlowSwitcherOption[] = [
+    ...(!matchedFixture
+      ? [
+          {
+            id: "__custom__",
+            flow: useFlowStore.getState().exportFlow(),
+            label: `Custom flow (${entityId})`,
+            current: true,
+          },
+        ]
+      : []),
+    ...FIXTURES.map((f) => ({
+      id: f.flow.entity.id,
+      flow: f.flow,
+      label: f.label,
+      current: !!matchedFixture && matchedFixture.label === f.label,
+    })),
+  ];
 
   // Clear trace if the simulator panel is collapsed or closed.
   useEffect(() => {
@@ -106,54 +136,96 @@ export function Shell() {
   return (
     <div className="shell">
       <header className="shell-topbar">
-        {/* LEFT — entity switcher + open-simulator + lock indicator */}
+        {/* LEFT — the entire identity area IS the flow switcher trigger.
+            Click anywhere on the icon / eyebrow / name / DID / chevron to
+            open the popover. There's no separate brand wordmark or
+            standalone identity block competing for the user's attention. */}
         <div className="shell-topbar-cluster">
-          <strong className="shell-brand">Call Flow Studio</strong>
-          <span className="shell-divider" aria-hidden />
-          <select
-            aria-label="Load fixture"
-            value={matchedFixture?.label ?? "__custom__"}
-            onChange={(e) => {
-              const f = FIXTURES.find((x) => x.label === e.target.value);
-              if (!f) return;
-              // Prefer the user's saved version of this entity over the
-              // pristine fixture, so picking the same entry twice doesn't
-              // wipe their work.
-              if (!restoreSavedForEntity(f.flow.entity.id)) {
-                loadFlow(f.flow);
+          <FlowSwitcher
+            options={switcherOptions}
+            current={{
+              eyebrow: entityTypeLabel,
+              name: entity.name,
+              number: entityNumber,
+              isAA: entity.type === "auto_attendant",
+            }}
+            onSelect={(opt) => {
+              if (opt.id === "__custom__") return;
+              if (!restoreSavedForEntity(opt.flow.entity.id)) {
+                loadFlow(opt.flow);
               }
-              // Reset undo history — keeping it across a fixture switch would
-              // let Ctrl+Z revert into a different entity, which is confusing.
               useFlowStore.temporal.getState().clear();
             }}
-          >
-            {!matchedFixture && (
-              <option value="__custom__">Custom flow ({entityId})</option>
-            )}
-            {FIXTURES.map((f) => (
-              <option key={f.label} value={f.label}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            className={"shell-sim-btn" + (simOpen ? " is-on" : "")}
-            onClick={() => setSimOpen((v) => !v)}
-            aria-pressed={simOpen}
-            title="Open the simulator drawer"
-          >
-            Open simulator
-          </button>
+            onCreateNew={(strategy) => {
+              const id = `${Date.now().toString(36)}_${Math.random()
+                .toString(36)
+                .slice(2, 6)}`;
+
+              if (strategy.kind === "blank") {
+                // From scratch: fresh empty flow with a default entity.
+                const newEntity: Entity =
+                  strategy.entityKind === "auto_attendant"
+                    ? {
+                        type: "auto_attendant",
+                        id: `aa_${id}`,
+                        did: "+10000000000",
+                        name: "New Auto Attendant",
+                        directory: [],
+                      }
+                    : {
+                        type: "extension",
+                        id: `ext_${id}`,
+                        extension: "000",
+                        name: "New Extension",
+                      };
+                loadFlow(emptyFlow(newEntity));
+              } else {
+                // Clone: copy the source flow's nodes/edges/scenarios but
+                // mint a fresh entity stub so the new flow doesn't collide
+                // with the source's identity. Entity type is inherited from
+                // the source — cloning across types would mismatch node
+                // kinds (menu nodes don't belong in an extension flow).
+                const src = switcherOptions.find(
+                  (o) => o.id === strategy.sourceFlowId,
+                )?.flow;
+                if (!src) return;
+                const newEntity: Entity =
+                  src.entity.type === "auto_attendant"
+                    ? {
+                        type: "auto_attendant",
+                        id: `aa_${id}`,
+                        did: src.entity.did,
+                        name: `Copy of ${src.entity.name}`,
+                        directory: src.entity.directory,
+                        time_periods: src.entity.time_periods,
+                        preferred_ivr_language: src.entity.preferred_ivr_language,
+                      }
+                    : {
+                        type: "extension",
+                        id: `ext_${id}`,
+                        extension: src.entity.extension,
+                        name: `Copy of ${src.entity.name}`,
+                        time_periods: src.entity.time_periods,
+                        preferred_ivr_language: src.entity.preferred_ivr_language,
+                      };
+                // Re-mint node/edge ids so the clone doesn't collide with the
+                // source if both ever end up loaded together (compare view,
+                // multi-flow workspace, paste-between-flows).
+                loadFlow({
+                  ...cloneFlowWithFreshIds(src),
+                  entity: newEntity,
+                });
+              }
+              useFlowStore.temporal.getState().clear();
+              setEntityOpen(true);
+            }}
+          />
         </div>
 
         {/* CENTER — reserved (empty for now). */}
         <div className="shell-topbar-cluster" />
 
-        {/* RIGHT — issues pill (only when issues exist), Save (mocked),
-            undo/redo, overflow, presence. The collab LockIndicator is
-            intentionally hidden for now — re-enable once real-time
-            collaboration lands. */}
+        {/* RIGHT — issues pill, Save, undo/redo, Help, overflow. */}
         <div className="shell-topbar-cluster">
           <StatusPill />
           <SaveButton />
@@ -179,6 +251,17 @@ export function Shell() {
               <Redo2 size={16} aria-hidden />
             </button>
           </div>
+          {/* Help promoted out of the overflow menu — it's the kind of
+              affordance you want one click away, not three. */}
+          <button
+            type="button"
+            className="shell-icon-btn"
+            onClick={() => setHelpOpen(true)}
+            title="Help / shortcuts (?)"
+            aria-label="Help"
+          >
+            <HelpCircle size={16} aria-hidden />
+          </button>
           <OverflowMenu
             items={[
               {
@@ -232,12 +315,6 @@ export function Shell() {
                   },
                 ],
               },
-              { divider: true, label: "" },
-              {
-                label: "Help / shortcuts",
-                icon: <HelpCircle size={14} />,
-                onClick: () => setHelpOpen(true),
-              },
             ]}
           />
         </div>
@@ -253,7 +330,11 @@ export function Shell() {
 
         <main className="shell-canvas" aria-label="Canvas">
           <ReactFlowProvider>
-            <Canvas />
+            <Canvas
+              simulatorOpen={simOpen}
+              onOpenSimulator={() => setSimOpen(true)}
+              onCloseSimulator={() => setSimOpen(false)}
+            />
           </ReactFlowProvider>
           <WelcomeBanner />
         </main>

@@ -203,16 +203,41 @@
   color: var(--accent);
 }
 
+/* Stacked-by-default: label on top of input. At narrow inspector widths
+   (default 320px) the prior 120px label column squeezed inputs to ~190px
+   which truncated paths, prompt names, and target ids. */
 .inspector-field {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  align-items: center;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
 }
 
 .inspector-field-label {
-  font-size: 13px;
+  font-size: var(--fs-11);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--text-dim);
+}
+
+/* When the user has resized the inspector wider, switch to the airier
+   two-column grid. 420px is the breakpoint where label + value can both
+   breathe. */
+@container shellinspector (min-width: 420px) {
+  .inspector-field {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .inspector-field-label {
+    text-transform: none;
+    font-size: var(--fs-13);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
 }
 
 .inspector-field input[type="text"],

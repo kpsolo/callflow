@@ -16,13 +16,12 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   z-index: 10;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-1);
 }
 
 @media (prefers-color-scheme: light) {
   .shell-topbar {
-    background: rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.85) !important;
   }
 }
 
@@ -37,16 +36,10 @@
   justify-content: flex-end;
 }
 
-.shell-brand {
-  font-family: var(--font-family-display);
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #4f8cff 0%, #a180ff 50%, #59d093 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  white-space: nowrap;
-}
+/* Identity trigger styles live in FlowSwitcher.css now — the whole
+   identity block is the switcher's trigger button. */
+
+/* Flow switcher (popover) styles live in FlowSwitcher.css. */
 
 .shell-undo-group {
   display: flex;
@@ -58,63 +51,40 @@
 }
 
 .shell-undo-group button:first-child {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
 }
 
 .shell-undo-group button:last-child {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
   border-left: 0;
 }
 
-/* Outline / ghost variant — used for the "Open simulator" affordance now
-   that the simulator is a secondary action sitting next to the fixture
-   select, not a primary call-to-action in the centre of the top bar. */
-.shell-sim-btn {
-  background: var(--bg-elev-2);
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.shell-sim-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--text);
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg-elev-2));
-  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.1);
-}
-
-.shell-sim-btn.is-on {
-  border-color: var(--accent);
-  background: var(--accent-dim) !important;
-  color: var(--accent) !important;
-  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.15);
-}
-
-/* Square icon-only button — used for undo/redo. Same hit area as a text
-   button but the glyph carries the meaning and the title attribute keeps
-   the hover hint. */
+/* Square icon-only button — used for undo/redo/help. Bumped to 32px for
+   comfortable mouse targeting (was 28px, below desktop guidance). */
 .shell-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   background: transparent;
   border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   color: var(--text);
 }
 
 .shell-icon-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.shell-icon-btn:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
 }
 
 .shell-icon-btn:disabled {
@@ -219,6 +189,7 @@
 
 .shell-inspector {
   border-left: 1px solid var(--border);
+  container: shellinspector / inline-size;
 }
 
 .shell-canvas {
@@ -279,9 +250,19 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 6px 12px;
+  padding: 10px 12px;
+  min-height: 36px;
+  font-weight: 600;
   color: var(--text-dim);
   border-bottom: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shell-simdrawer-toggle:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .shell-simdrawer.is-open .shell-simdrawer-toggle {

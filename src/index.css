@@ -9,13 +9,40 @@
   --text-dim: #8b95a5;
   --accent: #4f8cff;
   --accent-dim: rgba(79, 140, 255, 0.15);
+  --accent-strong: rgba(79, 140, 255, 0.45);
   --danger: #ff5577;
   --warn: #ffb454;
-  --info: #4fbcff;
+  /* --info pushed toward teal so it no longer collides with --accent blue */
+  --info: #22c5e3;
   --ok: #59d093;
   --dot-grid: #171c26;
   /* Text colour for pills/badges whose background is a status token */
   --text-on-status: #0b0d11;
+
+  /* ------- Design tokens (the single source of truth for shape & motion) ----- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-3: 0 16px 32px -8px rgba(0, 0, 0, 0.35);
+  --shadow-focus: 0 0 0 3px var(--accent-strong);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 0.15s var(--ease-out);
+  --motion-base: 0.2s var(--ease-out);
+
+  /* Type scale — tightened from 11 sizes to 7 */
+  --fs-9: 9px;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
 
   /* Flow node internal metrics */
   --fn-node-header-h: 26px;
@@ -46,12 +73,18 @@
     --text-dim: #5c6674;
     --accent: #2662d9;
     --accent-dim: rgba(38, 98, 217, 0.12);
+    --accent-strong: rgba(38, 98, 217, 0.35);
     --danger: #d9264c;
     --warn: #8f5d00;
-    --info: #107bb5;
+    /* teal-leaning info in light mode too */
+    --info: #0f8aa6;
     --ok: #108552;
     --dot-grid: #cbd2db;
     --text-on-status: #ffffff;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-3: 0 16px 32px -8px rgba(0, 0, 0, 0.16);
   }
 }
 
@@ -94,17 +127,24 @@ button {
   color: var(--text);
   background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 12px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--motion-base), border-color var(--motion-base),
+    color var(--motion-base), box-shadow var(--motion-base), transform var(--motion-fast);
+  box-shadow: var(--shadow-1);
 }
 
 button:hover:not(:disabled) {
   background: var(--bg-elev);
   border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.12);
+  box-shadow: var(--shadow-2);
+}
+
+button:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
 }
 
 button:active:not(:disabled) {
@@ -123,13 +163,14 @@ textarea {
   color: var(--text);
   background: var(--bg-elev-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 10px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color var(--motion-base), border-color var(--motion-base),
+    box-shadow var(--motion-base);
 }
 
 select {
-  font-size: 13px;
+  font-size: var(--fs-13);
   cursor: pointer;
 }
 
@@ -141,9 +182,12 @@ textarea:hover {
 
 input:focus,
 select:focus,
-textarea:focus {
+textarea:focus,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: var(--shadow-focus);
   background: var(--bg-elev);
 }

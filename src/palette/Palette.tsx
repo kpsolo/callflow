@@ -198,6 +198,14 @@ function PaletteItem({
 }) {
   const primary = isPrimaryFor(def, entityType);
   const Icon = getNodeIcon(def.kind);
+  // Off-pattern items used to be dimmed to 50% opacity, which reads as
+  // "disabled". Show a small tag instead — same signal, full readability.
+  const offPatternFor =
+    !primary && def.primaryFor
+      ? def.primaryFor
+          .map((e) => (e === "auto_attendant" ? "AA" : "Ext"))
+          .join("/")
+      : null;
   return (
     <li>
       <button
@@ -219,6 +227,11 @@ function PaletteItem({
             <span className="palette-item-cat">{CATEGORY_LABELS[def.category]}</span>
           )}
         </span>
+        {offPatternFor && (
+          <span className="palette-item-tag" title="Mainly used for other entity types">
+            {offPatternFor}
+          </span>
+        )}
       </button>
     </li>
   );

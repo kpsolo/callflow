@@ -127,12 +127,24 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.palette-item.is-demoted {
-  opacity: 0.5;
+/* Off-pattern items keep full opacity (so they don't read as "disabled")
+   and instead carry a small tag indicating their primary entity type. */
+.palette-item.is-demoted .palette-item-label {
+  color: var(--text-dim);
 }
 
-.palette-item.is-demoted:hover {
-  opacity: 0.9;
+.palette-item-tag {
+  font-family: var(--font-family-display);
+  font-size: var(--fs-9);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+  flex: 0 0 auto;
 }
 
 .palette-section.is-offpattern .palette-section-header {

@@ -17,7 +17,9 @@ import {
   Maximize2,
   Merge,
   Minimize2,
+  Play,
   Plus,
+  RotateCcw,
   Trash2,
 } from "lucide-react";
 import { useFlowStore } from "@/state/store";
@@ -29,6 +31,8 @@ import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 import { styleEdges } from "./edgeStyle";
 import { FlowEdge } from "./FlowEdge";
 import { useUiStore } from "@/state/uiStore";
+import { useTraceStore } from "@/state/traceStore";
+import { simulate } from "@/simulator/engine";
 import { MenuKeyPicker } from "./MenuKeyPicker";
 import "./Canvas.css";
 
@@ -40,7 +44,20 @@ export const PALETTE_DRAG_MIME = "application/x-callflow-node-kind";
 
 
 
-export function Canvas() {
+export interface CanvasProps {
+  /** True when the simulator drawer is open — controls the Run bar's "Hide trace" toggle. */
+  simulatorOpen?: boolean;
+  /** Called when the canvas Run button wants to surface the trace drawer. */
+  onOpenSimulator?: () => void;
+  /** Called when the user dismisses the trace from the canvas Run bar. */
+  onCloseSimulator?: () => void;
+}
+
+export function Canvas({
+  simulatorOpen = false,
+  onOpenSimulator,
+  onCloseSimulator,
+}: CanvasProps = {}) {
   const nodes = useFlowStore((s) => s.nodes);
   const edges = useFlowStore((s) => s.edges);
   const onNodesChange = useFlowStore((s) => s.onNodesChange);
@@ -237,6 +254,46 @@ export function Canvas() {
   const handleFitView = useCallback(() => {
     instanceRef.current?.fitView({ padding: 0.15, duration: 250 });
   }, []);
+
+  // Canvas-level Run — promotes the simulator from a hidden drawer to a
+  // first-class verification action. It runs with sensible defaults (or the
+  // first saved scenario if one exists) and surfaces the trace by opening
+  // the drawer. The full input controls still live in the drawer for power
+  // users; this is the "just run it" shortcut.
+  const exportFlow = useFlowStore((s) => s.exportFlow);
+  const scenarios = useFlowStore((s) => s.scenarios);
+  const setTrace = useTraceStore((s) => s.setTrace);
+  const traceTerminal = useTraceStore((s) => s.trace?.terminal ?? null);
+
+  const handleRun = useCallback(() => {
+    const flow = exportFlow();
+    const first = scenarios[0];
+    const input = first
+      ? {
+          caller: first.caller,
+          callee: first.callee,
+          time: first.time,
+          active_mode: first.active_mode,
+          press_sequence: first.press_sequence,
+          active_periods: ["always", "business_hours"],
+          answering_behavior: first.answering_behavior,
+        }
+      : {
+          caller: "+14155550101",
+          callee: "18005551234",
+          time: new Date().toISOString(),
+          active_periods: ["always", "business_hours"],
+          press_sequence: [],
+        };
+    const t = simulate(flow, input);
+    setTrace(t);
+    onOpenSimulator?.();
+  }, [exportFlow, scenarios, setTrace, onOpenSimulator]);
+
+  const handleResetTrace = useCallback(() => {
+    setTrace(null);
+    onCloseSimulator?.();
+  }, [setTrace, onCloseSimulator]);
 
   // Right-click handlers — keep them stable across renders.
   const onNodeContextMenu = useCallback(
@@ -443,6 +500,45 @@ export function Canvas() {
           </button>
           <button type="button" onClick={handleFitView} title="Fit view">
             Fit
+          </button>
+        </div>
+
+        {/* First-class canvas Run bar — verification loop is one click,
+            not three. The drawer still owns the full input controls; this
+            is the "trust the defaults and just run" shortcut. */}
+        <div className="canvas-runbar" role="toolbar" aria-label="Simulator">
+          <button
+            type="button"
+            className="canvas-runbar-btn canvas-runbar-btn--primary"
+            onClick={handleRun}
+            disabled={nodes.length === 0}
+            title="Run a simulated call through the flow"
+          >
+            <Play size={13} fill="currentColor" aria-hidden /> Run
+          </button>
+          {traceTerminal && (
+            <button
+              type="button"
+              className="canvas-runbar-btn"
+              onClick={handleResetTrace}
+              title="Clear trace"
+              aria-label="Clear trace"
+            >
+              <RotateCcw size={13} aria-hidden /> Clear
+            </button>
+          )}
+          <button
+            type="button"
+            className={
+              "canvas-runbar-btn" + (simulatorOpen ? " is-on" : "")
+            }
+            onClick={() =>
+              simulatorOpen ? onCloseSimulator?.() : onOpenSimulator?.()
+            }
+            aria-pressed={simulatorOpen}
+            title={simulatorOpen ? "Hide trace details" : "Show trace details"}
+          >
+            {simulatorOpen ? "Hide details" : "Details"}
           </button>
         </div>
 

@@ -8,39 +8,28 @@
 .fn-node {
   min-width: 195px;
   max-width: 260px;
-  background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
-  backdrop-filter: blur(20px) saturate(180%);
-  
-  /* Soft Translucent Border — "The No-Line Rule" */
-  border: 1px solid color-mix(in srgb, var(--node-color, var(--border)) 12%, transparent);
-  border-radius: 12px;
+  background: var(--bg-elev);
+
+  /* Soft tinted border — uses the node category color for identity. */
+  border: 1px solid color-mix(in srgb, var(--node-color, var(--border)) 18%, var(--border));
+  border-radius: var(--radius-lg);
   color: var(--text);
-  font-size: 13px;
-  
-  /* Elegant Depth & Ambient Glow Shadows */
-  box-shadow: 
-    0 4px 20px -2px rgba(0, 0, 0, 0.3), 
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  
-  /* Smooth Cubic-Bezier Transitions for Kinetic Feedback */
-  transition: 
-    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
-    box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
-    border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-    background-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-size: var(--fs-13);
+
+  box-shadow: var(--shadow-1);
+
+  /* Smaller, focused transitions — only the things that visibly change. */
+  transition:
+    transform var(--motion-base),
+    box-shadow var(--motion-base),
+    border-color var(--motion-base);
 }
 
-/* Kinetic Elevation Hover State */
+/* Calmer hover — 1px lift, no scale, no jiggle of the connection lines. */
 .fn-node:hover {
-  transform: translateY(-4px) scale(1.005);
-  background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
-  box-shadow: 
-    0 20px 40px -8px rgba(0, 0, 0, 0.5), 
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 16px -2px color-mix(in srgb, var(--node-color, var(--accent)) 18%, transparent);
-  border-color: color-mix(in srgb, var(--node-color, var(--accent)) 35%, transparent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+  border-color: color-mix(in srgb, var(--node-color, var(--accent)) 45%, var(--border));
 }
 
 /* High-Fidelity Active Selection Outlines */
@@ -74,32 +63,32 @@
     0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
-/* Corner Overlay Trash Button - Glides Up on Hover */
+/* Corner Overlay Trash Button — appears on hover. Bumped to 24px for a
+   slightly less mosquito-sized target without overwhelming the node. */
 .fn-node-trash {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 22px;
-  height: 22px;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: color-mix(in srgb, var(--bg-elev) 80%, #000);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--danger, #ef476f);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: 
-    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity var(--motion-base),
+    transform var(--motion-base),
+    background-color var(--motion-base),
+    color var(--motion-base);
   z-index: 5;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-2);
 }
 
 .fn-node:hover .fn-node-trash,
@@ -237,15 +226,14 @@
   background: var(--warn);
 }
 
-/* Glassmorphic Unresolved Comment Badge */
+/* Unresolved Comment Badge — solid token-based fill (was glassy). */
 .fn-node-badge-comment {
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--text) 14%, transparent);
   color: inherit;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 6px;
   font-family: var(--font-family-display);
-  font-size: 10.5px;
+  font-size: var(--fs-11);
   font-weight: 700;
   letter-spacing: 0.02em;
   width: auto;
@@ -253,8 +241,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
 }
 
 .fn-node-body {

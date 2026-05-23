@@ -13,6 +13,68 @@
   gap: 6px;
 }
 
+/* First-class canvas Run bar — sits below the layout/fit actions in the
+   top-right of the canvas. The verification loop (simulate → trace) is
+   now one click; the bottom drawer is reserved for trace details. */
+.canvas-runbar {
+  position: absolute;
+  top: 48px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+}
+
+.canvas-runbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  box-shadow: none;
+}
+
+.canvas-runbar-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.canvas-runbar-btn.is-on {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.canvas-runbar-btn--primary {
+  color: var(--text-on-status);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.canvas-runbar-btn--primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 85%, white);
+  border-color: color-mix(in srgb, var(--accent) 85%, white);
+  color: var(--text-on-status);
+}
+
+.canvas-runbar-btn--primary:disabled {
+  opacity: 0.5;
+}
+
 
 
 .react-flow__controls {
