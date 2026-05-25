@@ -50,6 +50,8 @@ export interface FieldDef {
    * The sidebar Inspector still shows the field.
    */
   inlineHidden?: boolean;
+  /** Wrap this field in a collapsible Advanced accordion section in the inspector. */
+  advanced?: boolean;
 }
 
 export const MOCK_EXTENSIONS: readonly SelectOption[] = [
@@ -247,18 +249,18 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
   ],
   forward_follow_me: [
     { key: "ring_mode", label: "Ring mode", type: "select", options: RING_MODES },
-    { key: "replace_caller_id_name", label: "Replace caller display name", type: "toggle" },
+    { key: "replace_caller_id_name", label: "Replace caller display name", type: "toggle", advanced: true },
     { key: "rules", label: "Forwarding rules", type: "rules-list" },
   ],
   forward_advanced: [
     { key: "ring_mode", label: "Ring mode", type: "select", options: RING_MODES },
-    { key: "keep_original_cld", label: "Keep Original CLD", type: "toggle" },
-    { key: "replace_caller_id_name", label: "Replace caller display name", type: "toggle" },
+    { key: "keep_original_cld", label: "Keep Original CLD", type: "toggle", advanced: true },
+    { key: "replace_caller_id_name", label: "Replace caller display name", type: "toggle", advanced: true },
     { key: "rules", label: "Forwarding rules", type: "rules-list" },
   ],
   forward_sip_uri: [
     { key: "target_uri", label: "Target URI", type: "text", placeholder: "sip:user@host" },
-    { key: "sip_proxy", label: "SIP proxy", type: "text" },
+    { key: "sip_proxy", label: "SIP proxy", type: "text", advanced: true },
     { key: "timeout_s", label: "Timeout (s)", type: "number", min: 1, max: 120 },
   ],
   forward_simple: [
@@ -311,16 +313,16 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
       label: "Allow start/stop with DTMF",
       type: "toggle",
     },
-    { key: "start_dtmf_code", label: "Start DTMF code", type: "text", placeholder: "*44" },
-    { key: "stop_dtmf_code", label: "Stop DTMF code", type: "text", placeholder: "*45" },
+    { key: "start_dtmf_code", label: "Start DTMF code", type: "text", placeholder: "*44", advanced: true },
+    { key: "stop_dtmf_code", label: "Stop DTMF code", type: "text", placeholder: "*45", advanced: true },
     { key: "announce_to_all", label: "Announce to all parties", type: "toggle" },
     { key: "announce_started_prompt", label: "Started prompt", type: "prompt" },
     { key: "announce_stopped_prompt", label: "Stopped prompt", type: "prompt" },
-    { key: "auto_record_incoming", label: "Auto-record incoming", type: "toggle" },
-    { key: "auto_record_redirected", label: "Auto-record redirected", type: "toggle" },
+    { key: "auto_record_incoming", label: "Auto-record incoming", type: "toggle", advanced: true },
+    { key: "auto_record_redirected", label: "Auto-record redirected", type: "toggle", advanced: true },
     { key: "format", label: "Output format", type: "select", options: ["wav", "mp3"] },
     { key: "send_to_email", label: "Send to email", type: "email" },
-    { key: "private_to_owner", label: "Show to myself only", type: "toggle" },
+    { key: "private_to_owner", label: "Show to myself only", type: "toggle", advanced: true },
     { key: "enable_transcription", label: "Enable AI transcription", type: "toggle" },
   ],
   cond_time: [{ key: "period", label: "Time period", type: "active-period" }],

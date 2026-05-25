@@ -159,7 +159,8 @@ export const simulate: SimulateFn = function simulate(
     menuStack: [],
   };
 
-  step(ctx, null, "entry", `Caller=${input.caller} Callee=${input.callee} Time=${input.time}`);
+  const tz = flow.entity.timezone ? ` Timezone=${flow.entity.timezone}` : "";
+  step(ctx, null, "entry", `Caller=${input.caller} Callee=${input.callee} Time=${input.time}${tz}`);
 
   if (flow.entity.type === "auto_attendant") {
     return runAutoAttendant(ctx);
@@ -330,7 +331,17 @@ function goForwardExt(ctx: Ctx): Trace {
       n.type === "forward_simple",
   );
   if (!fwd) return terminate(ctx, "dropped", "No forwarding configured");
+
+  const keepCld = (fwd.data as any).keep_original_cld;
+  const replaceName = (fwd.data as any).replace_caller_id_name;
+
   step(ctx, fwd.id, fwd.type, "Forwarding");
+  if (keepCld) {
+    step(ctx, fwd.id, fwd.type, "Forwarding parameter: Keep Original CLD = true (dialed DID preserved in To: header)");
+  }
+  if (replaceName) {
+    step(ctx, fwd.id, fwd.type, "Forwarding parameter: Replace display name = true (prepend forwarder metadata to caller ID)");
+  }
 
   if (fwd.type === "forward_simple") {
     const data = (fwd as NodeOf<"forward_simple">).data;
@@ -338,7 +349,7 @@ function goForwardExt(ctx: Ctx): Trace {
   }
   if (fwd.type === "forward_sip_uri") {
     const data = (fwd as NodeOf<"forward_sip_uri">).data;
-    return tryForwardOne(ctx, data.target_uri ?? "<unset>", data.timeout_s);
+    return tryForwardOne(ctx, data.target_uri ?? "<unset>", data.timeout_s, data.sip_proxy);
   }
   if (fwd.type === "call_forwarding" || fwd.type === "forward_follow_me" || fwd.type === "forward_advanced") {
     const data = (fwd as NodeOf<"call_forwarding" | "forward_follow_me" | "forward_advanced">).data;
@@ -370,7 +381,7 @@ function forwardSequentialOrdered(
     );
   }
   for (const r of rules) {
-    const t = tryForwardOne(ctx, r.target_node_id, r.timeout_s);
+    const t = tryForwardOne(ctx, r.target_node_id, r.timeout_s, (r as any).sip_proxy);
     if (t.terminal === "forwarded_answered") return t;
   }
   return terminate(ctx, "forwarded_unanswered", "All forwarding targets unanswered");
@@ -478,8 +489,9 @@ function seedFromCall(ctx: Ctx): number {
   return (h >>> 0) / 0x100000000;
 }
 
-function tryForwardOne(ctx: Ctx, target: string, timeout_s: number): Trace {
-  step(ctx, null, "forward", `→ ${target} (timeout ${timeout_s}s)`);
+function tryForwardOne(ctx: Ctx, target: string, timeout_s: number, sipProxy?: string): Trace {
+  const proxyStr = sipProxy ? ` via proxy ${sipProxy}` : "";
+  step(ctx, null, "forward", `→ ${target} (timeout ${timeout_s}s)${proxyStr}`);
   const r = answeringFor(ctx, target);
   if (r === "answer") {
     tick(ctx, 1500);

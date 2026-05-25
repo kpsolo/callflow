@@ -18,6 +18,8 @@ export const AutoAttendantEntitySchema = z.object({
   time_periods: TimePeriodMapSchema.optional(),
   /** Preferred IVR language (ISO 639-1 code, e.g. "en", "fr", "es"). */
   preferred_ivr_language: z.string().optional(),
+  /** Regional IANA Time Zone for time periods (e.g. "America/New_York"). */
+  timezone: z.string().optional(),
 });
 export type AutoAttendantEntity = z.infer<typeof AutoAttendantEntitySchema>;
 
@@ -28,6 +30,8 @@ export const ExtensionEntitySchema = z.object({
   name: z.string().min(1),
   time_periods: TimePeriodMapSchema.optional(),
   preferred_ivr_language: z.string().optional(),
+  /** Regional IANA Time Zone for time periods (e.g. "America/New_York"). */
+  timezone: z.string().optional(),
 });
 export type ExtensionEntity = z.infer<typeof ExtensionEntitySchema>;
 

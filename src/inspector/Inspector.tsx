@@ -141,9 +141,12 @@ function InspectorFields({
   const isVisible = (f: FieldDef) => !f.visibleWhen || f.visibleWhen(data);
 
   if (!tabbed) {
+    const normalFields = fields.filter((f) => !f.advanced && isVisible(f));
+    const advancedFields = fields.filter((f) => !!f.advanced && isVisible(f));
+
     return (
       <div className="inspector-fields">
-        {fields.filter(isVisible).map((f) => (
+        {normalFields.map((f) => (
           <FieldRow
             key={f.key}
             def={f}
@@ -153,12 +156,31 @@ function InspectorFields({
             nodeKind={nodeKind}
           />
         ))}
+        {advancedFields.length > 0 && (
+          <details className="inspector-advanced-details">
+            <summary className="inspector-advanced-summary">Advanced Telephony Settings</summary>
+            <div className="inspector-advanced-content">
+              {advancedFields.map((f) => (
+                <FieldRow
+                  key={f.key}
+                  def={f}
+                  value={getAtPath(data, f.path ?? f.key)}
+                  data={data}
+                  onChange={onChange}
+                  nodeKind={nodeKind}
+                />
+              ))}
+            </div>
+          </details>
+        )}
       </div>
     );
   }
 
   const presentTabs = TAB_ORDER.filter((t) => fields.some((f) => f.tab === t.key));
   const visibleFields = fields.filter((f) => f.tab === activeTab && isVisible(f));
+  const normalFields = visibleFields.filter((f) => !f.advanced);
+  const advancedFields = visibleFields.filter((f) => !!f.advanced);
 
   return (
     <>
@@ -177,7 +199,7 @@ function InspectorFields({
         ))}
       </nav>
       <div className="inspector-fields" role="tabpanel">
-        {visibleFields.map((f) => (
+        {normalFields.map((f) => (
           <FieldRow
             key={f.key}
             def={f}
@@ -187,6 +209,23 @@ function InspectorFields({
             nodeKind={nodeKind}
           />
         ))}
+        {advancedFields.length > 0 && (
+          <details className="inspector-advanced-details">
+            <summary className="inspector-advanced-summary">Advanced Telephony Settings</summary>
+            <div className="inspector-advanced-content">
+              {advancedFields.map((f) => (
+                <FieldRow
+                  key={f.key}
+                  def={f}
+                  value={getAtPath(data, f.path ?? f.key)}
+                  data={data}
+                  onChange={onChange}
+                  nodeKind={nodeKind}
+                />
+              ))}
+            </div>
+          </details>
+        )}
       </div>
     </>
   );

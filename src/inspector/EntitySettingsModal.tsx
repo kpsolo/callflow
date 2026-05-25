@@ -118,6 +118,36 @@ export function EntitySettingsModal({ onClose }: { onClose: () => void }) {
             </div>
           </label>
 
+          <label className="esm-field">
+            <span className="esm-label">
+              Regional Time Zone
+              <small className="esm-hint">
+                Configures the regional IANA timezone for call period scheduling (e.g. weekdays opening/closing).
+              </small>
+            </span>
+            <select
+              value={entity.timezone ?? ""}
+              onChange={(e) =>
+                patch({
+                  timezone: e.target.value || undefined,
+                } as Partial<Entity>)
+              }
+            >
+              <option value="">(system default / local time)</option>
+              <option value="UTC">UTC (Coordinated Universal Time)</option>
+              <option value="America/New_York">America/New York (EST/EDT)</option>
+              <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+              <option value="America/Denver">America/Denver (MST/MDT)</option>
+              <option value="America/Los_Angeles">America/Los Angeles (PST/PDT)</option>
+              <option value="Europe/London">Europe/London (GMT/BST)</option>
+              <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+              <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+              <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
+              <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+              <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+            </select>
+          </label>
+
           {entity.type === "auto_attendant" && (
             <section className="esm-directory">
               <div className="esm-directory-header">

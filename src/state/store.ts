@@ -495,3 +495,8 @@ export function resetEmptyFlow(entity: Entity) {
 
 // Convenience: clear undo history on initial load.
 useFlowStore.temporal.getState().clear();
+
+if (typeof window !== "undefined") {
+  (window as any).__flow_store__ = useFlowStore;
+}
+

@@ -69,6 +69,15 @@ export function EntityInspector({ onEditEntity }: { onEditEntity?: () => void })
           <code className="entity-inspector-id">{entity.id}</code>
         </dd>
 
+        {entity.timezone && (
+          <>
+            <dt>Time Zone</dt>
+            <dd>
+              <code>{entity.timezone}</code>
+            </dd>
+          </>
+        )}
+
         <dt>Nodes</dt>
         <dd>
           {nodeCount} node{nodeCount === 1 ? "" : "s"} · {edgeCount} edge

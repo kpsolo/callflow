@@ -313,25 +313,41 @@ export function SimulatorPanel({
         <section className="simpanel-scenarios">
           <h3 className="simpanel-section">Saved Scenarios ({scenarios.length})</h3>
           <div className="simpanel-scenario-controls">
-            <input
-              value={scenarioName}
-              onChange={(e) => setScenarioName(e.target.value)}
-              placeholder="Scenario name..."
-            />
-            <button type="button" onClick={saveScenario} disabled={!scenarioName}>
-              Save
-            </button>
-            <button type="button" onClick={runAll} disabled={scenarios.length === 0}>
-              Run all
-            </button>
+            <label className="simpanel-field">
+              <span>Scenario Name</span>
+              <input
+                value={scenarioName}
+                onChange={(e) => setScenarioName(e.target.value)}
+                placeholder="Scenario name..."
+                className="scenario-name-input"
+              />
+            </label>
+            <div className="scenario-buttons-row">
+              <button
+                type="button"
+                className="scenario-btn-save"
+                onClick={saveScenario}
+                disabled={!scenarioName}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="scenario-btn-runall"
+                onClick={runAll}
+                disabled={scenarios.length === 0}
+              >
+                Run all
+              </button>
+            </div>
           </div>
           <ul className="simpanel-scenario-list">
             {scenarios.map((s) => (
               <li key={s.name} className="scenario-item">
                 <button type="button" onClick={() => loadScenario(s.name)}>
-                  {s.name}
+                  <span className="scenario-item-name">{s.name}</span>
+                  <small className="scenario-item-expected">{s.expected_terminal ?? "—"}</small>
                 </button>
-                <small className="scenario-item-expected">{s.expected_terminal ?? "—"}</small>
               </li>
             ))}
             {scenarios.length === 0 && (
