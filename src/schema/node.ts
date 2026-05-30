@@ -40,6 +40,7 @@ import {
   AnnouncementDataSchema,
   HolidayCalendarDataSchema,
   MenuActionTransferDataSchema,
+  TimeRouterDataSchema,
 } from "./nodeData";
 
 export const NODE_KINDS = [
@@ -87,6 +88,7 @@ export const NODE_KINDS = [
   "announcement",
   "holiday_calendar",
   "menu_action_transfer",
+  "time_router",
 ] as const;
 export type NodeKind = (typeof NODE_KINDS)[number];
 
@@ -143,6 +145,7 @@ export const FlowNodeSchema = z.discriminatedUnion("type", [
   base("announcement", AnnouncementDataSchema),
   base("holiday_calendar", HolidayCalendarDataSchema),
   base("menu_action_transfer", MenuActionTransferDataSchema),
+  base("time_router", TimeRouterDataSchema),
 ]);
 export type FlowNode = z.infer<typeof FlowNodeSchema>;
 

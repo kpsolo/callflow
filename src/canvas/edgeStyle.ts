@@ -145,7 +145,7 @@ function isTimeConditional(
   if (!byId) return false;
   const src = byId.get(edge.source);
   if (!src) return false;
-  if (src.type === "cond_time") return true;
+  if (src.type === "cond_time" || src.type === "time_router") return true;
   if (src.type === "menu_root" || src.type === "menu_custom") {
     const period = (src.data as { active_period?: string } | undefined)?.active_period;
     if (period && period !== "always") return true;

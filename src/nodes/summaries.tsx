@@ -106,6 +106,7 @@ const summaries: { [K in NodeKind]?: SummaryFn<K> } = {
   target_hunt_group_ref: (d) => <Row k="HG" v={d.label ?? d.hunt_group_id} />,
   target_external: (d) => <Row k="Number" v={d.number} />,
   target_sip_uri: (d) => <Row k="URI" v={d.uri} />,
+  time_router: (d) => <Row k="Schedules" v={d.rules.length} />,
 };
 
 // Row counts mirror the structure of the summary functions above. Kept in lockstep
@@ -137,6 +138,7 @@ const rowCounts: { [K in NodeKind]?: RowCountFn<K> } = {
   target_hunt_group_ref: () => 1,
   target_external: () => 1,
   target_sip_uri: () => 1,
+  time_router: () => 1,
 };
 
 function Row({ k, v }: { k: string; v: React.ReactNode }) {

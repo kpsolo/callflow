@@ -42,6 +42,7 @@ export const ext401Screening: Flow = (() => {
       data: {
         rules: [
           {
+            id: "vip",
             name: "VIP — always ring",
             order: 0,
             enabled: true,
@@ -53,6 +54,7 @@ export const ext401Screening: Flow = (() => {
             action_mode: "ring_only",
           },
           {
+            id: "after_hours",
             name: "After-hours → voicemail",
             order: 1,
             enabled: true,
@@ -64,6 +66,7 @@ export const ext401Screening: Flow = (() => {
             action_mode: "voicemail_only",
           },
         ],
+        fallback_node_id: "am",
       },
     },
     {
@@ -153,7 +156,7 @@ export const ext401Screening: Flow = (() => {
   f.edges = [
     ...inferEdges(f.nodes),
     { id: "v_e1", source: "incoming", sourceHandle: "next", target: "screening", targetHandle: "in" },
-    { id: "v_e2", source: "screening", sourceHandle: "next", target: "am", targetHandle: "in" },
+    { id: "v_e2", source: "screening", sourceHandle: "fallback", target: "am", targetHandle: "in" },
     // Recording is attached implicitly by the simulator on any answered leg; show it as a dotted hook off the answering mode.
     { id: "v_e6", source: "am", sourceHandle: "answered", target: "rec", targetHandle: "in", label: "recorded" },
   ];

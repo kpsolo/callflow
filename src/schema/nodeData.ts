@@ -222,6 +222,7 @@ const ScreeningConditionSchema = z.object({
 });
 
 export const ScreeningRuleDataSchema = z.object({
+  id: z.string().min(1).optional(),
   name: z.string().min(1).default("Rule"),
   order: z.number().int().min(0).default(0),
   enabled: z.boolean().default(true),
@@ -230,8 +231,9 @@ export const ScreeningRuleDataSchema = z.object({
     caller: { kind: "any" },
     callee: { kind: "any" },
   }),
-  action_mode: AnsweringModeExtSchema.default("voicemail_only"),
+  action_mode: AnsweringModeExtSchema.optional(),
   play_before_action: PromptIdSchema.optional(),
+  target_node_id: z.string().optional(),
 });
 
 export const VoicemailDataSchema = z.object({
@@ -377,6 +379,7 @@ export const ConditionAdvancedDataSchema = z.object({
 
 export const CallScreeningDataSchema = z.object({
   rules: z.array(ScreeningRuleDataSchema).default([]),
+  fallback_node_id: z.string().optional(),
 });
 
 export const CallTerminalDataSchema = z.object({
@@ -411,3 +414,16 @@ export const MenuActionTransferDataSchema = z.object({
   uri: SipUriSchema.optional(),
   number: E164Schema.optional(),
 });
+
+export const TimeRouterRuleSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  period: z.string().min(1),
+  target_node_id: z.string().optional(),
+});
+
+export const TimeRouterDataSchema = z.object({
+  rules: z.array(TimeRouterRuleSchema).default([]),
+  fallback_node_id: z.string().optional(),
+});
+

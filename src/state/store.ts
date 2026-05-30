@@ -25,6 +25,16 @@ import {
   applyMenuEdgeRemovalToActions,
   projectMenuEdges,
 } from "./menuEdgeSync";
+import {
+  applyScreeningConnectToRules,
+  applyScreeningEdgeRemovalToRules,
+  projectScreeningEdges,
+} from "./screeningEdgeSync";
+import {
+  applyTimeRouterConnect,
+  applyTimeRouterEdgeRemoval,
+  projectTimeRouterEdges,
+} from "./timeRouterEdgeSync";
 
 let idSeq = 1;
 export function genId(prefix = "n"): string {
@@ -181,7 +191,11 @@ export const useFlowStore = create<FlowStore>()(
           for (const c of changes) {
             if (c.type === "remove") {
               const e = beforeEdges.find((x) => x.id === c.id);
-              if (e) nodes = applyMenuEdgeRemovalToActions(nodes, e);
+              if (e) {
+                nodes = applyMenuEdgeRemovalToActions(nodes, e);
+                nodes = applyScreeningEdgeRemovalToRules(nodes, e);
+                nodes = applyTimeRouterEdgeRemoval(nodes, e);
+              }
             }
           }
         }
@@ -197,14 +211,24 @@ export const useFlowStore = create<FlowStore>()(
         // back into the source menu's data.actions so the inspector stays in
         // sync with the canvas. React Flow's Connection type allows null
         // source/target during the drag; we only act on completed connects.
-        const nodes =
-          conn.source && conn.target
-            ? applyMenuConnectToActions(get().nodes, {
-                source: conn.source,
-                target: conn.target,
-                sourceHandle: conn.sourceHandle,
-              })
-            : get().nodes;
+        let nodes = get().nodes;
+        if (conn.source && conn.target) {
+          nodes = applyMenuConnectToActions(nodes, {
+            source: conn.source,
+            target: conn.target,
+            sourceHandle: conn.sourceHandle,
+          });
+          nodes = applyScreeningConnectToRules(nodes, {
+            source: conn.source,
+            target: conn.target,
+            sourceHandle: conn.sourceHandle,
+          });
+          nodes = applyTimeRouterConnect(nodes, {
+            source: conn.source,
+            target: conn.target,
+            sourceHandle: conn.sourceHandle,
+          });
+        }
         set({ edges, nodes, dirty: true });
       },
 
@@ -315,7 +339,17 @@ export const useFlowStore = create<FlowStore>()(
         const edgesAfter = rfAddEdge(newEdge, state.edges);
         // Mirror onConnect's menu-actions sync so dragging a menu handle to the
         // palette doesn't desync data.actions from the new edge.
-        const nodesAfter = applyMenuConnectToActions(nextNodes, {
+        let nodesAfter = applyMenuConnectToActions(nextNodes, {
+          source: sourceNodeId,
+          target: newId,
+          sourceHandle: resolvedHandle,
+        });
+        nodesAfter = applyScreeningConnectToRules(nodesAfter, {
+          source: sourceNodeId,
+          target: newId,
+          sourceHandle: resolvedHandle,
+        });
+        nodesAfter = applyTimeRouterConnect(nodesAfter, {
           source: sourceNodeId,
           target: newId,
           sourceHandle: resolvedHandle,
@@ -340,6 +374,10 @@ export const useFlowStore = create<FlowStore>()(
         // edges so the canvas reflects the change immediately.
         if (updated && (updated.type === "menu_root" || updated.type === "menu_custom")) {
           edges = projectMenuEdges(updated, edges);
+        } else if (updated && updated.type === "call_screening") {
+          edges = projectScreeningEdges(updated, edges);
+        } else if (updated && updated.type === "time_router") {
+          edges = projectTimeRouterEdges(updated, edges);
         }
         set({ nodes: nextNodes, edges, dirty: true });
       },

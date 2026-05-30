@@ -19,6 +19,7 @@ describe("call_screening consolidated node", () => {
     const scr = mkNode("call_screening", {
       rules: [
         {
+          id: "block_anon",
           name: "Block Anonymous",
           order: 0,
           enabled: true,
@@ -47,6 +48,7 @@ describe("call_screening consolidated node", () => {
     const scr = mkNode("call_screening", {
       rules: [
         {
+          id: "block_anon",
           name: "Block Anonymous",
           order: 0,
           enabled: true,
@@ -75,6 +77,7 @@ describe("call_screening consolidated node", () => {
     const scr = mkNode("call_screening", {
       rules: [
         {
+          id: "disabled_rule",
           name: "Disabled Rule",
           order: 0,
           enabled: false,
@@ -96,6 +99,69 @@ describe("call_screening consolidated node", () => {
       time: "2024-01-01T12:00:00Z",
     });
     expect(trace.terminal).toBe("answered");
+  });
+
+  it("routes call via rule exit handle connected to a target node on the canvas", () => {
+    const scr = mkNode("call_screening", {
+      rules: [
+        {
+          id: "block_anon",
+          name: "Block Anonymous",
+          order: 0,
+          enabled: true,
+          conditions: {
+            time_period: "always",
+            caller: { kind: "anonymous" },
+            callee: { kind: "any" },
+          },
+          target_node_id: "vm_node",
+        },
+      ],
+    });
+    const vm = mkNode("voicemail", {}, "vm_node");
+    const flow = {
+      ...mkExtFlow([scr, vm]),
+      edges: [mkEdge("e1", scr.id, vm.id, "rule:block_anon")],
+    };
+
+    const trace = simulate(flow, {
+      caller: "anonymous",
+      callee: "ext_test",
+      time: "2024-01-01T12:00:00Z",
+    });
+    expect(trace.terminal).toBe("voicemail_left");
+    expect(trace.steps.some((s) => s.message.includes("Block Anonymous"))).toBe(true);
+  });
+
+  it("routes call via fallback exit handle connected to a target node on the canvas when no rules match", () => {
+    const scr = mkNode("call_screening", {
+      rules: [
+        {
+          id: "block_anon",
+          name: "Block Anonymous",
+          order: 0,
+          enabled: true,
+          conditions: {
+            time_period: "always",
+            caller: { kind: "anonymous" },
+            callee: { kind: "any" },
+          },
+        },
+      ],
+      fallback_node_id: "vm_node",
+    });
+    const vm = mkNode("voicemail", {}, "vm_node");
+    const flow = {
+      ...mkExtFlow([scr, vm]),
+      edges: [mkEdge("e1", scr.id, vm.id, "fallback")],
+    };
+
+    const trace = simulate(flow, {
+      caller: "+15550001",
+      callee: "ext_test",
+      time: "2024-01-01T12:00:00Z",
+    });
+    expect(trace.terminal).toBe("voicemail_left");
   });
 });
 

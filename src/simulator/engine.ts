@@ -196,14 +196,36 @@ function runExtension(ctx: Ctx): Trace {
     if (r.enabled && matchesScreeningData(ctx, r)) {
       step(ctx, screenNode ? screenNode.id : null, screenNode ? "call_screening" : "screening_rule", `Screening rule "${r.name}" matched`);
       playPrompt(ctx, r.play_before_action);
+      
+      // If we have a rule target connected on the canvas, route there!
+      if (screenNode && r.target_node_id) {
+        const targetNode = ctx.nodesById.get(r.target_node_id);
+        if (targetNode) {
+          const edge = findEdge(ctx, screenNode.id, `rule:${r.id}`);
+          recordEdge(ctx, edge);
+          return runNode(ctx, targetNode);
+        }
+      }
+      
+      // Legacy fallback for older rules
       return runExtAnsweringMode(ctx, {
-        mode: r.action_mode,
+        mode: (r as any).action_mode ?? "voicemail_only",
         ring_timeout_s: 20,
         reject_sip_code: 486,
       });
     }
   }
   step(ctx, null, "screening", "No screening rule matched");
+
+  // Follow fallback route if screenNode has fallback_node_id
+  if (screenNode && screenNode.data.fallback_node_id) {
+    const fallbackNode = ctx.nodesById.get(screenNode.data.fallback_node_id);
+    if (fallbackNode) {
+      const edge = findEdge(ctx, screenNode.id, "fallback");
+      recordEdge(ctx, edge);
+      return runNode(ctx, fallbackNode);
+    }
+  }
 
   // 2. Default answering mode.
   const am = ctx.flow.nodes.find(
@@ -727,6 +749,17 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
   if (--ctx.stepLimit <= 0) return terminate(ctx, "dropped", "Step limit exceeded");
 
   switch (node.type) {
+    case "answering_mode_ext": {
+      step(ctx, node.id, node.type, `Answering mode: ${node.data.mode}`);
+      return runExtAnsweringMode(ctx, node.data);
+    }
+    case "answering_mode_aa": {
+      step(ctx, node.id, node.type, `AA answering mode: ${node.data.mode}`);
+      if (node.data.mode === "reject") return terminate(ctx, "rejected", `SIP ${node.data.reject_sip_code}`);
+      const root = ctx.flow.nodes.find((n): n is NodeOf<"menu_root"> => n.type === "menu_root");
+      if (!root) return terminate(ctx, "dropped", "No ROOT menu");
+      return runMenu(ctx, root);
+    }
     case "action_disconnect": {
       playPrompt(ctx, node.data.play_before_action);
       return terminate(ctx, "disconnected");
@@ -976,20 +1009,71 @@ function runNode(ctx: Ctx, node: FlowNode): Trace {
     }
     case "holiday_calendar": {
       const dateStr = ctx.input.time.split("T")[0]; // YYYY-MM-DD
-      if (node.data.dates.includes(dateStr)) {
+      const isHoliday = node.data.dates.includes(dateStr);
+      const port = isHoliday ? "true" : "false";
+      const edge = findEdge(ctx, node.id, port);
+      if (edge) {
+        recordEdge(ctx, edge);
+        const next = ctx.nodesById.get(edge.target);
+        if (next) return runNode(ctx, next);
+      }
+      
+      // Fallback for older holiday_calendar nodes without true edge connected
+      if (isHoliday) {
         return runExtAnsweringMode(ctx, {
           mode: node.data.action_mode ?? "voicemail_only",
           ring_timeout_s: 20,
           reject_sip_code: 486,
         });
       }
-      const edge = findEdge(ctx, node.id, "false");
+      
+      return terminate(ctx, "dropped", "Holiday calendar no next node");
+    }
+    case "cond_time": {
+      const period = node.data.period || "always";
+      const active = isPeriodActive(ctx, period);
+      const port = active ? "true" : "false";
+      const edge = findEdge(ctx, node.id, port);
       if (edge) {
         recordEdge(ctx, edge);
         const next = ctx.nodesById.get(edge.target);
         if (next) return runNode(ctx, next);
       }
-      return terminate(ctx, "dropped", "Holiday calendar no next node");
+      return terminate(
+        ctx,
+        "dropped",
+        `Time check period ${period} (${active ? "active" : "inactive"}) has no next node`
+      );
+    }
+    case "time_router": {
+      const rules = node.data.rules ?? [];
+      for (const r of rules) {
+        if (isPeriodActive(ctx, r.period)) {
+          step(ctx, node.id, node.type, `Time schedule matches: ${r.name} (${r.period})`);
+          if (r.target_node_id) {
+            const nextNode = ctx.nodesById.get(r.target_node_id);
+            if (nextNode) {
+              const edge = findEdge(ctx, node.id, `period:${r.id}`);
+              recordEdge(ctx, edge);
+              return runNode(ctx, nextNode);
+            }
+          }
+          break; // matched but no target connected visually
+        }
+      }
+
+      // Fallback path
+      if (node.data.fallback_node_id) {
+        step(ctx, node.id, node.type, "No time schedules match → fallback exit");
+        const fallbackNode = ctx.nodesById.get(node.data.fallback_node_id);
+        if (fallbackNode) {
+          const edge = findEdge(ctx, node.id, "fallback");
+          recordEdge(ctx, edge);
+          return runNode(ctx, fallbackNode);
+        }
+      }
+
+      return terminate(ctx, "dropped", "Time router has no next node");
     }
     case "condition_advanced": {
       const edgeTrue = findEdge(ctx, node.id, "true");

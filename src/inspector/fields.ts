@@ -8,6 +8,7 @@ export type FieldType =
   | "email"
   | "actions-map"
   | "rules-list"
+  | "time-rules-list"
   | "active-period"
   | "prompt"
   | "readonly";
@@ -326,6 +327,7 @@ export const FIELDS: Partial<Record<NodeKind, FieldDef[]>> = {
     { key: "enable_transcription", label: "Enable AI transcription", type: "toggle" },
   ],
   cond_time: [{ key: "period", label: "Time period", type: "active-period" }],
+  time_router: [{ key: "rules", label: "Schedule Exits", type: "time-rules-list" }],
   cond_caller: [
     {
       key: "kind",

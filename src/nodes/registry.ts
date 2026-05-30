@@ -405,6 +405,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     description: "Branch based on a named time period (e.g., business hours).",
     inputs: IN,
     outputs: OUT_TF,
+    paletteHidden: true,
     defaultData: () => ({ period: "always" }),
   },
   cond_caller: {
@@ -515,7 +516,7 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     color: C.screening,
     description: "Table-based call screening rules.",
     inputs: IN,
-    outputs: OUT_NEXT,
+    outputs: [],
     defaultData: () => ({ rules: [] }),
   },
   call_terminal: {
@@ -558,6 +559,16 @@ export const NODE_TYPES: { [K in NodeKind]: NodeTypeDef<K> } = {
     inputs: IN,
     outputs: OUT_NEXT,
     defaultData: () => ({}),
+  },
+  time_router: {
+    kind: "time_router",
+    category: "condition",
+    label: "Time Router",
+    color: C.condition,
+    description: "Branch calls based on active named time periods.",
+    inputs: IN,
+    outputs: [],
+    defaultData: () => ({ rules: [] }),
   },
 };
 

@@ -61,6 +61,7 @@ describe("Extension simulator (§13.1)", () => {
     const flow = mkExtFlow([
       mkNode("answering_mode_ext", { mode: "ring_only" }),
       mkNode("screening_rule", {
+        id: "vip",
         name: "VIP",
         order: 0,
         enabled: true,
@@ -81,6 +82,7 @@ describe("Extension simulator (§13.1)", () => {
     const flow = mkExtFlow([
       mkNode("answering_mode_ext", { mode: "ring_only" }),
       mkNode("screening_rule", {
+        id: "first",
         name: "First",
         order: 0,
         enabled: true,
@@ -88,6 +90,7 @@ describe("Extension simulator (§13.1)", () => {
         action_mode: "voicemail_only",
       }),
       mkNode("screening_rule", {
+        id: "second",
         name: "Second",
         order: 1,
         enabled: true,

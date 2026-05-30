@@ -7,6 +7,8 @@ import { FIELDS, type FieldDef } from "./fields";
 import { getAtPath, setAtPath } from "./paths";
 import { MenuActionsEditor } from "./MenuActionsEditor";
 import { ForwardRulesEditor } from "./ForwardRulesEditor";
+import { ScreeningRulesEditor } from "./ScreeningRulesEditor";
+import { TimeRouterRulesEditor } from "./TimeRouterRulesEditor";
 import { ActivePeriodPicker } from "./ActivePeriodPicker";
 import { PromptPicker } from "./PromptPicker";
 import { CommentsPanel } from "./CommentsPanel";
@@ -255,7 +257,29 @@ function FieldRow({
     );
   }
 
+  if (def.type === "time-rules-list") {
+    return (
+      <TimeRouterRulesEditor
+        rules={(data.rules as Array<Record<string, unknown>> | undefined) ?? []}
+        onChange={(next) => onChange("rules", next)}
+        fallbackNodeId={data.fallback_node_id as string | undefined}
+        onFallbackChange={(next) => onChange("fallback_node_id", next)}
+      />
+    );
+  }
+
   if (def.type === "rules-list") {
+    if (nodeKind === "call_screening") {
+      return (
+        <ScreeningRulesEditor
+          rules={(data.rules as Array<Record<string, unknown>> | undefined) ?? []}
+          onChange={(next) => onChange("rules", next)}
+          fallbackNodeId={data.fallback_node_id as string | undefined}
+          onFallbackChange={(next) => onChange("fallback_node_id", next)}
+          nodeKind={nodeKind}
+        />
+      );
+    }
     return (
       <ForwardRulesEditor
         rules={(data.rules as Array<Record<string, unknown>> | undefined) ?? []}

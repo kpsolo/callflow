@@ -84,6 +84,7 @@ const ICON_MAP: Record<NodeKind, LucideIcon> = {
   announcement: Megaphone,
   holiday_calendar: Calendar,
   menu_action_transfer: PhoneForwarded,
+  time_router: Clock,
 };
 
 export function getNodeIcon(kind: NodeKind): LucideIcon {

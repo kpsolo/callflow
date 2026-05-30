@@ -83,7 +83,11 @@ function FlowNodeViewImpl({ id, type, data, selected }: FlowNodeViewProps) {
           inactive_action_node_id?: string;
           no_input?: { action_node_id?: string };
         })
-      : null;
+      : kind === "call_screening"
+        ? screeningHandles(data as { rules?: Array<{ id: string; name: string }> })
+        : kind === "time_router"
+          ? timeRouterHandles(data as { rules?: Array<{ id: string; name: string }> })
+          : null;
 
   const bodyRows = summaryRowCount(kind, data);
   const bodyH = bodyRows > 0 ? bodyRows * ROW_H + BODY_PAD_Y : 0;
@@ -258,6 +262,34 @@ function menuHandles(data: {
   if (data.no_input?.action_node_id && !actionKeys.includes("no_input")) {
     out.push({ id: "no_input", label: "no_input" });
   }
+  return out;
+}
+
+function screeningHandles(data: {
+  rules?: Array<{ id: string; name: string }>;
+}): { id: string; label: string }[] {
+  const out: { id: string; label: string }[] = [];
+  const rules = data.rules ?? [];
+  for (const r of rules) {
+    if (r.id) {
+      out.push({ id: `rule:${r.id}`, label: r.name || "Rule" });
+    }
+  }
+  out.push({ id: "fallback", label: "fallback (no match)" });
+  return out;
+}
+
+function timeRouterHandles(data: {
+  rules?: Array<{ id: string; name: string }>;
+}): { id: string; label: string }[] {
+  const out: { id: string; label: string }[] = [];
+  const rules = data.rules ?? [];
+  for (const r of rules) {
+    if (r.id) {
+      out.push({ id: `period:${r.id}`, label: r.name || "Schedule" });
+    }
+  }
+  out.push({ id: "fallback", label: "fallback (no match)" });
   return out;
 }
 

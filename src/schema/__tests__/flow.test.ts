@@ -104,6 +104,7 @@ describe("Flow schema", () => {
       type: "screening_rule",
       position: { x: 50, y: 50 },
       data: {
+        id: "vip_rule",
         name: "VIP",
         order: 0,
         enabled: true,
